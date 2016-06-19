@@ -1,3 +1,4 @@
 [submodule "unicorn"]
 	path = unicorn
 	url = https://github.com/unicorn-engine/unicorn.git
+	ignore = dirty

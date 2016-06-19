@@ -1,0 +1,8 @@
+# Dependencies NodeJS
+node_modules/
+
+# Emscripten builds
+*.out.js
+
+# Unicorn.js
+/dist/*.js

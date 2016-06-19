@@ -1,0 +1,18 @@
+{
+  "name": "unicornjs",
+  "version": "0.9.0",
+  "description": "Unicorn CPU emulator framework port for JavaScript",
+  "homepage": "http://alexaltea.github.io/unicorn.js/",
+  "authors": [
+    "Alexandro Sanchez Bach <alexaltea123@gmail.com>"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/AlexAltea/unicorn.js.git"
+  },
+  "main": [
+    "dist/unicorn.min.js"
+  ],
+  "dependencies": {},
+  "devDependencies": {}
+}

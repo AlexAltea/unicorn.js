@@ -69,7 +69,17 @@ def copytree(src, dst, symlinks=False, ignore=None):
 # Patching #
 ############
 
-def patchUnicornQemuTCI():
+REPLACE_OBJECTS = """
+import re, glob, shutil
+path = 'qemu/*softmmu/**/*.o'
+for d in xrange(5):
+    for f in glob.glob(path.replace('/**', '/*' * d)):
+        f = f.replace('\\\\', '/')
+        m = re.match(r'qemu\/([0-9A-Za-z_]+)\-softmmu.*', f)
+        shutil.move(f, f[:-2] + '-' + m.group(1) + '.o')
+"""
+
+def patchUnicornTCI():
     """
     Patches Unicorn's QEMU fork to add the TCG Interpreter backend
     """
@@ -108,10 +118,25 @@ def patchUnicornQemuTCI():
     cmd = "bash -c \"cd " + UNICORN_QEMU_DIR + " && ./gen_all_header.sh\""
     os.system(cmd)
 
-def patchUnicornQemuJS():
+def patchUnicornJS():
     """
-    Patches Unicorn's QEMU fork to enable compilation to JavaScript
+    Patches Unicorn files to target JavaScript
     """
+    # Disable unnecessary options
+    replace(os.path.join(UNICORN_DIR, "config.mk"), {
+        "UNICORN_DEBUG ?= yes": "UNICORN_DEBUG ?= yes", # TODO: Change to `no`
+        "UNICORN_SHARED ?= yes": "UNICORN_SHARED ?= no",
+        "UNICORN_ARCHS ?= x86 m68k arm aarch64 mips sparc": "UNICORN_ARCHS ?= x86 arm", # TODO: Remove line
+    })
+    # Ensure QEMU's object files have different base names
+    name = "rename_objects.py"
+    with open(os.path.join(UNICORN_DIR, name), "wt") as f:
+        f.write(REPLACE_OBJECTS)
+    replace(os.path.join(UNICORN_DIR, "Makefile"), {
+        "$(MAKE) unicorn": "@python " + name + " && $(MAKE) unicorn",
+    })
+    # Link Glib functions
+    # TODO
     return
 
 
@@ -121,32 +146,16 @@ def patchUnicornQemuJS():
 
 def compileUnicorn():
     # Patching Unicorn's QEMU fork
-    patchUnicornQemuTCI()
-    patchUnicornQemuJS()
+    patchUnicornTCI()
+    patchUnicornJS()
 
     # TODO: Use --cpu=unknown flag for QEMU's configure, can be passed via: `UNICORN_QEMU_FLAGS="--cpu=unknown" ./make.sh`.
     return
-    
-    # CMake
-    cmd = 'cmake'
-    cmd += os.path.expandvars(' -DCMAKE_TOOLCHAIN_FILE=$EMSCRIPTEN/cmake/Modules/Platform/Emscripten.cmake')
-    cmd += ' -DCMAKE_BUILD_TYPE=Release'
-    cmd += ' -DBUILD_SHARED_LIBS=OFF'
-    cmd += ' -DCMAKE_CXX_FLAGS="-Os"'
-    if os.name == 'nt':
-        cmd += ' -DMINGW=ON'
-        cmd += ' -G \"MinGW Makefiles\"'
-    if os.name == 'posix':
-        cmd += ' -G \"Unix Makefiles\"'
-    cmd += ' unicorn/CMakeLists.txt'
-    os.system(cmd)
 
-    # MinGW (Windows) or Make (Linux/Unix)
+    # Emscripten + Make
     os.chdir('unicorn')
-    if os.name == 'nt':
-        os.system('mingw32-make')
     if os.name == 'posix':
-        os.system('make')
+        os.system('emmake make')
     os.chdir('..')
 
     # Compile static library to JavaScript
@@ -159,7 +168,11 @@ def compileUnicorn():
 
 
 if __name__ == "__main__":
-    if os.name in ['nt', 'posix']:
+    # Initialize Unicorn submodule if necessary
+    if not os.listdir(UNICORN_DIR):
+        os.system("git submodule update --init")
+    # Compile Unicorn
+    if os.name in ['posix']:
         compileUnicorn()
     else:
         print "Your operating system is not supported by this script:"

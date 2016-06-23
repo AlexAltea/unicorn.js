@@ -135,6 +135,11 @@ def patchUnicornJS():
     replace(os.path.join(UNICORN_DIR, "Makefile"), {
         "$(MAKE) unicorn": "@python " + name + " && $(MAKE) unicorn",
     })
+    # Replace sigsetjmp/siglongjump with setjmp/longjmp
+    replace(os.path.join(UNICORN_QEMU_DIR, "cpu-exec.c"), {
+        "sigsetjmp(cpu->jmp_env, 0)": "setjmp(cpu->jmp_env)",
+        "siglongjmp(cpu->jmp_env, 1)": "longjmp(cpu->jmp_env, 1)",
+    })
     # Link Glib functions
     # TODO
     return
@@ -163,6 +168,7 @@ def compileUnicorn():
     cmd += ' -Os --memory-init-file 0'
     cmd += ' unicorn/libunicorn.a'
     cmd += ' -s EXPORTED_FUNCTIONS=\"[\''+ '\', \''.join(EXPORTED_FUNCTIONS) +'\']\"'
+    cmd += ' -s USE_PTHREADS=1'
     cmd += ' -o src/unicorn.out.js'
     os.system(cmd)
 

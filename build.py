@@ -8,14 +8,36 @@ import shutil
 import stat
 
 EXPORTED_FUNCTIONS = [
+    '_uc_version',
+    '_uc_arch_supported',
     '_uc_open',
     '_uc_close',
+    '_uc_query',
+    '_uc_errno',
+    '_uc_strerror',
+    '_uc_reg_write',
+    '_uc_reg_read',
+    '_uc_reg_write_batch',
+    '_uc_reg_read_batch',
+    '_uc_mem_write',
+    '_uc_mem_read',
+    '_uc_emu_start',
+    '_uc_emu_stop',
+    '_uc_hook_add',
+    '_uc_hook_del',
+    '_uc_mem_map',
+    '_uc_mem_map_ptr',
+    '_uc_mem_unmap',
+    '_uc_mem_protect',
+    '_uc_mem_regions',
 ]
 
 # Directories
 UNICORN_DIR = os.path.abspath("unicorn")
 UNICORN_QEMU_DIR = os.path.join(UNICORN_DIR, "qemu")
+UNICORN_GLIB_DIR = os.path.join(UNICORN_DIR, "glib")
 ORIGINAL_QEMU_DIR = os.path.abspath("externals/qemu-2.2.1")
+ORIGINAL_GLIB_DIR = os.path.abspath("externals/glib-2.12.13")
 
 #############
 # Utilities #
@@ -79,6 +101,36 @@ for d in xrange(5):
         shutil.move(f, f[:-2] + '-' + m.group(1) + '.o')
 """
 
+def patchGlibJS():
+    """
+    Patches glib-2.12 to compile it with Emscripten,
+    so that Unicorn+QEMU build succeeds.
+    """
+    copytree(ORIGINAL_GLIB_DIR, UNICORN_GLIB_DIR)
+    # Disable assembler use for atomic operations
+    insert(
+        os.path.join(UNICORN_GLIB_DIR, "configure"),
+        "echo $ECHO_N \"checking whether to use assembler code for atomic operations... $ECHO_C\" >&6; }", [
+            "host_cpu=\"none\""
+        ])
+    # Disable inlined functions
+    replace(os.path.join(UNICORN_GLIB_DIR, "configure"), {
+        "g_can_inline=yes": "g_can_inline=no"
+    })
+    # Disable unnecessary projects
+    replace(os.path.join(UNICORN_GLIB_DIR, "configure"), {
+        "gobject/Makefile ": "",
+        "gobject/glib-mkenums ": "",
+        "docs/reference/Makefile ": "",
+        "docs/reference/glib/Makefile ": "",
+        "docs/reference/glib/version.xml ": "",
+        "docs/reference/gobject/Makefile ": "",
+        "docs/reference/gobject/version.xml ": "",
+        "tests/Makefile tests/gobject/Makefile ": "",
+        "tests/refcount/Makefile ": ""
+    })
+
+
 def patchUnicornTCI():
     """
     Patches Unicorn's QEMU fork to add the TCG Interpreter backend
@@ -118,6 +170,7 @@ def patchUnicornTCI():
     cmd = "bash -c \"cd " + UNICORN_QEMU_DIR + " && ./gen_all_header.sh\""
     os.system(cmd)
 
+
 def patchUnicornJS():
     """
     Patches Unicorn files to target JavaScript
@@ -149,6 +202,18 @@ def patchUnicornJS():
 # Building #
 ############
 
+def compileGlib():
+    # Patching Glib
+    patchGlibJS()
+    
+    # Emscripten + Configure + Make
+    os.chdir('unicorn/glib')
+    if os.name == 'posix':
+        os.system('emconfigure ./configure --disable-threads')
+        os.system('emmake make')
+    os.chdir('../..')
+
+
 def compileUnicorn():
     # Patching Unicorn's QEMU fork
     patchUnicornTCI()
@@ -169,6 +234,7 @@ def compileUnicorn():
     cmd += ' unicorn/libunicorn.a'
     cmd += ' -s EXPORTED_FUNCTIONS=\"[\''+ '\', \''.join(EXPORTED_FUNCTIONS) +'\']\"'
     cmd += ' -s USE_PTHREADS=1'
+    cmd += ' -s ALLOW_MEMORY_GROWTH=1'
     cmd += ' -o src/unicorn.out.js'
     os.system(cmd)
 
@@ -179,6 +245,7 @@ if __name__ == "__main__":
         os.system("git submodule update --init")
     # Compile Unicorn
     if os.name in ['posix']:
+        compileGlib()
         compileUnicorn()
     else:
         print "Your operating system is not supported by this script:"

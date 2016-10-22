@@ -1,0 +1,824 @@
+# Esperanto translation of glib.
+# Copyright (C) 2003 Free Software Foundation, Inc.
+# This file is distributed under the same license as the glib package.
+# Charles Voelger <cvoelger@dweasel.com>, 2003.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: glib 2.3.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2007-07-16 15:09-0400\n"
+"PO-Revision-Date: 2003-07-01 15:10-0500\n"
+"Last-Translator: Charles Voelger <cvoelger@dweasel.com>\n"
+"Language-Team: Esperanto <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: glib/gbookmarkfile.c:716 glib/gbookmarkfile.c:793 glib/gbookmarkfile.c:872
+#: glib/gbookmarkfile.c:919
+#, fuzzy, c-format
+msgid "Unexpected attribute '%s' for element '%s'"
+msgstr ""
+"Malbona signo '%s', unu '>' signo estas atendita post atributnomo '%s' "
+"deelemento '%s'"
+
+#: glib/gbookmarkfile.c:727 glib/gbookmarkfile.c:804 glib/gbookmarkfile.c:814
+#: glib/gbookmarkfile.c:930
+#, c-format
+msgid "Attribute '%s' of element '%s' not found"
+msgstr ""
+
+#: glib/gbookmarkfile.c:1103 glib/gbookmarkfile.c:1168
+#: glib/gbookmarkfile.c:1232 glib/gbookmarkfile.c:1242
+#, c-format
+msgid "Unexpected tag '%s', tag '%s' expected"
+msgstr ""
+
+#: glib/gbookmarkfile.c:1128 glib/gbookmarkfile.c:1142
+#: glib/gbookmarkfile.c:1210 glib/gbookmarkfile.c:1262
+#, c-format
+msgid "Unexpected tag '%s' inside '%s'"
+msgstr ""
+
+#: glib/gbookmarkfile.c:1792
+#, c-format
+msgid "No valid bookmark file found in data dirs"
+msgstr ""
+
+#: glib/gbookmarkfile.c:1993
+#, c-format
+msgid "A bookmark for URI '%s' already exists"
+msgstr ""
+
+#: glib/gbookmarkfile.c:2039 glib/gbookmarkfile.c:2196
+#: glib/gbookmarkfile.c:2281 glib/gbookmarkfile.c:2362
+#: glib/gbookmarkfile.c:2447 glib/gbookmarkfile.c:2530
+#: glib/gbookmarkfile.c:2608 glib/gbookmarkfile.c:2687
+#: glib/gbookmarkfile.c:2729 glib/gbookmarkfile.c:2826
+#: glib/gbookmarkfile.c:2952 glib/gbookmarkfile.c:3142
+#: glib/gbookmarkfile.c:3218 glib/gbookmarkfile.c:3379
+#: glib/gbookmarkfile.c:3454 glib/gbookmarkfile.c:3544
+#: glib/gbookmarkfile.c:3671
+#, c-format
+msgid "No bookmark found for URI '%s'"
+msgstr ""
+
+#: glib/gbookmarkfile.c:2371
+#, c-format
+msgid "No MIME type defined in the bookmark for URI '%s'"
+msgstr ""
+
+#: glib/gbookmarkfile.c:2456
+#, c-format
+msgid "No private flag has been defined in bookmark for URI '%s'"
+msgstr ""
+
+#: glib/gbookmarkfile.c:2835
+#, c-format
+msgid "No groups set in bookmark for URI '%s'"
+msgstr ""
+
+#: glib/gbookmarkfile.c:3236 glib/gbookmarkfile.c:3389
+#, c-format
+msgid "No application with name '%s' registered a bookmark for '%s'"
+msgstr ""
+
+#: glib/gbookmarkfile.c:3402
+#, fuzzy, c-format
+msgid "Failed to expand exec line '%s' with URI '%s'"
+msgstr "Malsukcesis krei dosieron '%s': %s"
+
+#: glib/gconvert.c:423 glib/gconvert.c:501 glib/giochannel.c:1150
+#, c-format
+msgid "Conversion from character set '%s' to '%s' is not supported"
+msgstr "Konverto de signaro '%s' el '%s' ne estas subtenata"
+
+#: glib/gconvert.c:427 glib/gconvert.c:505
+#, fuzzy, c-format
+msgid "Could not open converter from '%s' to '%s'"
+msgstr "Ne eblas malfermi konvertilon de '%s' to '%s': %s"
+
+#: glib/gconvert.c:621 glib/gconvert.c:1010 glib/giochannel.c:1322
+#: glib/giochannel.c:1364 glib/giochannel.c:2206 glib/gutf8.c:949
+#: glib/gutf8.c:1398
+#, c-format
+msgid "Invalid byte sequence in conversion input"
+msgstr "Nevalida bitokosekvenco en konverta enigo"
+
+#: glib/gconvert.c:627 glib/gconvert.c:937 glib/giochannel.c:1329
+#: glib/giochannel.c:2218
+#, c-format
+msgid "Error during conversion: %s"
+msgstr "Eraro dum konverto: %s"
+
+#: glib/gconvert.c:662 glib/gutf8.c:945 glib/gutf8.c:1149 glib/gutf8.c:1290
+#: glib/gutf8.c:1394
+#, c-format
+msgid "Partial character sequence at end of input"
+msgstr "Parta signosekvenco je enigofino"
+
+#: glib/gconvert.c:912
+#, c-format
+msgid "Cannot convert fallback '%s' to codeset '%s'"
+msgstr "Ne povas konverti fallback '%s' al kodaro '%s'"
+
+#: glib/gconvert.c:1721
+#, fuzzy, c-format
+msgid "The URI '%s' is not an absolute URI using the \"file\" scheme"
+msgstr "La URI '%s' ne estas absolutan URI uzanta la dosiermodelo"
+
+#: glib/gconvert.c:1731
+#, c-format
+msgid "The local file URI '%s' may not include a '#'"
+msgstr "La loka dosiera URI '%s' eble ne enhavas '#'"
+
+#: glib/gconvert.c:1748
+#, c-format
+msgid "The URI '%s' is invalid"
+msgstr "La URI '%s' estas nevalida"
+
+#: glib/gconvert.c:1760
+#, c-format
+msgid "The hostname of the URI '%s' is invalid"
+msgstr "La komputilnomo de la URI '%s' ne estas valida"
+
+#: glib/gconvert.c:1776
+#, c-format
+msgid "The URI '%s' contains invalidly escaped characters"
+msgstr "La URI '%s' enhavas nevalidajn eskapajn signojn"
+
+#: glib/gconvert.c:1871
+#, c-format
+msgid "The pathname '%s' is not an absolute path"
+msgstr "La padnomo '%s' ne estas absolutan padon"
+
+#: glib/gconvert.c:1881
+#, c-format
+msgid "Invalid hostname"
+msgstr "Nevalida komputilnomo"
+
+#: glib/gdir.c:121 glib/gdir.c:141
+#, c-format
+msgid "Error opening directory '%s': %s"
+msgstr "Eraro dum malfermado de dosierujo '%s': %s"
+
+#: glib/gfileutils.c:572 glib/gfileutils.c:645
+#, c-format
+msgid "Could not allocate %lu bytes to read file \"%s\""
+msgstr "Ne eblis akiri %lu bitokojn por lego de dosiero \"%s\""
+
+#: glib/gfileutils.c:587
+#, c-format
+msgid "Error reading file '%s': %s"
+msgstr "Eraro dum legado de dosiero '%s': %s"
+
+#: glib/gfileutils.c:669
+#, c-format
+msgid "Failed to read from file '%s': %s"
+msgstr "Malsukcesis legi de dosieron '%s': %s"
+
+#: glib/gfileutils.c:720 glib/gfileutils.c:807
+#, c-format
+msgid "Failed to open file '%s': %s"
+msgstr "Malsukcesis malfermi dosieron '%s': %s"
+
+#: glib/gfileutils.c:737 glib/gmappedfile.c:133
+#, c-format
+msgid "Failed to get attributes of file '%s': fstat() failed: %s"
+msgstr "Malsukcesis ricevi atributojn de dosiero '%s': fstat() malsukcesis: %s"
+
+#: glib/gfileutils.c:771
+#, c-format
+msgid "Failed to open file '%s': fdopen() failed: %s"
+msgstr "Malsukcesis malfermi dosieron '%s': fdopen() malsukcesis: %s"
+
+#: glib/gfileutils.c:905
+#, fuzzy, c-format
+msgid "Failed to rename file '%s' to '%s': g_rename() failed: %s"
+msgstr "Malsukcesis malfermi dosieron '%s': fdopen() malsukcesis: %s"
+
+#: glib/gfileutils.c:946 glib/gfileutils.c:1404
+#, c-format
+msgid "Failed to create file '%s': %s"
+msgstr "Malsukcesis krei dosieron '%s': %s"
+
+#: glib/gfileutils.c:960
+#, fuzzy, c-format
+msgid "Failed to open file '%s' for writing: fdopen() failed: %s"
+msgstr "Malsukcesis malfermi dosieron '%s': fdopen() malsukcesis: %s"
+
+#: glib/gfileutils.c:985
+#, fuzzy, c-format
+msgid "Failed to write file '%s': fwrite() failed: %s"
+msgstr "Malsukcesis malfermi dosieron '%s': fdopen() malsukcesis: %s"
+
+#: glib/gfileutils.c:1004
+#, fuzzy, c-format
+msgid "Failed to close file '%s': fclose() failed: %s"
+msgstr "Malsukcesis malfermi dosieron '%s': fdopen() malsukcesis: %s"
+
+#: glib/gfileutils.c:1122
+#, c-format
+msgid "Existing file '%s' could not be removed: g_unlink() failed: %s"
+msgstr ""
+
+#: glib/gfileutils.c:1366
+#, c-format
+msgid "Template '%s' invalid, should not contain a '%s'"
+msgstr "Ŝablono '%s' ne estas valida, ĝi devus ne enhavi '%s'"
+
+#: glib/gfileutils.c:1379
+#, fuzzy, c-format
+msgid "Template '%s' doesn't contain XXXXXX"
+msgstr "Ŝablono '%s' ne finiĝas je XXXXXX"
+
+#: glib/gfileutils.c:1854
+#, fuzzy, c-format
+msgid "Failed to read the symbolic link '%s': %s"
+msgstr "Malsukcesis krei dosieron '%s': %s"
+
+#: glib/gfileutils.c:1875
+#, c-format
+msgid "Symbolic links not supported"
+msgstr ""
+
+#: glib/giochannel.c:1154
+#, fuzzy, c-format
+msgid "Could not open converter from '%s' to '%s': %s"
+msgstr "Ne eblis malfermi konvertilon de '%s al '%s: %s"
+
+#: glib/giochannel.c:1499
+#, c-format
+msgid "Can't do a raw read in g_io_channel_read_line_string"
+msgstr "Ne povas fari krudan legon en g_io_channel_read_line_string"
+
+#: glib/giochannel.c:1546 glib/giochannel.c:1803 glib/giochannel.c:1889
+#, c-format
+msgid "Leftover unconverted data in read buffer"
+msgstr "Kroma nekonvertinta datumo en legbufro"
+
+#: glib/giochannel.c:1626 glib/giochannel.c:1703
+#, c-format
+msgid "Channel terminates in a partial character"
+msgstr "Kanalo finas kun parta signo"
+
+#: glib/giochannel.c:1689
+#, c-format
+msgid "Can't do a raw read in g_io_channel_read_to_end"
+msgstr "Ne povas fari krudan legon en g_io_channel_read_to_end"
+
+#: glib/gmappedfile.c:116
+#, fuzzy, c-format
+msgid "Failed to open file '%s': open() failed: %s"
+msgstr "Malsukcesis malfermi dosieron '%s': fdopen() malsukcesis: %s"
+
+#: glib/gmappedfile.c:193
+#, fuzzy, c-format
+msgid "Failed to map file '%s': mmap() failed: %s"
+msgstr "Malsukcesis malfermi dosieron '%s': fdopen() malsukcesis: %s"
+
+#: glib/gmarkup.c:226
+#, c-format
+msgid "Error on line %d char %d: %s"
+msgstr "Eraro ĉe linio %d signo %d: %s"
+
+#: glib/gmarkup.c:324
+#, c-format
+msgid "Error on line %d: %s"
+msgstr "Eraro ĉe linio %d: %s"
+
+#: glib/gmarkup.c:428
+msgid ""
+"Empty entity '&;' seen; valid entities are: &amp; &quot; &lt; &gt; &apos;"
+msgstr "Malplena ero '&;'; validaj eroj estas : &amp; &quot; &lt; &gt; &apos;"
+
+#: glib/gmarkup.c:438
+#, c-format
+msgid ""
+"Character '%s' is not valid at the start of an entity name; the & character "
+"begins an entity; if this ampersand isn't supposed to be an entity, escape "
+"it as &amp;"
+msgstr ""
+"Signo '%s' ne estas valida en la komenco de eronomo; la & signo komencas unu "
+"ero;se la kaj-signo ne estas ero, eskapu ĝin kiel &amp;"
+
+#: glib/gmarkup.c:472
+#, c-format
+msgid "Character '%s' is not valid inside an entity name"
+msgstr "Signo '%s' ne estas valida en unu eronomo"
+
+#: glib/gmarkup.c:509
+#, c-format
+msgid "Entity name '%s' is not known"
+msgstr "Eronomo '%s' ne estas konata"
+
+#: glib/gmarkup.c:520
+msgid ""
+"Entity did not end with a semicolon; most likely you used an ampersand "
+"character without intending to start an entity - escape ampersand as &amp;"
+msgstr ""
+"Ero ne finis kun punktokomo; vi eble uzis kaj-signo sen voli komenci eron."
+"Eskapu kaj-signon kiel &amp;"
+
+#: glib/gmarkup.c:573
+#, fuzzy, c-format
+msgid ""
+"Failed to parse '%-.*s', which should have been a digit inside a character "
+"reference (&#234; for example) - perhaps the digit is too large"
+msgstr ""
+"Analizo de '%s' malsuksesis. Une cifero devus esti en la signoreferenco "
+"(&#234; ekzemple)- eble la cifero estas tro granda"
+
+#: glib/gmarkup.c:598
+#, fuzzy, c-format
+msgid "Character reference '%-.*s' does not encode a permitted character"
+msgstr "Signorefrenco '%s' ne faras kodigu permesatan signon"
+
+#: glib/gmarkup.c:613
+msgid "Empty character reference; should include a digit such as &#454;"
+msgstr "Malplena signa referenco; devus enhavi ciferon kiel &#454;"
+
+#: glib/gmarkup.c:623
+msgid ""
+"Character reference did not end with a semicolon; most likely you used an "
+"ampersand character without intending to start an entity - escape ampersand "
+"as &amp;"
+msgstr ""
+"Signa referenco ne finis kun punktokomo; vi verŝajne uzas kaj-signon sen "
+"volikomenci eron - eskapu kaj-signon kiel &amp;"
+
+#: glib/gmarkup.c:709
+msgid "Unfinished entity reference"
+msgstr "Nefinita erorefrenco"
+
+#: glib/gmarkup.c:715
+msgid "Unfinished character reference"
+msgstr "Nefinita signorefrenco"
+
+#: glib/gmarkup.c:958 glib/gmarkup.c:986 glib/gmarkup.c:1022
+msgid "Invalid UTF-8 encoded text"
+msgstr "Nevalida UTF-8 kodiginta teksto"
+
+#: glib/gmarkup.c:1058
+msgid "Document must begin with an element (e.g. <book>)"
+msgstr "Dokumento devas komenci kun elemento (ekz. <book>)"
+
+#: glib/gmarkup.c:1098
+#, c-format
+msgid ""
+"'%s' is not a valid character following a '<' character; it may not begin an "
+"element name"
+msgstr ""
+"'%s' ne estas valida signo post la signo '<'; ĝi ne eblas "
+"komcencielementnomon"
+
+#: glib/gmarkup.c:1162
+#, c-format
+msgid ""
+"Odd character '%s', expected a '>' character to end the start tag of element "
+"'%s'"
+msgstr ""
+"Malbona signo '%s', unu '>' signo estas atendita por fini la "
+"komencetikedonde elemento '%s'"
+
+#: glib/gmarkup.c:1251
+#, c-format
+msgid ""
+"Odd character '%s', expected a '=' after attribute name '%s' of element '%s'"
+msgstr ""
+"Malbona signo '%s', unu '>' signo estas atendita post atributnomo '%s' "
+"deelemento '%s'"
+
+#: glib/gmarkup.c:1293
+#, c-format
+msgid ""
+"Odd character '%s', expected a '>' or '/' character to end the start tag of "
+"element '%s', or optionally an attribute; perhaps you used an invalid "
+"character in an attribute name"
+msgstr ""
+"Malbona signo '%s', unu '>' aŭ '/' signo estas atendita por fini "
+"lakomencetikedon de elemento '%s' aŭ unu atributo; eble vi uzas nevalidan "
+"signon enunu atributnomo"
+
+#: glib/gmarkup.c:1382
+#, c-format
+msgid ""
+"Odd character '%s', expected an open quote mark after the equals sign when "
+"giving value for attribute '%s' of element '%s'"
+msgstr ""
+"Malbona signo '%s', malferma citilo estas atendita post la egalsigno "
+"kiamdonita valoro por atributo '%s' de elemento '%s'"
+
+#: glib/gmarkup.c:1527
+#, c-format
+msgid ""
+"'%s' is not a valid character following the characters '</'; '%s' may not "
+"begin an element name"
+msgstr ""
+"'%s' ne estas valida signo post la signoj '</'; '%s' ne eblas "
+"komcencielementnomon"
+
+#: glib/gmarkup.c:1567
+#, c-format
+msgid ""
+"'%s' is not a valid character following the close element name '%s'; the "
+"allowed character is '>'"
+msgstr ""
+"'%s' ne estas valida signo post la ferma elementnomo '%s'; la valida signo "
+"estas'>'"
+
+#: glib/gmarkup.c:1578
+#, c-format
+msgid "Element '%s' was closed, no element is currently open"
+msgstr "Elemento '%s' estis fermita, neniu elemento estas malfermita"
+
+#: glib/gmarkup.c:1587
+#, c-format
+msgid "Element '%s' was closed, but the currently open element is '%s'"
+msgstr ""
+"Elemento '%s' estis fermita, sed la momente malfermita elemento estas '%s'"
+
+#: glib/gmarkup.c:1753
+msgid "Document was empty or contained only whitespace"
+msgstr "Dokumento estis malpena aŭ enhavis nur blankspaco"
+
+#: glib/gmarkup.c:1767
+msgid "Document ended unexpectedly just after an open angle bracket '<'"
+msgstr "Dokumento neatendite finis post malfermi-angulkrampon '<'"
+
+#: glib/gmarkup.c:1775 glib/gmarkup.c:1820
+#, c-format
+msgid ""
+"Document ended unexpectedly with elements still open - '%s' was the last "
+"element opened"
+msgstr ""
+"Dokumento neatendite finis kun elementoj ankoraŭ malfermi - '%s' estis la "
+"lasta elemento malfermita"
+
+#: glib/gmarkup.c:1783
+#, c-format
+msgid ""
+"Document ended unexpectedly, expected to see a close angle bracket ending "
+"the tag <%s/>"
+msgstr ""
+"Dokumento neatendite finis, atendis vidi etikedon finiĝanta je fermi-"
+"angulkrampo <%s/>"
+
+#: glib/gmarkup.c:1789
+msgid "Document ended unexpectedly inside an element name"
+msgstr "Dokumento neatendite finis en elementa nomo"
+
+#: glib/gmarkup.c:1795
+msgid "Document ended unexpectedly inside an attribute name"
+msgstr "Dokumento neatendite finis en atributa nomo"
+
+#: glib/gmarkup.c:1800
+msgid "Document ended unexpectedly inside an element-opening tag."
+msgstr "Dokumento neatendite finis en elemento-malfermanta etikedo."
+
+#: glib/gmarkup.c:1806
+msgid ""
+"Document ended unexpectedly after the equals sign following an attribute "
+"name; no attribute value"
+msgstr ""
+"Dokumento neatendite finis post le egalsigno sekvita de atributnomo; ne "
+"atributvaloro"
+
+#: glib/gmarkup.c:1813
+msgid "Document ended unexpectedly while inside an attribute value"
+msgstr "Dokumento neatendite finis dum en atributvaloro"
+
+#: glib/gmarkup.c:1829
+#, c-format
+msgid "Document ended unexpectedly inside the close tag for element '%s'"
+msgstr "Dokumento neatendite finis en la fermetikedo por elemento '%s'"
+
+#: glib/gmarkup.c:1835
+msgid "Document ended unexpectedly inside a comment or processing instruction"
+msgstr "Dokumento neatendite finis en komento aŭ komputanta instrukcio"
+
+#: glib/gshell.c:70
+#, c-format
+msgid "Quoted text doesn't begin with a quotation mark"
+msgstr "Citita teksto ne komencas je citilo"
+
+#: glib/gshell.c:160
+#, c-format
+msgid "Unmatched quotation mark in command line or other shell-quoted text"
+msgstr "Konvenita citilo en komandlinio aŭ alia programeto"
+
+#: glib/gshell.c:538
+#, c-format
+msgid "Text ended just after a '\\' character. (The text was '%s')"
+msgstr "Teksto finis post '\\' signon. (La teksto estis '%s')"
+
+#: glib/gshell.c:545
+#, c-format
+msgid "Text ended before matching quote was found for %c. (The text was '%s')"
+msgstr "Teksto finis antaŭ konvenan citilon por %c. (La teksto estis '%s')"
+
+#: glib/gshell.c:557
+#, c-format
+msgid "Text was empty (or contained only whitespace)"
+msgstr "Teksto estis malplena (aŭ enhavis nur blankspacon)"
+
+#: glib/gspawn-win32.c:272
+#, c-format
+msgid "Failed to read data from child process"
+msgstr "Malsukesis legi datumon de procezido"
+
+#: glib/gspawn-win32.c:287 glib/gspawn.c:1379
+#, c-format
+msgid "Failed to create pipe for communicating with child process (%s)"
+msgstr "Malsukcesis krei dukton por komunikado kun procezido (%s)"
+
+#: glib/gspawn-win32.c:325 glib/gspawn.c:1043
+#, c-format
+msgid "Failed to read from child pipe (%s)"
+msgstr "Malsukcesis legi de duktido (%s)"
+
+#: glib/gspawn-win32.c:351 glib/gspawn.c:1248
+#, c-format
+msgid "Failed to change to directory '%s' (%s)"
+msgstr "Malsukcesis ŝanĝi al dosierujo '%s' (%s)"
+
+#: glib/gspawn-win32.c:357 glib/gspawn-win32.c:577
+#, c-format
+msgid "Failed to execute child process (%s)"
+msgstr "Malsukcesis lanĉi procezidon (%s)"
+
+#: glib/gspawn-win32.c:467 glib/gspawn-win32.c:523
+#, fuzzy, c-format
+msgid "Invalid program name: %s"
+msgstr "Nevalida komputilnomo"
+
+#: glib/gspawn-win32.c:477 glib/gspawn-win32.c:533 glib/gspawn-win32.c:776
+#: glib/gspawn-win32.c:831 glib/gspawn-win32.c:1366
+#, c-format
+msgid "Invalid string in argument vector at %d: %s"
+msgstr ""
+
+#: glib/gspawn-win32.c:488 glib/gspawn-win32.c:544 glib/gspawn-win32.c:790
+#: glib/gspawn-win32.c:844 glib/gspawn-win32.c:1399
+#, fuzzy, c-format
+msgid "Invalid string in environment: %s"
+msgstr "Nevalida sekvenco en konverta enigo"
+
+#: glib/gspawn-win32.c:772 glib/gspawn-win32.c:827 glib/gspawn-win32.c:1347
+#, fuzzy, c-format
+msgid "Invalid working directory: %s"
+msgstr "Eraro dum malfermado de dosierujo '%s': %s"
+
+#: glib/gspawn-win32.c:886
+#, fuzzy, c-format
+msgid "Failed to execute helper program (%s)"
+msgstr "Malsukcesis lanĉi helpant-programon"
+
+#: glib/gspawn-win32.c:1086
+#, c-format
+msgid ""
+"Unexpected error in g_io_channel_win32_poll() reading data from a child "
+"process"
+msgstr ""
+"Neatendita eraro dum g_io_channel_win32_poll() legado de datumo de procezido"
+
+#: glib/gspawn.c:168
+#, c-format
+msgid "Failed to read data from child process (%s)"
+msgstr "Malsukcesis legi datumon de procezido (%s)"
+
+#: glib/gspawn.c:300
+#, c-format
+msgid "Unexpected error in select() reading data from a child process (%s)"
+msgstr "Neatendita eraro en select() dum datumlegado de procezido (%s)"
+
+#: glib/gspawn.c:383
+#, c-format
+msgid "Unexpected error in waitpid() (%s)"
+msgstr "Neatendita eraro en waitpid() (%s)"
+
+#: glib/gspawn.c:1108
+#, c-format
+msgid "Failed to fork (%s)"
+msgstr "Malsukcesis branĉiĝi (%s)"
+
+#: glib/gspawn.c:1258
+#, c-format
+msgid "Failed to execute child process \"%s\" (%s)"
+msgstr "Malsukcesis lanĉi procezidon \"%s\" (%s)"
+
+#: glib/gspawn.c:1268
+#, c-format
+msgid "Failed to redirect output or input of child process (%s)"
+msgstr "Malsukcesis alidirekti enigon aŭ eligon de procezido (%s)"
+
+#: glib/gspawn.c:1277
+#, c-format
+msgid "Failed to fork child process (%s)"
+msgstr "Malsukcesis branĉiĝi procezidon (%s)"
+
+#: glib/gspawn.c:1285
+#, c-format
+msgid "Unknown error executing child process \"%s\""
+msgstr "Nekonata eraro dum la lanĉando de la procezido \"%s\""
+
+#: glib/gspawn.c:1307
+#, c-format
+msgid "Failed to read enough data from child pid pipe (%s)"
+msgstr "Malsukcesis legi sufiĉe datumon de ida pid-dukto (%s)"
+
+#: glib/gutf8.c:1023
+#, c-format
+msgid "Character out of range for UTF-8"
+msgstr "Signo ne estas en la UTF-8 intervalo"
+
+#: glib/gutf8.c:1117 glib/gutf8.c:1126 glib/gutf8.c:1258 glib/gutf8.c:1267
+#: glib/gutf8.c:1408 glib/gutf8.c:1504
+#, c-format
+msgid "Invalid sequence in conversion input"
+msgstr "Nevalida sekvenco en konverta enigo"
+
+#: glib/gutf8.c:1419 glib/gutf8.c:1515
+#, c-format
+msgid "Character out of range for UTF-16"
+msgstr "Signo ne estas en la UTF-16 intervalo"
+
+#: glib/goption.c:553
+msgid "Usage:"
+msgstr ""
+
+#: glib/goption.c:553
+msgid "[OPTION...]"
+msgstr ""
+
+#: glib/goption.c:644
+msgid "Help Options:"
+msgstr ""
+
+#: glib/goption.c:645
+msgid "Show help options"
+msgstr ""
+
+#: glib/goption.c:650
+msgid "Show all help options"
+msgstr ""
+
+#: glib/goption.c:700
+msgid "Application Options:"
+msgstr ""
+
+#: glib/goption.c:744 glib/goption.c:814
+#, c-format
+msgid "Cannot parse integer value '%s' for %s"
+msgstr ""
+
+#: glib/goption.c:754 glib/goption.c:822
+#, c-format
+msgid "Integer value '%s' for %s out of range"
+msgstr ""
+
+#: glib/goption.c:779
+#, c-format
+msgid "Cannot parse double value '%s' for %s"
+msgstr ""
+
+#: glib/goption.c:787
+#, c-format
+msgid "Double value '%s' for %s out of range"
+msgstr ""
+
+#: glib/goption.c:1124
+#, fuzzy, c-format
+msgid "Error parsing option %s"
+msgstr "Eraro dum konverto: %s"
+
+#: glib/goption.c:1155 glib/goption.c:1266
+#, c-format
+msgid "Missing argument for %s"
+msgstr ""
+
+#: glib/goption.c:1655
+#, c-format
+msgid "Unknown option %s"
+msgstr ""
+
+#: glib/gkeyfile.c:342
+#, c-format
+msgid "Valid key file could not be found in data dirs"
+msgstr ""
+
+#: glib/gkeyfile.c:377
+#, c-format
+msgid "Not a regular file"
+msgstr ""
+
+#: glib/gkeyfile.c:385
+#, c-format
+msgid "File is empty"
+msgstr ""
+
+#: glib/gkeyfile.c:701
+#, c-format
+msgid ""
+"Key file contains line '%s' which is not a key-value pair, group, or comment"
+msgstr ""
+
+#: glib/gkeyfile.c:762
+#, fuzzy, c-format
+msgid "Invalid group name: %s"
+msgstr "Nevalida komputilnomo"
+
+#: glib/gkeyfile.c:784
+#, c-format
+msgid "Key file does not start with a group"
+msgstr ""
+
+#: glib/gkeyfile.c:810
+#, fuzzy, c-format
+msgid "Invalid key name: %s"
+msgstr "Nevalida komputilnomo"
+
+#: glib/gkeyfile.c:837
+#, c-format
+msgid "Key file contains unsupported encoding '%s'"
+msgstr ""
+
+#: glib/gkeyfile.c:1050 glib/gkeyfile.c:1209 glib/gkeyfile.c:2410
+#: glib/gkeyfile.c:2477 glib/gkeyfile.c:2598 glib/gkeyfile.c:2733
+#: glib/gkeyfile.c:2886 glib/gkeyfile.c:3066 glib/gkeyfile.c:3124
+#, c-format
+msgid "Key file does not have group '%s'"
+msgstr ""
+
+#: glib/gkeyfile.c:1221
+#, c-format
+msgid "Key file does not have key '%s'"
+msgstr ""
+
+#: glib/gkeyfile.c:1323 glib/gkeyfile.c:1433
+#, c-format
+msgid "Key file contains key '%s' with value '%s' which is not UTF-8"
+msgstr ""
+
+#: glib/gkeyfile.c:1343 glib/gkeyfile.c:1453 glib/gkeyfile.c:1821
+#, c-format
+msgid "Key file contains key '%s' which has value that cannot be interpreted."
+msgstr ""
+
+#: glib/gkeyfile.c:2033 glib/gkeyfile.c:2242
+#, c-format
+msgid ""
+"Key file contains key '%s' in group '%s' which has value that cannot be "
+"interpreted."
+msgstr ""
+
+#: glib/gkeyfile.c:2425 glib/gkeyfile.c:2613 glib/gkeyfile.c:3135
+#, c-format
+msgid "Key file does not have key '%s' in group '%s'"
+msgstr ""
+
+#: glib/gkeyfile.c:3374
+#, c-format
+msgid "Key file contains escape character at end of line"
+msgstr ""
+
+#: glib/gkeyfile.c:3396
+#, fuzzy, c-format
+msgid "Key file contains invalid escape sequence '%s'"
+msgstr "La URI '%s' enhavas nevalidajn eskapajn signojn"
+
+#: glib/gkeyfile.c:3538
+#, c-format
+msgid "Value '%s' cannot be interpreted as a number."
+msgstr ""
+
+#: glib/gkeyfile.c:3552
+#, c-format
+msgid "Integer value '%s' out of range"
+msgstr ""
+
+#: glib/gkeyfile.c:3585
+#, c-format
+msgid "Value '%s' cannot be interpreted as a float number."
+msgstr ""
+
+#: glib/gkeyfile.c:3612
+#, c-format
+msgid "Value '%s' cannot be interpreted as a boolean."
+msgstr ""
+
+#, fuzzy
+#~ msgid "Could not change file mode: fork() failed: %s"
+#~ msgstr "Malsukcesis malfermi dosieron '%s': fdopen() malsukcesis: %s"
+
+#, fuzzy
+#~ msgid "Could not change file mode: waitpid() failed: %s"
+#~ msgstr "Ne eblis akiri %lu bitokojn por lego de dosiero \"%s\""
+
+#, fuzzy
+#~ msgid "Could not change file mode: chmod() failed: %s"
+#~ msgstr "Malsukcesis malfermi dosieron '%s': fdopen() malsukcesis: %s"
+
+#~ msgid "Conversion from character set `%s' to `%s' is not supported"
+#~ msgstr "Konverto de signaro '%s' al '%s' ne estas subtenata"

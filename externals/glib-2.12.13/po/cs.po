@@ -1,0 +1,825 @@
+# translation of cs.po to Czech
+# glib Czech translation.
+# Copyright (C) 2002, 2006 Free Software Foundation, Inc.
+# Copyright (C) 2004, 2005 glib'S COPYRIGHT HOLDER
+# Copyright (C) 2004, 2005 Miloslav Trmac <mitr@volny.cz>
+# Copyright (C) 2006 Lukas Novotny <lukasnov@cvs.gnome.org>
+# Petr Pytelka <pyta@lightcomp.cz>, 2002.
+# Miloslav Trmac <mitr@volny.cz>, 2002, 2004, 2005.
+# Lukas Novotny <lukasnov@cvs.gnome.org>, 2006.
+# Jakub Friedl <jfriedl@suse.cz>, 2006.
+#
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: cs\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2007-07-16 15:09-0400\n"
+"PO-Revision-Date: 2006-08-03 15:32+0200\n"
+"Last-Translator: Jakub Friedl <jfriedl@suse.cz>\n"
+"Language-Team: Czech <gnome-cs-list@gnome.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: KBabel 1.10.2\n"
+"Plural-Forms:  nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2;\n"
+
+#: glib/gbookmarkfile.c:716 glib/gbookmarkfile.c:793 glib/gbookmarkfile.c:872
+#: glib/gbookmarkfile.c:919
+#, c-format
+msgid "Unexpected attribute '%s' for element '%s'"
+msgstr "Neočekávaný atribut '%s' elementu '%s'"
+
+#: glib/gbookmarkfile.c:727 glib/gbookmarkfile.c:804 glib/gbookmarkfile.c:814
+#: glib/gbookmarkfile.c:930
+#, c-format
+msgid "Attribute '%s' of element '%s' not found"
+msgstr "Atribut '%s' elementu '%s' nenalezen"
+
+#: glib/gbookmarkfile.c:1103 glib/gbookmarkfile.c:1168
+#: glib/gbookmarkfile.c:1232 glib/gbookmarkfile.c:1242
+#, c-format
+msgid "Unexpected tag '%s', tag '%s' expected"
+msgstr "Neočekávaný tag '%s', byl očekáván tag '%s'"
+
+#: glib/gbookmarkfile.c:1128 glib/gbookmarkfile.c:1142
+#: glib/gbookmarkfile.c:1210 glib/gbookmarkfile.c:1262
+#, c-format
+msgid "Unexpected tag '%s' inside '%s'"
+msgstr "Neočekávaný tag '%s' v '%s'"
+
+#: glib/gbookmarkfile.c:1792
+#, fuzzy, c-format
+msgid "No valid bookmark file found in data dirs"
+msgstr "V datových adresářích nebyl nalezen platný soubor záložek"
+
+#: glib/gbookmarkfile.c:1993
+#, c-format
+msgid "A bookmark for URI '%s' already exists"
+msgstr "Záložka pro URI '%s' již existuje"
+
+#: glib/gbookmarkfile.c:2039 glib/gbookmarkfile.c:2196
+#: glib/gbookmarkfile.c:2281 glib/gbookmarkfile.c:2362
+#: glib/gbookmarkfile.c:2447 glib/gbookmarkfile.c:2530
+#: glib/gbookmarkfile.c:2608 glib/gbookmarkfile.c:2687
+#: glib/gbookmarkfile.c:2729 glib/gbookmarkfile.c:2826
+#: glib/gbookmarkfile.c:2952 glib/gbookmarkfile.c:3142
+#: glib/gbookmarkfile.c:3218 glib/gbookmarkfile.c:3379
+#: glib/gbookmarkfile.c:3454 glib/gbookmarkfile.c:3544
+#: glib/gbookmarkfile.c:3671
+#, c-format
+msgid "No bookmark found for URI '%s'"
+msgstr "Nebyla nalezena záložka pro URI '%s'"
+
+#: glib/gbookmarkfile.c:2371
+#, c-format
+msgid "No MIME type defined in the bookmark for URI '%s'"
+msgstr "V záložce pro URI '%s' není definován žádný MIME typ"
+
+#: glib/gbookmarkfile.c:2456
+#, c-format
+msgid "No private flag has been defined in bookmark for URI '%s'"
+msgstr "V záložce pro URI '%s' není definován žádný soukromý příznak"
+
+#: glib/gbookmarkfile.c:2835
+#, c-format
+msgid "No groups set in bookmark for URI '%s'"
+msgstr "Žádné skupiny nenastaveny v záložce pro URI '%s'"
+
+#: glib/gbookmarkfile.c:3236 glib/gbookmarkfile.c:3389
+#, c-format
+msgid "No application with name '%s' registered a bookmark for '%s'"
+msgstr "Žádná aplikace se jménem '%s' nezaregistrovala záložku pro '%s'"
+
+#: glib/gbookmarkfile.c:3402
+#, fuzzy, c-format
+msgid "Failed to expand exec line '%s' with URI '%s'"
+msgstr "Nemohu přečíst symbolický odkaz '%s': %s"
+
+#: glib/gconvert.c:423 glib/gconvert.c:501 glib/giochannel.c:1150
+#, c-format
+msgid "Conversion from character set '%s' to '%s' is not supported"
+msgstr "Převod ze znakové sady '%s' do '%s' není podporován"
+
+#: glib/gconvert.c:427 glib/gconvert.c:505
+#, c-format
+msgid "Could not open converter from '%s' to '%s'"
+msgstr "Nemohu otevřít převaděč z '%s' do '%s'"
+
+#: glib/gconvert.c:621 glib/gconvert.c:1010 glib/giochannel.c:1322
+#: glib/giochannel.c:1364 glib/giochannel.c:2206 glib/gutf8.c:949
+#: glib/gutf8.c:1398
+#, c-format
+msgid "Invalid byte sequence in conversion input"
+msgstr "Neplatná posloupnost bajtů na vstupu převodu"
+
+#: glib/gconvert.c:627 glib/gconvert.c:937 glib/giochannel.c:1329
+#: glib/giochannel.c:2218
+#, c-format
+msgid "Error during conversion: %s"
+msgstr "Chyba při převodu: %s"
+
+#: glib/gconvert.c:662 glib/gutf8.c:945 glib/gutf8.c:1149 glib/gutf8.c:1290
+#: glib/gutf8.c:1394
+#, c-format
+msgid "Partial character sequence at end of input"
+msgstr "Částečná sekvence znaků na konci vstupu"
+
+#: glib/gconvert.c:912
+#, c-format
+msgid "Cannot convert fallback '%s' to codeset '%s'"
+msgstr "Nemohu převést ukončení '%s' do znakové sady '%s'"
+
+#: glib/gconvert.c:1721
+#, c-format
+msgid "The URI '%s' is not an absolute URI using the \"file\" scheme"
+msgstr "URI '%s' není absolutní URI používající schéma \"file\""
+
+#: glib/gconvert.c:1731
+#, c-format
+msgid "The local file URI '%s' may not include a '#'"
+msgstr "URI '%s' místního souboru nesmí obsahovat '#'"
+
+#: glib/gconvert.c:1748
+#, c-format
+msgid "The URI '%s' is invalid"
+msgstr "URI '%s' je neplatné"
+
+#: glib/gconvert.c:1760
+#, c-format
+msgid "The hostname of the URI '%s' is invalid"
+msgstr "Jméno počítače v URI '%s' je neplatné"
+
+#: glib/gconvert.c:1776
+#, c-format
+msgid "The URI '%s' contains invalidly escaped characters"
+msgstr "URI '%s' obsahuje nesprávně escapované znaky"
+
+#: glib/gconvert.c:1871
+#, c-format
+msgid "The pathname '%s' is not an absolute path"
+msgstr "'%s' není absolutní cesta"
+
+#: glib/gconvert.c:1881
+#, c-format
+msgid "Invalid hostname"
+msgstr "Neplatné jméno počítače"
+
+#: glib/gdir.c:121 glib/gdir.c:141
+#, c-format
+msgid "Error opening directory '%s': %s"
+msgstr "Chyba při otevírání adresáře '%s': %s"
+
+#: glib/gfileutils.c:572 glib/gfileutils.c:645
+#, c-format
+msgid "Could not allocate %lu bytes to read file \"%s\""
+msgstr "Nemohu se alokovat %lu bytů pro přečtení souboru \"%s\""
+
+#: glib/gfileutils.c:587
+#, c-format
+msgid "Error reading file '%s': %s"
+msgstr "Chyba čtení souboru '%s': %s"
+
+#: glib/gfileutils.c:669
+#, c-format
+msgid "Failed to read from file '%s': %s"
+msgstr "Chyba při čtení ze souboru '%s': %s"
+
+#: glib/gfileutils.c:720 glib/gfileutils.c:807
+#, c-format
+msgid "Failed to open file '%s': %s"
+msgstr "Nemohu otevřít soubor '%s': %s"
+
+#: glib/gfileutils.c:737 glib/gmappedfile.c:133
+#, c-format
+msgid "Failed to get attributes of file '%s': fstat() failed: %s"
+msgstr "Nemohu získat atributy souboru '%s': fstat() selhalo: %s"
+
+#: glib/gfileutils.c:771
+#, c-format
+msgid "Failed to open file '%s': fdopen() failed: %s"
+msgstr "Nemohu otevřít soubor '%s': fdopen() selhalo: %s"
+
+#: glib/gfileutils.c:905
+#, c-format
+msgid "Failed to rename file '%s' to '%s': g_rename() failed: %s"
+msgstr "Nemohu přejmenovat soubor '%s' na '%s': g_rename() selhalo: %s"
+
+#: glib/gfileutils.c:946 glib/gfileutils.c:1404
+#, c-format
+msgid "Failed to create file '%s': %s"
+msgstr "Nemohu vytvořit soubor '%s': %s"
+
+#: glib/gfileutils.c:960
+#, c-format
+msgid "Failed to open file '%s' for writing: fdopen() failed: %s"
+msgstr "Nemohu otevřít soubor '%s' pro zápis: fdopen() selhalo: %s"
+
+#: glib/gfileutils.c:985
+#, c-format
+msgid "Failed to write file '%s': fwrite() failed: %s"
+msgstr "Nemohu zapisovat do souboru '%s': fwrite() selhalo: %s"
+
+#: glib/gfileutils.c:1004
+#, c-format
+msgid "Failed to close file '%s': fclose() failed: %s"
+msgstr "Nemohu zavřít soubor '%s': fclose() selhalo: %s"
+
+#: glib/gfileutils.c:1122
+#, c-format
+msgid "Existing file '%s' could not be removed: g_unlink() failed: %s"
+msgstr "Existující soubor '%s' nelze odstranit: g_unlink() selhalo: %s"
+
+#: glib/gfileutils.c:1366
+#, c-format
+msgid "Template '%s' invalid, should not contain a '%s'"
+msgstr "Šablona '%s' je neplatná, neměla by obsahovat '%s'"
+
+#: glib/gfileutils.c:1379
+#, c-format
+msgid "Template '%s' doesn't contain XXXXXX"
+msgstr "Šablona '%s' neobsahuje XXXXXX"
+
+#: glib/gfileutils.c:1854
+#, c-format
+msgid "Failed to read the symbolic link '%s': %s"
+msgstr "Nemohu přečíst symbolický odkaz '%s': %s"
+
+#: glib/gfileutils.c:1875
+#, c-format
+msgid "Symbolic links not supported"
+msgstr "Symbolické odkazy nejsou podporovány"
+
+#: glib/giochannel.c:1154
+#, c-format
+msgid "Could not open converter from '%s' to '%s': %s"
+msgstr "Nemohu otevřít převodník z '%s' do '%s': %s"
+
+#: glib/giochannel.c:1499
+#, c-format
+msgid "Can't do a raw read in g_io_channel_read_line_string"
+msgstr "Nemohu přímo číst v g_io_channel_read_line_string"
+
+#: glib/giochannel.c:1546 glib/giochannel.c:1803 glib/giochannel.c:1889
+#, c-format
+msgid "Leftover unconverted data in read buffer"
+msgstr "Zbyla nepřevedená data ve vstupní vyrovnávací paměti"
+
+#: glib/giochannel.c:1626 glib/giochannel.c:1703
+#, c-format
+msgid "Channel terminates in a partial character"
+msgstr "Kanál ukončen částí znaku"
+
+#: glib/giochannel.c:1689
+#, c-format
+msgid "Can't do a raw read in g_io_channel_read_to_end"
+msgstr "Nemohu přímo číst v g_io_channel_read_to_end"
+
+#: glib/gmappedfile.c:116
+#, c-format
+msgid "Failed to open file '%s': open() failed: %s"
+msgstr "Nemohu otevřít soubor '%s': open() selhalo: %s"
+
+#: glib/gmappedfile.c:193
+#, c-format
+msgid "Failed to map file '%s': mmap() failed: %s"
+msgstr "Nemohu otevřít soubor '%s': mmap() selhalo: %s"
+
+#: glib/gmarkup.c:226
+#, c-format
+msgid "Error on line %d char %d: %s"
+msgstr "Chyba na řádku %d znak %d: %s"
+
+#: glib/gmarkup.c:324
+#, c-format
+msgid "Error on line %d: %s"
+msgstr "Chyba na řádku %d: %s"
+
+#: glib/gmarkup.c:428
+msgid ""
+"Empty entity '&;' seen; valid entities are: &amp; &quot; &lt; &gt; &apos;"
+msgstr ""
+"Nalezena prázdná entita '&;', platné entity jsou: &amp; &quot; &lt; &gt; "
+"&apos;"
+
+#: glib/gmarkup.c:438
+#, c-format
+msgid ""
+"Character '%s' is not valid at the start of an entity name; the & character "
+"begins an entity; if this ampersand isn't supposed to be an entity, escape "
+"it as &amp;"
+msgstr ""
+"Znak '%s' není platný na začátku názvu entity; počátečním znakem entity je "
+"&; v případě, že nemá být entitou, je zapotřebí ho napsat jako &amp;"
+
+#: glib/gmarkup.c:472
+#, c-format
+msgid "Character '%s' is not valid inside an entity name"
+msgstr "Znak '%s' je v názvu entity neplatný"
+
+#: glib/gmarkup.c:509
+#, c-format
+msgid "Entity name '%s' is not known"
+msgstr "Název entity '%s' není znám"
+
+#: glib/gmarkup.c:520
+msgid ""
+"Entity did not end with a semicolon; most likely you used an ampersand "
+"character without intending to start an entity - escape ampersand as &amp;"
+msgstr ""
+"Entita nekončí středníkem; pravděpodobně jste použili znak & bez úmyslu "
+"začít entitu - zapište ampersand jako &amp;"
+
+#: glib/gmarkup.c:573
+#, c-format
+msgid ""
+"Failed to parse '%-.*s', which should have been a digit inside a character "
+"reference (&#234; for example) - perhaps the digit is too large"
+msgstr ""
+"Nemohu zpracovat '%-.*s', což by mělo být číslo v odkazu na znak (například "
+"&#234) - číslo je možná příliš velké"
+
+#: glib/gmarkup.c:598
+#, c-format
+msgid "Character reference '%-.*s' does not encode a permitted character"
+msgstr "Odkaz na znak '%-.*s' nekóduje povolený znak"
+
+#: glib/gmarkup.c:613
+msgid "Empty character reference; should include a digit such as &#454;"
+msgstr ""
+"Prázdný odkaz na znak. Odkaz by měl obsahovat číslice, například &#454;"
+
+#: glib/gmarkup.c:623
+msgid ""
+"Character reference did not end with a semicolon; most likely you used an "
+"ampersand character without intending to start an entity - escape ampersand "
+"as &amp;"
+msgstr ""
+"Odkaz na znak nekončí středníkem; pravděpodobně jste použili znak & bez "
+"úmyslu začít entitu - zapište ampersand jako &amp;"
+
+#: glib/gmarkup.c:709
+msgid "Unfinished entity reference"
+msgstr "Neukončený odkaz na entitu"
+
+#: glib/gmarkup.c:715
+msgid "Unfinished character reference"
+msgstr "Neukončený odkaz na znak"
+
+#: glib/gmarkup.c:958 glib/gmarkup.c:986 glib/gmarkup.c:1022
+msgid "Invalid UTF-8 encoded text"
+msgstr "Neplatný text v kódování UTF-8"
+
+#: glib/gmarkup.c:1058
+msgid "Document must begin with an element (e.g. <book>)"
+msgstr "Dokument musí začínat elementem (například: <book>)"
+
+#: glib/gmarkup.c:1098
+#, c-format
+msgid ""
+"'%s' is not a valid character following a '<' character; it may not begin an "
+"element name"
+msgstr "'%s' není platný znak po znaku '<'; nesmí s ním začínat název elementu"
+
+#: glib/gmarkup.c:1162
+#, c-format
+msgid ""
+"Odd character '%s', expected a '>' character to end the start tag of element "
+"'%s'"
+msgstr ""
+"Divný znak '%s', byl očekáván znak '>' pro ukončení počátečního tagu "
+"elementu '%s'"
+
+#: glib/gmarkup.c:1251
+#, c-format
+msgid ""
+"Odd character '%s', expected a '=' after attribute name '%s' of element '%s'"
+msgstr ""
+"Divný znak '%s', po názvu atributu '%s' elementu '%s' bylo očekáváno '=' "
+
+#: glib/gmarkup.c:1293
+#, c-format
+msgid ""
+"Odd character '%s', expected a '>' or '/' character to end the start tag of "
+"element '%s', or optionally an attribute; perhaps you used an invalid "
+"character in an attribute name"
+msgstr ""
+"Divný znak '%s', bylo očekáváno '>' nebo '/' pro ukončení počátečního tagu "
+"elementu '%s' nebo případně atribut; pravděpodobně jste použili neplatný "
+"znak v názvu atributu"
+
+#: glib/gmarkup.c:1382
+#, c-format
+msgid ""
+"Odd character '%s', expected an open quote mark after the equals sign when "
+"giving value for attribute '%s' of element '%s'"
+msgstr ""
+"Divný znak '%s', po znaku rovnítka při udávání hodnoty atributu '%s' "
+"elementu '%s' byly očekávány uvozovky"
+
+#: glib/gmarkup.c:1527
+#, c-format
+msgid ""
+"'%s' is not a valid character following the characters '</'; '%s' may not "
+"begin an element name"
+msgstr ""
+"'%s' není platný znak po znacích '</'; znakem '%s' nesmí začínat název "
+"elementu"
+
+#: glib/gmarkup.c:1567
+#, c-format
+msgid ""
+"'%s' is not a valid character following the close element name '%s'; the "
+"allowed character is '>'"
+msgstr ""
+"'%s' není povolený znak po ukončovacím názvu elementu '%s'; povoleným znakem "
+"je '>'"
+
+#: glib/gmarkup.c:1578
+#, c-format
+msgid "Element '%s' was closed, no element is currently open"
+msgstr "Element '%s' byl uzavřen, žádný element není momentálně otevřen"
+
+#: glib/gmarkup.c:1587
+#, c-format
+msgid "Element '%s' was closed, but the currently open element is '%s'"
+msgstr "Byl uzavřen element '%s', ale aktuálně je otevřen element '%s'"
+
+#: glib/gmarkup.c:1753
+msgid "Document was empty or contained only whitespace"
+msgstr "Dokument je prázdný nebo obsahuje pouze mezery"
+
+#: glib/gmarkup.c:1767
+msgid "Document ended unexpectedly just after an open angle bracket '<'"
+msgstr "Dokument neočekávaně skončil hned po otevírací značce '<'"
+
+#: glib/gmarkup.c:1775 glib/gmarkup.c:1820
+#, c-format
+msgid ""
+"Document ended unexpectedly with elements still open - '%s' was the last "
+"element opened"
+msgstr ""
+"Dokument neočekávaně skončil, elementy jsou stále otevřeny - poslední "
+"otevřený element byl '%s'"
+
+#: glib/gmarkup.c:1783
+#, c-format
+msgid ""
+"Document ended unexpectedly, expected to see a close angle bracket ending "
+"the tag <%s/>"
+msgstr ""
+"Dokument neočekávaně skončil, byla očekávána uzavírací závorka tagu <%s/>"
+
+#: glib/gmarkup.c:1789
+msgid "Document ended unexpectedly inside an element name"
+msgstr "Dokument neočekávaně skončil uvnitř názvu elementu"
+
+#: glib/gmarkup.c:1795
+msgid "Document ended unexpectedly inside an attribute name"
+msgstr "Dokument neočekávaně skončil uvnitř názvu atributu"
+
+#: glib/gmarkup.c:1800
+msgid "Document ended unexpectedly inside an element-opening tag."
+msgstr "Dokument neočekávaně skončil v tagu otevírajícím element."
+
+#: glib/gmarkup.c:1806
+msgid ""
+"Document ended unexpectedly after the equals sign following an attribute "
+"name; no attribute value"
+msgstr ""
+"Dokument neočekávaně skončil po znaku přiřazení následujícím za názvem "
+"atributu; chybí hodnota atributu"
+
+#: glib/gmarkup.c:1813
+msgid "Document ended unexpectedly while inside an attribute value"
+msgstr "Dokument neočekávaně skončil uvnitř hodnoty atributu"
+
+#: glib/gmarkup.c:1829
+#, c-format
+msgid "Document ended unexpectedly inside the close tag for element '%s'"
+msgstr "Dokument neočekávaně skončil uvnitř uzavíracího tagu pro element '%s'"
+
+#: glib/gmarkup.c:1835
+msgid "Document ended unexpectedly inside a comment or processing instruction"
+msgstr ""
+"Dokument neočekávaně skončil uvnitř komentáře nebo instrukce pro zpracování"
+
+#: glib/gshell.c:70
+#, c-format
+msgid "Quoted text doesn't begin with a quotation mark"
+msgstr "Text v uvozovkách nezačíná uvozovkami"
+
+#: glib/gshell.c:160
+#, c-format
+msgid "Unmatched quotation mark in command line or other shell-quoted text"
+msgstr ""
+"Nenalezena uzavírací uvozovka v příkazovém řádku nebo jiném textu quotovaném "
+"jako shellem"
+
+#: glib/gshell.c:538
+#, c-format
+msgid "Text ended just after a '\\' character. (The text was '%s')"
+msgstr "Text skončil právě za znakem '\\'. (Text byl '%s')"
+
+#: glib/gshell.c:545
+#, c-format
+msgid "Text ended before matching quote was found for %c. (The text was '%s')"
+msgstr ""
+"Text skončil před nalezením odpovídajících uvozovek znakem %c. (Text byl '%"
+"s')"
+
+#: glib/gshell.c:557
+#, c-format
+msgid "Text was empty (or contained only whitespace)"
+msgstr "Text je prázdný (nebo obsahuje pouze mezery)"
+
+#: glib/gspawn-win32.c:272
+#, c-format
+msgid "Failed to read data from child process"
+msgstr "Nemohu číst data z procesu potomka"
+
+#: glib/gspawn-win32.c:287 glib/gspawn.c:1379
+#, c-format
+msgid "Failed to create pipe for communicating with child process (%s)"
+msgstr "Nemohu vytvořit rouru pro komunikaci s procesem potomka (%s)"
+
+#: glib/gspawn-win32.c:325 glib/gspawn.c:1043
+#, c-format
+msgid "Failed to read from child pipe (%s)"
+msgstr "Nemohu číst z roury potomka (%s)"
+
+#: glib/gspawn-win32.c:351 glib/gspawn.c:1248
+#, c-format
+msgid "Failed to change to directory '%s' (%s)"
+msgstr "Nemohu přejít do adresáře '%s' (%s)"
+
+#: glib/gspawn-win32.c:357 glib/gspawn-win32.c:577
+#, c-format
+msgid "Failed to execute child process (%s)"
+msgstr "Nemohu spustit proces potomka (%s)"
+
+#: glib/gspawn-win32.c:467 glib/gspawn-win32.c:523
+#, c-format
+msgid "Invalid program name: %s"
+msgstr "Neplatný název programu: %s"
+
+#: glib/gspawn-win32.c:477 glib/gspawn-win32.c:533 glib/gspawn-win32.c:776
+#: glib/gspawn-win32.c:831 glib/gspawn-win32.c:1366
+#, c-format
+msgid "Invalid string in argument vector at %d: %s"
+msgstr "Neplatný řetězec v poli argumentů v %d: %s"
+
+#: glib/gspawn-win32.c:488 glib/gspawn-win32.c:544 glib/gspawn-win32.c:790
+#: glib/gspawn-win32.c:844 glib/gspawn-win32.c:1399
+#, c-format
+msgid "Invalid string in environment: %s"
+msgstr "Neplatný řetězec v prostředí: %s"
+
+#: glib/gspawn-win32.c:772 glib/gspawn-win32.c:827 glib/gspawn-win32.c:1347
+#, c-format
+msgid "Invalid working directory: %s"
+msgstr "Neplatný aktuální adresář: %s"
+
+#: glib/gspawn-win32.c:886
+#, c-format
+msgid "Failed to execute helper program (%s)"
+msgstr "Nemohu spustit pomocný program (%s)"
+
+#: glib/gspawn-win32.c:1086
+#, c-format
+msgid ""
+"Unexpected error in g_io_channel_win32_poll() reading data from a child "
+"process"
+msgstr ""
+"Neočekávaná chyba v g_io_channel_win32_poll() při čtení dat z procesu potomka"
+
+#: glib/gspawn.c:168
+#, c-format
+msgid "Failed to read data from child process (%s)"
+msgstr "Nemohu číst data z procesu potomka (%s)"
+
+#: glib/gspawn.c:300
+#, c-format
+msgid "Unexpected error in select() reading data from a child process (%s)"
+msgstr "Neočekávaná chyba v select() při čtení dat z procesu potomka (%s)"
+
+#: glib/gspawn.c:383
+#, c-format
+msgid "Unexpected error in waitpid() (%s)"
+msgstr "Neočekávaná chyba v waitpid() (%s)"
+
+#: glib/gspawn.c:1108
+#, c-format
+msgid "Failed to fork (%s)"
+msgstr "Nemohu fork (%s)"
+
+#: glib/gspawn.c:1258
+#, c-format
+msgid "Failed to execute child process \"%s\" (%s)"
+msgstr "Nemohu spustit proces potomka \"%s\" (%s)"
+
+#: glib/gspawn.c:1268
+#, c-format
+msgid "Failed to redirect output or input of child process (%s)"
+msgstr "Nemohu přesměrovat vstup nebo výstup procesu potomka (%s)"
+
+#: glib/gspawn.c:1277
+#, c-format
+msgid "Failed to fork child process (%s)"
+msgstr "Nemohu fork proces potomka (%s)"
+
+#: glib/gspawn.c:1285
+#, c-format
+msgid "Unknown error executing child process \"%s\""
+msgstr "Neznámá chyba při běhu procesu potomka \"%s\""
+
+#: glib/gspawn.c:1307
+#, c-format
+msgid "Failed to read enough data from child pid pipe (%s)"
+msgstr "Nemohu přečíst dostatek dat z roury pid potomka (%s)"
+
+#: glib/gutf8.c:1023
+#, c-format
+msgid "Character out of range for UTF-8"
+msgstr "Znak je mimo rozsah UTF-8"
+
+#: glib/gutf8.c:1117 glib/gutf8.c:1126 glib/gutf8.c:1258 glib/gutf8.c:1267
+#: glib/gutf8.c:1408 glib/gutf8.c:1504
+#, c-format
+msgid "Invalid sequence in conversion input"
+msgstr "Neplatná posloupnost na vstupu převodu"
+
+#: glib/gutf8.c:1419 glib/gutf8.c:1515
+#, c-format
+msgid "Character out of range for UTF-16"
+msgstr "Znak je mimo rozsah UTF-16"
+
+#: glib/goption.c:553
+msgid "Usage:"
+msgstr "Použití:"
+
+#: glib/goption.c:553
+msgid "[OPTION...]"
+msgstr "[PŘEPÍNAČ...]"
+
+#: glib/goption.c:644
+msgid "Help Options:"
+msgstr "Přepínače nápovědy:"
+
+#: glib/goption.c:645
+msgid "Show help options"
+msgstr "Zobrazit přepínače nápovědy"
+
+#: glib/goption.c:650
+msgid "Show all help options"
+msgstr "Zobrazit všechny přepínače nápovědy"
+
+#: glib/goption.c:700
+msgid "Application Options:"
+msgstr "Přepínače aplikace:"
+
+#: glib/goption.c:744 glib/goption.c:814
+#, c-format
+msgid "Cannot parse integer value '%s' for %s"
+msgstr "Nemohu zpracovat celočíselnou hodnotu '%s' pro %s"
+
+#: glib/goption.c:754 glib/goption.c:822
+#, c-format
+msgid "Integer value '%s' for %s out of range"
+msgstr "Celočíselná hodnota '%s' pro %s mimo rozsah"
+
+#: glib/goption.c:779
+#, c-format
+msgid "Cannot parse double value '%s' for %s"
+msgstr "Nelze zpracovat celočíselnou (double) hodnotu '%s' pro %s"
+
+#: glib/goption.c:787
+#, c-format
+msgid "Double value '%s' for %s out of range"
+msgstr "Celočíselná (double) hodnota '%s' pro %s mimo rozsah"
+
+#: glib/goption.c:1124
+#, c-format
+msgid "Error parsing option %s"
+msgstr "Chyba volby %s při syntaktické analýze"
+
+#: glib/goption.c:1155 glib/goption.c:1266
+#, c-format
+msgid "Missing argument for %s"
+msgstr "Chybí parametr %s"
+
+#: glib/goption.c:1655
+#, c-format
+msgid "Unknown option %s"
+msgstr "Neznámý přepínač %s"
+
+#: glib/gkeyfile.c:342
+#, c-format
+msgid "Valid key file could not be found in data dirs"
+msgstr "V datových adresářích nelze najít platný soubor klíče"
+
+#: glib/gkeyfile.c:377
+#, c-format
+msgid "Not a regular file"
+msgstr "Není obyčejný soubor"
+
+#: glib/gkeyfile.c:385
+#, c-format
+msgid "File is empty"
+msgstr "Soubor je prázdný"
+
+#: glib/gkeyfile.c:701
+#, c-format
+msgid ""
+"Key file contains line '%s' which is not a key-value pair, group, or comment"
+msgstr ""
+"Soubor klíče obsahuje '%s', což není dvojice klíč-hodnota, skupina ani "
+"komentář"
+
+#: glib/gkeyfile.c:762
+#, fuzzy, c-format
+msgid "Invalid group name: %s"
+msgstr "Neplatný název programu: %s"
+
+#: glib/gkeyfile.c:784
+#, c-format
+msgid "Key file does not start with a group"
+msgstr "Soubor klíče nezačíná skupinou"
+
+#: glib/gkeyfile.c:810
+#, fuzzy, c-format
+msgid "Invalid key name: %s"
+msgstr "Neplatný název programu: %s"
+
+#: glib/gkeyfile.c:837
+#, c-format
+msgid "Key file contains unsupported encoding '%s'"
+msgstr "Soubor klíče obsahuje nepodporované kódování '%s'"
+
+#: glib/gkeyfile.c:1050 glib/gkeyfile.c:1209 glib/gkeyfile.c:2410
+#: glib/gkeyfile.c:2477 glib/gkeyfile.c:2598 glib/gkeyfile.c:2733
+#: glib/gkeyfile.c:2886 glib/gkeyfile.c:3066 glib/gkeyfile.c:3124
+#, c-format
+msgid "Key file does not have group '%s'"
+msgstr "Soubor klíče nemá skupinu '%s'"
+
+#: glib/gkeyfile.c:1221
+#, c-format
+msgid "Key file does not have key '%s'"
+msgstr "Soubor klíče nemá klíč '%s'"
+
+#: glib/gkeyfile.c:1323 glib/gkeyfile.c:1433
+#, c-format
+msgid "Key file contains key '%s' with value '%s' which is not UTF-8"
+msgstr "Soubor klíče obsahuje klíč '%s' s hodnotou '%s', která není v UTF-8"
+
+#: glib/gkeyfile.c:1343 glib/gkeyfile.c:1453 glib/gkeyfile.c:1821
+#, c-format
+msgid "Key file contains key '%s' which has value that cannot be interpreted."
+msgstr ""
+"Soubor klíče obsahuje klíč '%s', který má hodnotu, kterou nelze "
+"interpretovat."
+
+#: glib/gkeyfile.c:2033 glib/gkeyfile.c:2242
+#, c-format
+msgid ""
+"Key file contains key '%s' in group '%s' which has value that cannot be "
+"interpreted."
+msgstr ""
+"Soubor klíče obsahuje klíč '%s' ve skupině '%s', který má hodnotu, kterou "
+"nelze interpretovat."
+
+#: glib/gkeyfile.c:2425 glib/gkeyfile.c:2613 glib/gkeyfile.c:3135
+#, c-format
+msgid "Key file does not have key '%s' in group '%s'"
+msgstr "Soubor klíče nemá klíč '%s' ve skupině '%s'"
+
+#: glib/gkeyfile.c:3374
+#, c-format
+msgid "Key file contains escape character at end of line"
+msgstr "Soubor klíče obsahuje znak escape na konci řádku"
+
+#: glib/gkeyfile.c:3396
+#, c-format
+msgid "Key file contains invalid escape sequence '%s'"
+msgstr "Soubor klíče obsahuje neplatnou escape sekvenci '%s'"
+
+#: glib/gkeyfile.c:3538
+#, c-format
+msgid "Value '%s' cannot be interpreted as a number."
+msgstr "Hodnotu '%s' nelze interpretovat jako číslo."
+
+#: glib/gkeyfile.c:3552
+#, c-format
+msgid "Integer value '%s' out of range"
+msgstr "Celočíselná hodnota '%s' mimo rozsah"
+
+#: glib/gkeyfile.c:3585
+#, c-format
+msgid "Value '%s' cannot be interpreted as a float number."
+msgstr "Hodnotu '%s' nelze interpretovat jako reálné (float) číslo."
+
+#: glib/gkeyfile.c:3612
+#, c-format
+msgid "Value '%s' cannot be interpreted as a boolean."
+msgstr "Hodnotu '%s' nelze interpretovat jako booleovskou hodnotu."

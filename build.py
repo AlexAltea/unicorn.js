@@ -107,28 +107,30 @@ def patchGlibJS():
     so that Unicorn+QEMU build succeeds.
     """
     copytree(ORIGINAL_GLIB_DIR, UNICORN_GLIB_DIR)
-    # Disable assembler use for atomic operations
-    insert(
-        os.path.join(UNICORN_GLIB_DIR, "configure"),
-        "echo $ECHO_N \"checking whether to use assembler code for atomic operations... $ECHO_C\" >&6; }", [
-            "host_cpu=\"none\""
-        ])
-    # Disable inlined functions
+    # Update configure file
     replace(os.path.join(UNICORN_GLIB_DIR, "configure"), {
-        "g_can_inline=yes": "g_can_inline=no"
+        # Disable assembler use for atomic operations
+        "echo $ECHO_N \"checking whether to use assembler code for atomic operations... $ECHO_C\" >&6;":
+            "host_cpu=\"none\";",
+        # Disable inlined functions
+        "g_can_inline=yes": "g_can_inline=no",
+        # Disable unnecessary projects from `ac_config_files`
+        "build/win32/Makefile build/win32/dirent/Makefile build/win32/vs8/Makefile ": "",
+        "gobject/Makefile gobject/glib-mkenums ": "",
+        "docs/Makefile docs/reference/Makefile docs/reference/glib/Makefile docs/reference/glib/version.xml docs/reference/gobject/Makefile docs/reference/gobject/version.xml ": "",
+        "tests/Makefile tests/gobject/Makefile tests/refcount/Makefile ": "",
     })
-    # Disable unnecessary projects
-    replace(os.path.join(UNICORN_GLIB_DIR, "configure"), {
-        "gobject/Makefile ": "",
-        "gobject/glib-mkenums ": "",
-        "docs/reference/Makefile ": "",
-        "docs/reference/glib/Makefile ": "",
-        "docs/reference/glib/version.xml ": "",
-        "docs/reference/gobject/Makefile ": "",
-        "docs/reference/gobject/version.xml ": "",
-        "tests/Makefile tests/gobject/Makefile ": "",
-        "tests/refcount/Makefile ": ""
-    })
+    # Update Makefiles
+    makefileReplacements = {
+        "SUBDIRS = . m4macros glib gobject gmodule gthread tests build po docs":
+            "SUBDIRS = . m4macros glib gmodule gthread po"
+    }
+    replace(os.path.join(UNICORN_GLIB_DIR, "Makefile.am"), makefileReplacements)
+    replace(os.path.join(UNICORN_GLIB_DIR, "Makefile.in"), makefileReplacements)
+    # Add executable permissions for the new configure file
+    path = os.path.join(UNICORN_GLIB_DIR, "configure")
+    st = os.stat(path)
+    os.chmod(path, st.st_mode | stat.S_IEXEC)
 
 
 def patchUnicornTCI():
@@ -206,10 +208,17 @@ def compileGlib():
     # Patching Glib
     patchGlibJS()
     
-    # Emscripten + Configure + Make
+    # Emscripten: Configure + Make
     os.chdir('unicorn/glib')
     if os.name == 'posix':
-        os.system('emconfigure ./configure --disable-threads')
+        glibBuildDir = os.path.abspath(os.path.join(UNICORN_GLIB_DIR, "build"))
+        cmd = 'emconfigure ./configure'
+        cmd += ' --disable-threads'
+        cmd += ' --enable-static'
+        cmd += ' --disable-shared'
+        cmd += ' --prefix=' + glibBuildDir
+        cmd += ' --exec-prefix=' + glibBuildDir
+        os.system(cmd)
         os.system('emmake make')
     os.chdir('../..')
 

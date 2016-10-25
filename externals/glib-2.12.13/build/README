@@ -1,0 +1,20 @@
+This directory contains various stuff that is used when building
+software from the GNOME CVS (and dependent software) on uncommon
+platforms. It contains:
+
+- makefile snippets and scripts used when building GLib, GTk+,
+  and related software for Win32 with MSVC's command line
+  tools, when not using the GNU auto*/configure/libtool mechanism
+
+- the <dirent.h> implementation from (the public domain) mingw
+  runtime, separated for the benefit of MSVC builds.
+
+(Originally, this directory was intended to be used by a build system
+for GNOME, written in Python. See CVS for the original README
+text. Apparently this concept never was taken into use, and this
+directory hadn't been touched for two years, when I got the idea to
+use this suitably named directory for another purpose. The original
+author, Jay Painter, has okayed this.)
+
+Tor Lillqvist
+tml@iki.fi

@@ -195,8 +195,6 @@ def patchUnicornJS():
         "sigsetjmp(cpu->jmp_env, 0)": "setjmp(cpu->jmp_env)",
         "siglongjmp(cpu->jmp_env, 1)": "longjmp(cpu->jmp_env, 1)",
     })
-    # Link Glib functions
-    # TODO
     return
 
 
@@ -207,20 +205,35 @@ def patchUnicornJS():
 def compileGlib():
     # Patching Glib
     patchGlibJS()
-    
+
     # Emscripten: Configure + Make
     os.chdir('unicorn/glib')
     if os.name == 'posix':
         glibBuildDir = os.path.abspath(os.path.join(UNICORN_GLIB_DIR, "build"))
         cmd = 'emconfigure ./configure'
         cmd += ' --disable-threads'
-        cmd += ' --enable-static'
-        cmd += ' --disable-shared'
         cmd += ' --prefix=' + glibBuildDir
         cmd += ' --exec-prefix=' + glibBuildDir
         os.system(cmd)
         os.system('emmake make')
+        # Will silently fail halfway through, but it does not matter
+        os.system('make install')
     os.chdir('../..')
+
+    # Verify if `make install` did what we need
+    if not os.path.isfile(os.path.join(UNICORN_GLIB_DIR, "build/include/glib-2.0/glib.h")) or \
+       not os.path.isfile(os.path.join(UNICORN_GLIB_DIR, "build/lib/libglib-2.0.so")) or \
+       not os.path.isfile(os.path.join(UNICORN_GLIB_DIR, "build/lib/libgthread-2.0.so")) or \
+       not os.path.isfile(os.path.join(UNICORN_GLIB_DIR, "build/lib/glib-2.0/include/glibconfig.h")):
+        raise Exception('Could not compile glib with Emscripten')
+
+    # Rename LLVM bytecode libs
+    shutil.move(
+        os.path.join(UNICORN_GLIB_DIR, "build/lib/libglib-2.0.so"),
+        os.path.join(UNICORN_GLIB_DIR, "build/lib/libglib-2.0.bc"))
+    shutil.move(
+        os.path.join(UNICORN_GLIB_DIR, "build/lib/libgthread-2.0.so"),
+        os.path.join(UNICORN_GLIB_DIR, "build/lib/libgthread-2.0.bc"))
 
 
 def compileUnicorn():
@@ -228,14 +241,17 @@ def compileUnicorn():
     patchUnicornTCI()
     patchUnicornJS()
 
-    # TODO: Use --cpu=unknown flag for QEMU's configure, can be passed via: `UNICORN_QEMU_FLAGS="--cpu=unknown" ./make.sh`.
-    return
-
-    # Emscripten + Make
+    # Emscripten: Make
     os.chdir('unicorn')
     if os.name == 'posix':
-        os.system('emmake make')
+        glibPkgDir = os.path.abspath(os.path.join(UNICORN_GLIB_DIR, "build/lib/pkgconfig"))
+        cmd = 'emmake make'
+        cmd += ' PKG_CONFIG_PATH=' + glibPkgDir
+        os.system(cmd)
     os.chdir('..')
+
+    # TODO: Use --cpu=unknown flag for QEMU's configure, can be passed via: `UNICORN_QEMU_FLAGS="--cpu=unknown" ./make.sh`.
+    return
 
     # Compile static library to JavaScript
     cmd = os.path.expandvars('$EMSCRIPTEN/emcc')

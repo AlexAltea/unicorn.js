@@ -17,10 +17,8 @@
     "grunt-contrib-uglify": "^0.9.1",
     "grunt-contrib-watch": "^0.6.1",
     "grunt-exec": "~0.4.6",
-    "grunt-typescript": "~0.4.4",
     "load-grunt-tasks": "^1.0.0",
-    "time-grunt": "^1.0.0",
-    "typescript": "~1.3.0"
+    "time-grunt": "^1.0.0"
   },
   "bugs": {
     "url": "https://github.com/AlexAltea/unicorn.js/issues"

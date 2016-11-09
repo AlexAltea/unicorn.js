@@ -27,21 +27,13 @@
                 margin-bottom: 0px;
                 color: #EEE;
             }
-            .editor {
-                position: relative;
-                height: 200px;
+            .demo-button {
+                width: 100px;
+                margin: 0px 2px;
             }
             .monospaced {
                 font-family: 'Inconsolata';
                 font-size: 14px;
-            }
-            select, input {
-                width: 100%;
-            }
-            textarea {
-                width: 100%;
-                height: 100px;
-                padding-right: 50px;
             }
         </style>
     </head>
@@ -87,6 +79,14 @@
                 Below you have simple demos, showing realtime client-side emulation of foreign architectures thanks to Unicorn.js and Angular, as well as <a href="https://alexaltea.github.io/capstone.js/">Capstone.js</a> and <a href="https://alexaltea.github.io/keystone.js/">Keystone.js</a> to assemble/disassemble instructions.
             </p>
             
+            <div style="text-align: center">
+                <a role="button" class="btn btn-default btn-lg demo-button" disabled href="demo-arm.html">ARM</a>
+                <a role="button" class="btn btn-default btn-lg demo-button" disabled href="demo-m68k.html">M68K</a>
+                <a role="button" class="btn btn-default btn-lg demo-button" disabled href="demo-mips.html">MIPS</a>
+                <a role="button" class="btn btn-default btn-lg demo-button" disabled href="demo-sparc.html">SPARC</a>
+                <a role="button" class="btn btn-default btn-lg demo-button" disabled href="demo-x86.html">X86</a>
+            </div>
+            
             <hr />
 
             <div class="row">
@@ -114,10 +114,19 @@
             <footer class="container">
                 <p style="color: #666; font-weight: 300">&copy; Unicorn.JS 2016. Wrapper made by Alexandro S&aacute;nchez Bach.</p>
                 <p style="color: #666; font-weight: 300">
-                    Unicorn.JS uses on the Unicorn framework, originally developed by Nguyen Anh Quynh et al.<br/>
+                    Unicorn.JS uses on the Unicorn framework, originally developed by Nguyen Anh Quynh, Dang Hoang Vu et al.<br/>
                     Check the repository for license details.
                 </p>
             </footer>
         </div>
+        
+        <!-- External scripts -->
+        <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/8.4/highlight.min.js"></script>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/8.4/languages/javascript.min.js"></script>
+        
+        <script>
+            // Highlight.JS
+            hljs.initHighlightingOnLoad();
+        </script>
     </body>
 </html>

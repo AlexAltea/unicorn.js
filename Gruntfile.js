@@ -28,7 +28,10 @@ module.exports = function (grunt) {
         },
         concat: {
             dist: {
-                src: ['src/unicorn.out.js', 'src/unicorn-wrapper.js'],
+                src: [
+                    'src/libunicorn.out.js',
+                    'src/unicorn.js',
+                ],
                 dest: 'dist/unicorn.min.js'
             }
         },

@@ -3,6 +3,15 @@
  * Wrapper made by Alexandro Sanchez Bach.
  */
 
+// Extend Unicorn.js namespace with per-architecture members 
+ Object.prototype.extend = function(obj) {
+    for (var i in obj) {
+        if (obj.hasOwnProperty(i)) {
+            this[i] = obj[i];
+        }
+    }
+};
+
 var uc = {
     // Return codes
     ERR_OK:                 0,  // No error: everything was fine

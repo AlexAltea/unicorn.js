@@ -31,6 +31,12 @@ module.exports = function (grunt) {
                 src: [
                     'src/libunicorn.out.js',
                     'src/unicorn.js',
+                    'src/unicorn-arm.js',
+                    'src/unicorn-arm64.js',
+                    'src/unicorn-m68k.js',
+                    'src/unicorn-mips.js',
+                    'src/unicorn-sparc.js',
+                    'src/unicorn-x86.js',
                 ],
                 dest: 'dist/unicorn.min.js'
             }

@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8"/>
+
+    <title>Unicorn.js: X86</title>
+
+    <!-- External fonts -->
+    <link href='//fonts.googleapis.com/css?family=Open+Sans:400italic,600italic,400,600' rel='stylesheet' type='text/css'>
+    <link href='//fonts.googleapis.com/css?family=Inconsolata:400,700' rel='stylesheet' type='text/css'>
+
+    <!-- Style -->
+    <link href='demo.css' rel='stylesheet' type='text/css'>
+  </head>
+  <body>
+    <!-- Navigation -->
+    <nav class="navbar" role="navigation">
+      <a class="navbar-brand" href=".">Unicorn.js</a>
+      <span class="navbar-sep"></span>
+      <a class="navbar-demo" href="./demo-x86.html">X86</a>
+    </nav>
+
+    <div class="content">
+      <div class="pane" id="pane-v1">
+        <!-- Disassembly -->
+        <div class="pane" id="pane-v1-h1">
+          Disassembly
+        </div>
+        <div class="gutter gutter-vertical"></div>
+        <!-- Registers -->
+        <div class="pane" id="pane-v1-h2">
+          Registers
+        </div>
+      </div>
+      <div class="gutter gutter-horizontal"></div>
+      <div class="pane" id="pane-v2">
+        <!-- Memory -->
+        <div class="pane" id="pane-v2-h1">
+          Memory
+        </div>
+        <div class="gutter gutter-vertical"></div>
+        <!-- Stack -->
+        <div class="pane" id="pane-v2-h2">
+          Stack
+        </div>
+      </div>
+    </div>
+
+    <!-- External scripts -->
+    <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+    <script src="externals/split.min.js"></script>
+
+    <!-- Unicorn.js demo -->
+    <script src="demo.js"></script>
+  </body>
+</html>

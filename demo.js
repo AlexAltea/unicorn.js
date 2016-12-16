@@ -1,12 +1,19 @@
 $(document).ready(function () {
-    Split(['#pane-v1', '#pane-v2'], {
-        sizes: [70, 30],
-        direction: 'vertical'
+    Split(['#a', '#b'], {
+      gutterSize: 8,
+      sizes: [65, 35],
+      cursor: 'col-resize'
     });
-    Split(['#pane-v1-h1', '#pane-v1-h2'], {
-        sizes: [70, 30]
+    Split(['#c', '#d'], {
+      direction: 'vertical',
+      sizes: [65, 35],
+      gutterSize: 8,
+      cursor: 'row-resize'
     });
-    Split(['#pane-v2-h1', '#pane-v2-h2'], {
-        sizes: [70, 30]
+    Split(['#e', '#f'], {
+      direction: 'vertical',
+      sizes: [65, 35],
+      gutterSize: 8,
+      cursor: 'row-resize'
     });
 });

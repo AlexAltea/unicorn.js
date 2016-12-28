@@ -59,6 +59,9 @@ module.exports = function (grunt) {
                     '*.html',
                     '*.css',
                     '*.js',
+                    'demos/*.html',
+                    'demos/*.css',
+                    'demos/*.js',
                     'dist/*.js'
                 ],
                 options: {

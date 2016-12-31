@@ -35,9 +35,7 @@ EXPORTED_FUNCTIONS = [
 # Directories
 UNICORN_DIR = os.path.abspath("unicorn")
 UNICORN_QEMU_DIR = os.path.join(UNICORN_DIR, "qemu")
-UNICORN_GLIB_DIR = os.path.join(UNICORN_DIR, "glib")
 ORIGINAL_QEMU_DIR = os.path.abspath("externals/qemu-2.2.1")
-ORIGINAL_GLIB_DIR = os.path.abspath("externals/glib-2.12.13")
 
 #############
 # Utilities #
@@ -101,38 +99,6 @@ for d in xrange(5):
         shutil.move(f, f[:-2] + '-' + m.group(1) + '.o')
 """
 
-def patchGlibJS():
-    """
-    Patches glib-2.12 to compile it with Emscripten,
-    so that Unicorn+QEMU build succeeds.
-    """
-    copytree(ORIGINAL_GLIB_DIR, UNICORN_GLIB_DIR)
-    # Update configure file
-    replace(os.path.join(UNICORN_GLIB_DIR, "configure"), {
-        # Disable assembler use for atomic operations
-        "echo $ECHO_N \"checking whether to use assembler code for atomic operations... $ECHO_C\" >&6;":
-            "host_cpu=\"none\";",
-        # Disable inlined functions
-        "g_can_inline=yes": "g_can_inline=no",
-        # Disable unnecessary projects from `ac_config_files`
-        "build/win32/Makefile build/win32/dirent/Makefile build/win32/vs8/Makefile ": "",
-        "gobject/Makefile gobject/glib-mkenums ": "",
-        "docs/Makefile docs/reference/Makefile docs/reference/glib/Makefile docs/reference/glib/version.xml docs/reference/gobject/Makefile docs/reference/gobject/version.xml ": "",
-        "tests/Makefile tests/gobject/Makefile tests/refcount/Makefile ": "",
-    })
-    # Update Makefiles
-    makefileReplacements = {
-        "SUBDIRS = . m4macros glib gobject gmodule gthread tests build po docs":
-            "SUBDIRS = . m4macros glib gmodule gthread po"
-    }
-    replace(os.path.join(UNICORN_GLIB_DIR, "Makefile.am"), makefileReplacements)
-    replace(os.path.join(UNICORN_GLIB_DIR, "Makefile.in"), makefileReplacements)
-    # Add executable permissions for the new configure file
-    path = os.path.join(UNICORN_GLIB_DIR, "configure")
-    st = os.stat(path)
-    os.chmod(path, st.st_mode | stat.S_IEXEC)
-
-
 def patchUnicornTCI():
     """
     Patches Unicorn's QEMU fork to add the TCG Interpreter backend
@@ -195,46 +161,11 @@ def patchUnicornJS():
         "sigsetjmp(cpu->jmp_env, 0)": "setjmp(cpu->jmp_env)",
         "siglongjmp(cpu->jmp_env, 1)": "longjmp(cpu->jmp_env, 1)",
     })
-    return
 
 
 ############
 # Building #
 ############
-
-def compileGlib():
-    # Patching Glib
-    patchGlibJS()
-
-    # Emscripten: Configure + Make
-    os.chdir('unicorn/glib')
-    if os.name == 'posix':
-        glibBuildDir = os.path.abspath(os.path.join(UNICORN_GLIB_DIR, "build"))
-        cmd = 'emconfigure ./configure'
-        cmd += ' --disable-threads'
-        cmd += ' --prefix=' + glibBuildDir
-        cmd += ' --exec-prefix=' + glibBuildDir
-        os.system(cmd)
-        os.system('emmake make')
-        # Will silently fail halfway through, but it does not matter
-        os.system('make install')
-    os.chdir('../..')
-
-    # Verify if `make install` did what we need
-    if not os.path.isfile(os.path.join(UNICORN_GLIB_DIR, "build/include/glib-2.0/glib.h")) or \
-       not os.path.isfile(os.path.join(UNICORN_GLIB_DIR, "build/lib/libglib-2.0.so")) or \
-       not os.path.isfile(os.path.join(UNICORN_GLIB_DIR, "build/lib/libgthread-2.0.so")) or \
-       not os.path.isfile(os.path.join(UNICORN_GLIB_DIR, "build/lib/glib-2.0/include/glibconfig.h")):
-        raise Exception('Could not compile glib with Emscripten')
-
-    # Rename LLVM bytecode libs
-    shutil.move(
-        os.path.join(UNICORN_GLIB_DIR, "build/lib/libglib-2.0.so"),
-        os.path.join(UNICORN_GLIB_DIR, "build/lib/libglib-2.0.bc"))
-    shutil.move(
-        os.path.join(UNICORN_GLIB_DIR, "build/lib/libgthread-2.0.so"),
-        os.path.join(UNICORN_GLIB_DIR, "build/lib/libgthread-2.0.bc"))
-
 
 def compileUnicorn():
     # Patching Unicorn's QEMU fork
@@ -244,9 +175,7 @@ def compileUnicorn():
     # Emscripten: Make
     os.chdir('unicorn')
     if os.name == 'posix':
-        glibPkgDir = os.path.abspath(os.path.join(UNICORN_GLIB_DIR, "build/lib/pkgconfig"))
         cmd = 'emmake make'
-        cmd += ' PKG_CONFIG_PATH=' + glibPkgDir
         os.system(cmd)
     os.chdir('..')
 
@@ -270,7 +199,6 @@ if __name__ == "__main__":
         os.system("git submodule update --init")
     # Compile Unicorn
     if os.name in ['posix']:
-        compileGlib()
         compileUnicorn()
     else:
         print "Your operating system is not supported by this script:"

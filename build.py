@@ -154,7 +154,8 @@ def patchUnicornJS():
     with open(os.path.join(UNICORN_DIR, name), "wt") as f:
         f.write(REPLACE_OBJECTS)
     replace(os.path.join(UNICORN_DIR, "Makefile"), {
-        "$(MAKE) unicorn": "@python " + name + " && $(MAKE) unicorn",
+        "$(MAKE) -C qemu -j 4":
+        "$(MAKE) -C qemu -j 4\r\n\t@python " + name,
     })
     # Replace sigsetjmp/siglongjump with setjmp/longjmp
     replace(os.path.join(UNICORN_QEMU_DIR, "cpu-exec.c"), {

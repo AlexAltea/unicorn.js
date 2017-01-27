@@ -162,6 +162,11 @@ def patchUnicornJS():
         "sigsetjmp(cpu->jmp_env, 0)": "setjmp(cpu->jmp_env)",
         "siglongjmp(cpu->jmp_env, 1)": "longjmp(cpu->jmp_env, 1)",
     })
+    # Fix Glib function pointer issues
+    replace(os.path.join(UNICORN_QEMU_DIR, "glib_compat.c"), {
+        "(GCompareDataFunc) compare_func) (l1->data, l2->data, user_data)":
+            "(GCompareFunc) compare_func) (l1->data, l2->data)",
+    })
 
 
 ############

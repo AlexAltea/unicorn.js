@@ -167,6 +167,36 @@ def patchUnicornJS():
         "(GCompareDataFunc) compare_func) (l1->data, l2->data, user_data)":
             "(GCompareFunc) compare_func) (l1->data, l2->data)",
     })
+    # Fix unaligned reads
+    replace(os.path.join(UNICORN_QEMU_DIR, "tci.c"), {
+        "static uint32_t tci_read_i32(uint8_t **tb_ptr)":
+        """
+        static uint32_t tci_read_i32(uint8_t **tb_ptr) {
+            uint32_t value =
+                *((*tb_ptr)+0) <<  0 |
+                *((*tb_ptr)+1) <<  8 |
+                *((*tb_ptr)+2) << 16 |
+                *((*tb_ptr)+3) << 24;
+            *tb_ptr += sizeof(value);
+            return value;
+        }
+        static uint32_t tci_read_i32_old(uint8_t **tb_ptr)
+        """,
+        
+        "static int32_t tci_read_s32(uint8_t **tb_ptr)":
+        """
+        static int32_t tci_read_s32(uint8_t **tb_ptr) {
+            int32_t value =
+                *((*tb_ptr)+0) <<  0 |
+                *((*tb_ptr)+1) <<  8 |
+                *((*tb_ptr)+2) << 16 |
+                *((*tb_ptr)+3) << 24;
+            *tb_ptr += sizeof(value);
+            return value;
+        }
+        static int32_t tci_read_s32_old(uint8_t **tb_ptr)
+        """,
+    })
 
 
 ############

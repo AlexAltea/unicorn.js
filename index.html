@@ -104,7 +104,29 @@
                 <div class="col-md-6">
                     <h2>Tutorial</h2>
                     <p>
-<pre><code class="javascript">// TODO</code></pre>
+<pre><code class="javascript">var addr = 0x10000;
+var code = [
+  0x37, 0x00, 0xA0, 0xE3,  // mov r0, #0x37
+  0x03, 0x10, 0x42, 0xE0,  // sub r1, r2, r3
+];
+
+// Initialize engine
+var e = new uc.Unicorn(uc.ARCH_ARM, uc.MODE_ARM);
+
+// Write registers and memory
+e.reg_write_int(uc.ARM_REG_R2, 0x456);
+e.reg_write_int(uc.ARM_REG_R3, 0x123);
+e.mem_map(addr, 4*1024, uc.PROT_ALL);
+e.mem_write(addr, code)
+
+// Start emulator
+var begin = addr;
+var until = addr + code.length;
+e.emu_start(begin, until, 0, 0);
+
+// Read registers
+var r0 = e.reg_read_int(uc.ARM_REG_R0);  // 0x37
+var r1 = e.reg_read_int(uc.ARM_REG_R1);  // 0x333</code></pre>
                     </p>
                 </div>
             </div>

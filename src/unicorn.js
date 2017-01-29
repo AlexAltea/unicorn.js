@@ -254,6 +254,46 @@ var uc = {
             }
         }
 
+        // Helpers
+        this.reg_write_int = function (regid, value) {
+            // Allocate space for the output value
+            var value_ptr = Module._malloc(4);
+            Module.setValue(value_ptr, value, 'i32');
+
+            // Register read
+            var handle = Module.getValue(this.handle_ptr, '*');
+            var ret = Module.ccall('uc_reg_write', 'number',
+                ['pointer', 'number', 'pointer'],
+                [handle, regid, value_ptr]
+            );
+            // Free memory and handle return code
+            Module._free(value_ptr);
+            if (ret != uc.ERR_OK) {
+                console.error('Unicorn.js: Function uc_reg_write failed with code %d.', ret);
+            }
+        }
+
+        this.reg_read_int = function (regid) {
+            // Allocate space for the output value
+            var value_ptr = Module._malloc(4);
+            Module.setValue(value_ptr, 0, 'i32');
+
+            // Register read
+            var handle = Module.getValue(this.handle_ptr, '*');
+            var ret = Module.ccall('uc_reg_read', 'number',
+                ['pointer', 'number', 'pointer'],
+                [handle, regid, value_ptr]
+            );
+            // Get register value, free memory and handle return code
+            var value = Module.getValue(value_ptr, 'i32');
+            Module._free(value_ptr);
+            if (ret != uc.ERR_OK) {
+                console.error('Unicorn.js: Function uc_reg_read failed with code %d.', ret);
+            }
+            return value;
+        }
+
+
         // Constructor
         var ret = Module.ccall('uc_open', 'number',
             ['number', 'number', 'pointer'],

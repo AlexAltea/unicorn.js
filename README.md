@@ -2,8 +2,6 @@ Unicorn.js
 ==========
 [![Last Release](https://img.shields.io/badge/version-0.9-brightgreen.svg?style=flat)](https://github.com/AlexAltea/unicorn.js/releases)
 
-### Disclaimer: Port still in progress, please ignore the installation+usage+building instructions below.
-
 Port of the [Unicorn](https://github.com/unicorn-engine/unicorn) CPU emulator framework for JavaScript. Powered by [Emscripten](https://github.com/kripken/emscripten).
 
 **Notes:** _Unicorn_ is a lightweight multi-architecture CPU emulator framework originally developed by Nguyen Anh Quynh, Dang Hoang Vu et al. and released under GPLv2 license. More information about contributors and license terms can be found in the files `AUTHORS.TXT`, `CREDITS.TXT` and `COPYING` inside the *unicorn* submodule of this repository.
@@ -20,7 +18,29 @@ bower install unicornjs
 
 ## Usage                                                      
 ```javascript
-// TODO
+var addr = 0x10000;
+var code = [
+  0x37, 0x00, 0xA0, 0xE3,  // mov r0, #0x37
+  0x03, 0x10, 0x42, 0xE0,  // sub r1, r2, r3
+];
+
+// Initialize engine
+var e = new uc.Unicorn(uc.ARCH_ARM, uc.MODE_ARM);
+
+// Write registers and memory
+e.reg_write_int(uc.ARM_REG_R2, 0x456);
+e.reg_write_int(uc.ARM_REG_R3, 0x123);
+e.mem_map(addr, 4*1024, uc.PROT_ALL);
+e.mem_write(addr, code)
+
+// Start emulator
+var begin = addr;
+var until = addr + code.length;
+e.emu_start(begin, until, 0, 0);
+
+// Read registers
+var r0 = e.reg_read_int(uc.ARM_REG_R0);  // 0x37
+var r1 = e.reg_read_int(uc.ARM_REG_R1);  // 0x333
 ```
 
 ## Building

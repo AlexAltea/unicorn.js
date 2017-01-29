@@ -271,8 +271,8 @@ uc.extend({
     ARM64_REG_PC:       260,
 
     // Alias-registers
-    ARM64_REG_IP1:  UC_ARM64_REG_X16,
-    ARM64_REG_IP0:  UC_ARM64_REG_X17,
-    ARM64_REG_FP:   UC_ARM64_REG_X29,
-    ARM64_REG_LR:   UC_ARM64_REG_X30,
+    ARM64_REG_IP1:      215, // ARM64_REG_X16
+    ARM64_REG_IP0:      216, // ARM64_REG_X17
+    ARM64_REG_FP:         1, // ARM64_REG_X29
+    ARM64_REG_LR:         2, // ARM64_REG_X30
 });

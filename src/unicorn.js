@@ -105,19 +105,26 @@ var uc = {
     
     // Hooks (shorthands)
     // Hook type for all events of unmapped memory access
-    HOOK_MEM_UNMAPPED: (HOOK_MEM_READ_UNMAPPED + HOOK_MEM_WRITE_UNMAPPED + HOOK_MEM_FETCH_UNMAPPED),
+    // > HOOK_MEM_READ_UNMAPPED | HOOK_MEM_WRITE_UNMAPPED | HOOK_MEM_FETCH_UNMAPPED
+    HOOK_MEM_UNMAPPED: (1 << 4) | (1 << 5) | (1 << 6),
     // Hook type for all events of illegal protected memory access
-    HOOK_MEM_PROT: (HOOK_MEM_READ_PROT + HOOK_MEM_WRITE_PROT + HOOK_MEM_FETCH_PROT),
+    // > HOOK_MEM_READ_PROT | HOOK_MEM_WRITE_PROT | HOOK_MEM_FETCH_PROT
+    HOOK_MEM_PROT: (1 << 7) | (1 << 8) | (1 << 9),
     // Hook type for all events of illegal read memory access
-    HOOK_MEM_READ_INVALID: (HOOK_MEM_READ_PROT + HOOK_MEM_READ_UNMAPPED),
+    // > HOOK_MEM_READ_PROT | HOOK_MEM_READ_UNMAPPED
+    HOOK_MEM_READ_INVALID: (1 << 4) | (1 << 7),
     // Hook type for all events of illegal write memory access
-    HOOK_MEM_WRITE_INVALID: (HOOK_MEM_WRITE_PROT + HOOK_MEM_WRITE_UNMAPPED),
+    // > HOOK_MEM_WRITE_PROT | HOOK_MEM_WRITE_UNMAPPED
+    HOOK_MEM_WRITE_INVALID: (1 << 5) | (1 << 8),
     // Hook type for all events of illegal fetch memory access
-    HOOK_MEM_FETCH_INVALID: (HOOK_MEM_FETCH_PROT + HOOK_MEM_FETCH_UNMAPPED),
+    // > HOOK_MEM_FETCH_PROT | HOOK_MEM_FETCH_UNMAPPED
+    HOOK_MEM_FETCH_INVALID: (1 << 6) | (1 << 9),
     // Hook type for all events of illegal memory access
-    HOOK_MEM_INVALID: (HOOK_MEM_UNMAPPED + HOOK_MEM_PROT),
+    // > HOOK_MEM_UNMAPPED | HOOK_MEM_PROT
+    HOOK_MEM_INVALID: (1 << 4) | (1 << 5) | (1 << 6) | (1 << 7) | (1 << 8) | (1 << 9),
     // Hook type for all events of valid memory access
-    HOOK_MEM_VALID: (HOOK_MEM_READ + HOOK_MEM_WRITE + HOOK_MEM_FETCH),
+    // > HOOK_MEM_READ | HOOK_MEM_WRITE | HOOK_MEM_FETCH
+    HOOK_MEM_VALID: (1 << 10) | (1 << 11) | (1 << 12),
 
     // Static
     version: function() {
@@ -174,11 +181,19 @@ var uc = {
         }
 
         this.mem_write = function (address, bytes) {
+            // Allocate bytes buffer and copy data
+            var buffer_len = bytes.length;
+            var buffer_ptr = Module._malloc(buffer_len);
+            Module.writeArrayToMemory(bytes, buffer_ptr);
+
+            // Write to memory
             var handle = Module.getValue(this.handle_ptr, '*');
             var ret = Module.ccall('uc_mem_write', 'number',
                 ['pointer', 'number', 'number', 'pointer', 'number'],
-                [handle, address, 0, bytes, bytes.length()]
+                [handle, address, 0, buffer_ptr, buffer_len]
             );
+            // Free memory and handle return code
+            Module._free(buffer_ptr);
             if (ret != uc.ERR_OK) {
                 console.error('Unicorn.js: Function uc_mem_write failed with code %d.', ret);
             }

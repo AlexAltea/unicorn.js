@@ -119,11 +119,11 @@ uc.extend({
     ARM_REG_S31:         110,
 
     // Alias-registers
-    ARM_REG_R13:  UC_ARM_REG_SP,
-    ARM_REG_R14:  UC_ARM_REG_LR,
-    ARM_REG_R15:  UC_ARM_REG_PC,
-    ARM_REG_SB:   UC_ARM_REG_R9,
-    ARM_REG_SL:   UC_ARM_REG_R10,
-    ARM_REG_FP:   UC_ARM_REG_R11,
-    ARM_REG_IP:   UC_ARM_REG_R12,
+    ARM_REG_R13:          12, // ARM_REG_SP
+    ARM_REG_R14:          10, // ARM_REG_LR
+    ARM_REG_R15:          11, // ARM_REG_PC
+    ARM_REG_SB:           75, // ARM_REG_R9
+    ARM_REG_SL:           76, // ARM_REG_R10
+    ARM_REG_FP:           77, // ARM_REG_R11
+    ARM_REG_IP:           78, // ARM_REG_R12
 });

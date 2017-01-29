@@ -54,6 +54,12 @@ module.exports = function (grunt) {
             }
         },
         watch: {
+            building: {
+                files: [
+                    'src/*.js',
+                ],
+                tasks: ['concat'],
+            },
             livereload: {
                 files: [
                     '*.html',
@@ -62,7 +68,7 @@ module.exports = function (grunt) {
                     'demos/*.html',
                     'demos/*.css',
                     'demos/*.js',
-                    'dist/*.js'
+                    'dist/*.js',
                 ],
                 options: {
                     livereload: '<%= connect.options.livereload %>'

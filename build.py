@@ -30,6 +30,10 @@ EXPORTED_FUNCTIONS = [
     '_uc_mem_unmap',
     '_uc_mem_protect',
     '_uc_mem_regions',
+    '_uc_context_alloc',
+    '_uc_free',
+    '_uc_context_save',
+    '_uc_context_restore',
 ]
 
 # Directories
@@ -342,15 +346,11 @@ def compileUnicorn():
         os.system(cmd)
     os.chdir('..')
 
-    # TODO: Use --cpu=unknown flag for QEMU's configure, can be passed via: `UNICORN_QEMU_FLAGS="--cpu=unknown" ./make.sh`.
-    return
-
     # Compile static library to JavaScript
-    cmd = os.path.expandvars('$EMSCRIPTEN/emcc')
+    cmd = 'emcc'
     cmd += ' -Os --memory-init-file 0'
     cmd += ' unicorn/libunicorn.a'
     cmd += ' -s EXPORTED_FUNCTIONS=\"[\''+ '\', \''.join(EXPORTED_FUNCTIONS) +'\']\"'
-    cmd += ' -s USE_PTHREADS=1'
     cmd += ' -s ALLOW_MEMORY_GROWTH=1'
     cmd += ' -o src/unicorn.out.js'
     os.system(cmd)

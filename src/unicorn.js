@@ -1,5 +1,5 @@
 /**
- * (c) 2016 Unicorn.JS
+ * (c) 2016-2017 Unicorn.JS
  * Wrapper made by Alexandro Sanchez Bach.
  */
 
@@ -118,4 +118,136 @@ var uc = {
     HOOK_MEM_INVALID: (HOOK_MEM_UNMAPPED + HOOK_MEM_PROT),
     // Hook type for all events of valid memory access
     HOOK_MEM_VALID: (HOOK_MEM_READ + HOOK_MEM_WRITE + HOOK_MEM_FETCH),
+
+    // Static
+    version: function() {
+        major_ptr = Module._malloc(4);
+        minor_ptr = Module._malloc(4);
+        var ret = Module.ccall('uc_version', 'number',
+            ['pointer', 'pointer'], [major_ptr, minor_ptr]);
+        major = Module.getValue(major_ptr, 'i32');
+        minor = Module.getValue(minor_ptr, 'i32');
+        Module._free(major_ptr);
+        Module._free(minor_ptr);
+        return ret;
+    },
+
+    arch_supported: function(arch) {
+        var ret = Module.ccall('uc_arch_supported', 'number', ['number'], [arch]);
+        return ret;
+    },
+
+    strerror: function(code) {
+        var ret = Module.ccall('uc_strerror', 'string', ['number'], [code]);
+        return ret;
+    },
+
+    /**
+     * Unicorn object
+     */
+    Unicorn: function (arch, mode) {
+        this.arch = arch;
+        this.mode = mode;
+        this.handle_ptr = Module._malloc(4);
+
+        // Methods
+        this.reg_write = function (regid, value) {
+            var handle = Module.getValue(this.handle_ptr, '*');
+            var ret = Module.ccall('uc_reg_write', 'number',
+                ['pointer', 'number', 'pointer'],
+                [handle, regid, this.handle_ptr]
+            );
+            if (ret != uc.ERR_OK) {
+                console.error('Unicorn.js: Function uc_reg_write failed with code %d.', ret);
+            }
+        }
+
+        this.reg_read = function (regid) {
+            var handle = Module.getValue(this.handle_ptr, '*');
+            var ret = Module.ccall('uc_reg_read', 'number',
+                ['pointer', 'number', 'pointer'],
+                [handle, regid, this.handle_ptr]
+            );
+            if (ret != uc.ERR_OK) {
+                console.error('Unicorn.js: Function uc_reg_read failed with code %d.', ret);
+            }
+        }
+
+        this.mem_write = function (address, bytes) {
+            var handle = Module.getValue(this.handle_ptr, '*');
+            var ret = Module.ccall('uc_mem_write', 'number',
+                ['pointer', 'number', 'number', 'pointer', 'number'],
+                [handle, address, 0, bytes, bytes.length()]
+            );
+            if (ret != uc.ERR_OK) {
+                console.error('Unicorn.js: Function uc_mem_write failed with code %d.', ret);
+            }
+        }
+
+        this.mem_read = function (address, size) {
+            var handle = Module.getValue(this.handle_ptr, '*');
+            var ret = Module.ccall('uc_mem_read', 'number',
+                ['pointer', 'number', 'number', 'pointer', 'number'],
+                [handle, address, 0, bytes, size]
+            );
+            if (ret != uc.ERR_OK) {
+                console.error('Unicorn.js: Function uc_mem_read failed with code %d.', ret);
+            }
+        }
+
+        this.mem_map = function (address, size, perms) {
+            var handle = Module.getValue(this.handle_ptr, '*');
+            var ret = Module.ccall('uc_mem_map', 'number',
+                ['pointer', 'number', 'number', 'number', 'number'],
+                [handle, address, 0, size, perms]
+            );
+            if (ret != uc.ERR_OK) {
+                console.error('Unicorn.js: Function uc_mem_map failed with code %d.', ret);
+            }
+        }
+
+        this.emu_start = function (begin, until, timeout, count) {
+            var handle = Module.getValue(this.handle_ptr, '*');
+            var ret = Module.ccall('uc_emu_start', 'number',
+                ['pointer', 'number', 'number', 'number', 'number', 'number', 'number', 'number'],
+                [handle, begin, 0, until, 0, timeout, 0, count]
+            );
+            if (ret != uc.ERR_OK) {
+                console.error('Unicorn.js: Function uc_emu_start failed with code %d.', ret);
+            }
+        }
+
+        this.emu_stop = function (begin, until, timeout, count) {
+            var handle = Module.getValue(this.handle_ptr, '*');
+            var ret = Module.ccall('uc_emu_stop', 'number', ['number'], [handle]);
+            if (ret != uc.ERR_OK) {
+                console.error('Unicorn.js: Function uc_emu_stop failed with code %d.', ret);
+            }
+        }
+
+        this.errno = function() {
+            var handle = Module.getValue(this.handle_ptr, '*');
+            var ret = Module.ccall('uc_errno', 'number', ['pointer'], [handle]);
+            return ret;
+        }
+
+        this.close = function() {
+            var handle = Module.getValue(this.handle_ptr, '*');
+            var ret = Module.ccall('uc_close', 'number', ['pointer'], [handle]);
+            if (ret != uc.ERR_OK) {
+                console.error('Unicorn.js: Function uc_close failed with code %d.', ret);
+            }
+        }
+
+        // Constructor
+        var ret = Module.ccall('uc_open', 'number',
+            ['number', 'number', 'pointer'],
+            [this.arch, this.mode, this.handle_ptr]
+        );
+
+        if (ret != uc.ERR_OK) {
+            Module.setValue(this.handle_ptr, 0, '*');
+            console.error('Unicorn.js: Function uc_open failed with code %d.', ret);
+        }
+    }
 };

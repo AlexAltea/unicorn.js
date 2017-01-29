@@ -352,7 +352,7 @@ def compileUnicorn():
     cmd += ' unicorn/libunicorn.a'
     cmd += ' -s EXPORTED_FUNCTIONS=\"[\''+ '\', \''.join(EXPORTED_FUNCTIONS) +'\']\"'
     cmd += ' -s ALLOW_MEMORY_GROWTH=1'
-    cmd += ' -o src/unicorn.out.js'
+    cmd += ' -o src/libunicorn.out.js'
     os.system(cmd)
 
 

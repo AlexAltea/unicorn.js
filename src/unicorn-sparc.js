@@ -1,5 +1,5 @@
 /**
- * (c) 2016 Unicorn.JS
+ * (c) 2016-2017 Unicorn.JS
  * Wrapper made by Alexandro Sanchez Bach.
  */
 

@@ -9,6 +9,9 @@
     <link href='//fonts.googleapis.com/css?family=Open+Sans:400italic,600italic,400,600' rel='stylesheet' type='text/css'>
     <link href='//fonts.googleapis.com/css?family=Inconsolata:400,700' rel='stylesheet' type='text/css'>
 
+    <!-- External icons -->
+    <link href="//cdn.materialdesignicons.com/1.8.36/css/materialdesignicons.min.css" rel="stylesheet">
+
     <!-- Style -->
     <link href='demo.css' rel='stylesheet' type='text/css'>
   </head>
@@ -21,17 +24,40 @@
     </nav>
 
     <!-- UI -->
-    <div id="a" class="split split-horizontal">
-      <div id="c" class="split content">Disassembly</div>
-      <div id="d" class="split content">Memory</div>
+    <div id="pane-l" class="split split-horizontal">
+      <div id="pane-lt" class="split content">
+        <!-- Disassembler -->
+        <div class="toolbar">
+          <div class="toolbar-button mdi mdi-play" title="Run"></div>
+          <div class="toolbar-button mdi mdi-pause" title="Pause"></div>
+          <div class="toolbar-button mdi mdi-debug-step-into" title="Step into"></div>
+          <div class="toolbar-button mdi mdi-debug-step-over" title="Step over"></div>
+          <div class="toolbar-button mdi mdi-debug-step-out" title="Step out"></div>
+        </div>
+        <div class="assembler">
+        </div>
+      </div>
+      <div id="pane-lb" class="split content">
+        <div class="toolbar">
+          Memory
+        </div>
+      </div>
     </div>
-    <div id="b" class="split split-horizontal">
-      <div id="e" class="split content">Registers</div>
-      <div id="f" class="split content">Stack</div>
+    <div id="pane-r" class="split split-horizontal">
+      <div id="pane-rt" class="split content">
+        <div class="toolbar">
+          Registers
+        </div>
+      </div>
+      <div id="pane-rb" class="split content">
+        <div class="toolbar">
+          Stack
+        </div>
+      </div>
     </div>
 
     <!-- External scripts -->
-    <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+    <script src="//code.jquery.com/jquery-3.1.1.min.js"></script>
     <script src="externals/split.min.js"></script>
 
     <!-- Unicorn.js demo -->

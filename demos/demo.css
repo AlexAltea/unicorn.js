@@ -36,33 +36,52 @@ nav > a:hover   { color: #EEE; text-decoration: none; border: 0px; -moz-outline-
 nav > a:focus   { outline: none; -moz-outline-style: none; }
 
 /* Separation */
-.gutter {
-  background-color: transparent;
-  background-repeat: no-repeat;
-  background-position: 50%;
-}
-.gutter.gutter-horizontal {
-  cursor: col-resize;
-  background-image: url('../grips/vertical.png');
-}
-.gutter.gutter-vertical {
-  cursor: row-resize;
-  background-image: url('../grips/horizontal.png');
-}
-
-/* Panes */
 .split {
   box-sizing: border-box;
   overflow-y: auto;
   overflow-x: hidden;
 }
-.content {
-  border: 1px solid #C0C0C0;
-  box-shadow: inset 0 1px 2px #e4e4e4;
-  background-color: #fff;
+.gutter {
+  background-color: transparent;
+  background-repeat: no-repeat;
+  background-position: 50%;
+  background-color: #333;
+}
+.gutter.gutter-horizontal {
+  cursor: col-resize;
+  background-image: url('resources/grips_vertical.png');
+}
+.gutter.gutter-vertical {
+  cursor: row-resize;
+  background-image: url('resources/grips_horizontal.png');
 }
 .split.split-horizontal,
 .gutter.gutter-horizontal {
   height: 100%;
   float: left;
 }
+
+/* Panes */
+.content {
+  /*border: 1px solid #C0C0C0;*/
+  box-shadow: inset 0 1px 2px #e4e4e4;
+  background-color: #666;
+}
+
+/* Toolbar */
+.toolbar {
+  background-color: #444;
+  padding: 4px;
+  color: #EEE;
+}
+.toolbar-button {
+  display: inline-block;  
+  width: 20px;
+  height: 20px;
+  color: #EEE;
+  background-color: #555;
+  text-align: center;
+  cursor: pointer;
+}
+.toolbar-button:hover  { background-color: #666; color: #EEE; }
+.toolbar-button:active { background-color: #777; color: #EEE; }

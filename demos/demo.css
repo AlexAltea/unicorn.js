@@ -63,8 +63,6 @@ nav > a:focus   { outline: none; -moz-outline-style: none; }
 
 /* Panes */
 .content {
-  /*border: 1px solid #C0C0C0;*/
-  box-shadow: inset 0 1px 2px #e4e4e4;
   background-color: #666;
 }
 
@@ -73,6 +71,11 @@ nav > a:focus   { outline: none; -moz-outline-style: none; }
   background-color: #444;
   padding: 4px;
   color: #EEE;
+  -webkit-user-select: none; /* Safari */
+   -khtml-user-select: none; /* Konqueror HTML */
+     -moz-user-select: none; /* Firefox */
+      -ms-user-select: none; /* IE/Edge */
+          user-select: none; /* Chrome/Opera */
 }
 .toolbar-button {
   display: inline-block;  

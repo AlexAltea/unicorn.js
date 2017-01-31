@@ -13,7 +13,7 @@
     <link href="//cdn.materialdesignicons.com/1.8.36/css/materialdesignicons.min.css" rel="stylesheet">
 
     <!-- Style -->
-    <link href='demo.css' rel='stylesheet' type='text/css'>
+    <link href='demos/demo.css' rel='stylesheet' type='text/css'>
   </head>
   <body>
     <!-- Navigation -->
@@ -26,7 +26,7 @@
     <!-- UI -->
     <div id="pane-l" class="split split-horizontal">
       <div id="pane-lt" class="split content">
-        <!-- Disassembler -->
+        <!-- Assembler -->
         <div class="toolbar">
           <div class="toolbar-button mdi mdi-play" title="Run"></div>
           <div class="toolbar-button mdi mdi-pause" title="Pause"></div>
@@ -35,6 +35,9 @@
           <div class="toolbar-button mdi mdi-debug-step-out" title="Step out"></div>
         </div>
         <div class="assembler">
+          <div class="col-addr"></div>
+          <div class="col-hex"></div>
+          <div class="col-asm"></div>
         </div>
       </div>
       <div id="pane-lb" class="split content">
@@ -48,6 +51,9 @@
         <div class="toolbar">
           Registers
         </div>
+        <div id='registers'>
+
+        </div>
       </div>
       <div id="pane-rb" class="split content">
         <div class="toolbar">
@@ -58,10 +64,34 @@
 
     <!-- External scripts -->
     <script src="//code.jquery.com/jquery-3.1.1.min.js"></script>
-    <script src="externals/split.min.js"></script>
+    <script src="demos/externals/split.min.js"></script>
+    <!--script src="demos/externals/keystone.min.js"></script-->
 
     <!-- Unicorn.js demo -->
-    <script src="../dist/unicorn.min.js"></script>
-    <script src="demo.js"></script>
+    <script src="demos/demo.js"></script>
+    <script>
+      // Get URL anchor-based parameters
+      var query = {};
+      var params = window.location.hash.substr(1);
+      params.split("&").forEach(function(part) {
+        var item = part.split("=");
+        query[item[0]] = decodeURIComponent(item[1]);
+      });
+
+      // Get needed scripts from URL anchor-based parameters
+      var scripts = []
+      switch (query['arch']) {
+      case 'arm':
+        scripts.push('./dist/unicorn.min.js');
+        scripts.push('./demos/demo-arm.js');
+        break;
+      case 'x86':
+        scripts.push('./dist/unicorn.min.js');
+        scripts.push('./demos/demo-x86.js');
+        break;
+      default:
+        window.location = './index.html';
+      }
+    </script>
   </body>
 </html>

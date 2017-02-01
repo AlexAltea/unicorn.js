@@ -6,6 +6,7 @@
 import os
 import shutil
 import stat
+import sys
 
 EXPORTED_FUNCTIONS = [
     '_uc_version',
@@ -149,9 +150,8 @@ def patchUnicornJS():
     """
     # Disable unnecessary options
     replace(os.path.join(UNICORN_DIR, "config.mk"), {
-        "UNICORN_DEBUG ?= yes": "UNICORN_DEBUG ?= yes", # TODO: Change to `no`
+        "UNICORN_DEBUG ?= yes": "UNICORN_DEBUG ?= no",
         "UNICORN_SHARED ?= yes": "UNICORN_SHARED ?= no",
-        "UNICORN_ARCHS ?= x86 m68k arm aarch64 mips sparc": "UNICORN_ARCHS ?= x86 arm", # TODO: Remove line
     })
     # Ensure QEMU's object files have different base names
     name = "rename_objects.py"
@@ -182,7 +182,7 @@ def patchUnicornJS():
         #define IIF_0(t, ...) __VA_ARGS__
         #define IIF_1(t, ...) t
 
-        #define PROBE(x) x, 1 
+        #define PROBE(x) x, 1
         #define CHECK(...) CHECK_N(__VA_ARGS__, 0)
         #define CHECK_N(x, n, ...) n
 
@@ -205,7 +205,7 @@ def patchUnicornJS():
           uint32_t a6, uint32_t a7, uint32_t a8, uint32_t a9, uint32_t a10) { \
             IIF(IS_VOID(ret)) (GEN_ADAPTER_0_VOID(name), GEN_ADAPTER_0_NONVOID(name)) \
         }
-        
+
         #define GEN_ADAPTER_1_VOID(name, t1) \
             HELPER(name)((dh_ctype(t1))a1); return 0;
         #define GEN_ADAPTER_1_NONVOID(name, t1) \
@@ -299,7 +299,7 @@ def patchUnicornJS():
         }
         static tcg_target_ulong tci_read_i_old(uint8_t **tb_ptr)
         """,
-        
+
         "static uint32_t tci_read_i32(uint8_t **tb_ptr)":
         """
         static uint32_t tci_read_i32(uint8_t **tb_ptr) {
@@ -313,7 +313,7 @@ def patchUnicornJS():
         }
         static uint32_t tci_read_i32_old(uint8_t **tb_ptr)
         """,
-        
+
         "static int32_t tci_read_s32(uint8_t **tb_ptr)":
         """
         static int32_t tci_read_s32(uint8_t **tb_ptr) {
@@ -334,7 +334,7 @@ def patchUnicornJS():
 # Building #
 ############
 
-def compileUnicorn():
+def compileUnicorn(targets):
     # Patching Unicorn's QEMU fork
     patchUnicornTCI()
     patchUnicornJS()
@@ -342,7 +342,10 @@ def compileUnicorn():
     # Emscripten: Make
     os.chdir('unicorn')
     if os.name == 'posix':
-        cmd = 'emmake make'
+        cmd = ''
+        if targets:
+            cmd += 'UNICORN_ARCHS="%s" ' % (' '.join(targets))
+        cmd += 'emmake make'
         os.system(cmd)
     os.chdir('..')
 
@@ -352,7 +355,12 @@ def compileUnicorn():
     cmd += ' unicorn/libunicorn.a'
     cmd += ' -s EXPORTED_FUNCTIONS=\"[\''+ '\', \''.join(EXPORTED_FUNCTIONS) +'\']\"'
     cmd += ' -s ALLOW_MEMORY_GROWTH=1'
-    cmd += ' -o src/libunicorn.out.js'
+    cmd += ' -s MODULARIZE=1'
+    cmd += ' -s EXPORT_NAME="\'MUnicorn\'"'
+    if targets:
+        cmd += ' -o src/libunicorn-%s.out.js' % ('-'.join(targets))
+    else:
+        cmd += ' -o src/libunicorn.out.js'
     os.system(cmd)
 
 
@@ -361,8 +369,9 @@ if __name__ == "__main__":
     if not os.listdir(UNICORN_DIR):
         os.system("git submodule update --init")
     # Compile Unicorn
+    targets = sys.argv[1:]
     if os.name in ['posix']:
-        compileUnicorn()
+        compileUnicorn(targets)
     else:
         print "Your operating system is not supported by this script:"
         print "Please, use Emscripten to compile Unicorn manually to src/unicorn.out.js"

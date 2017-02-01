@@ -1,11 +1,16 @@
 // Utils
-function utilToHex(n, pad) {
+function utilIntToHex(n, pad) {
     pad = (typeof pad !== 'undefined') ? pad : 1;
-    var s = Number(n).toString(16);
+    var s = Number(n).toString(16).toUpperCase();
     while (s.length < pad) {
         s = '0' + s;
     }
     return s;
+}
+function utilBytesToHex(b) {
+    return b.map(function (b) {
+        return utilIntToHex(b, 2);
+    }).join(' ');
 }
 
 // Classes
@@ -17,9 +22,9 @@ function Register(name, type, id) {
     this._update_int = function () {
         var value = e.reg_read_int(this.id);
         switch (this.type) {
-            case 'i8':  this.nodeValue.innerHTML = utilToHex(value, 2);
-            case 'i16': this.nodeValue.innerHTML = utilToHex(value, 4);
-            case 'i32': this.nodeValue.innerHTML = utilToHex(value, 8);
+            case 'i8':  this.nodeValue.innerHTML = utilIntToHex(value, 2);
+            case 'i16': this.nodeValue.innerHTML = utilIntToHex(value, 4);
+            case 'i32': this.nodeValue.innerHTML = utilIntToHex(value, 8);
         }
     }
     this._update_float = function () {
@@ -71,17 +76,21 @@ function Instruction() {
 
     // Methods
     this.setAddr = function (addr) {
-        this.nodeAddr.innerHTML = utilToHex(addr, 8);
+        this.nodeAddr.innerHTML = utilIntToHex(addr, 8);
     }
     this.setHex = function (bytes) {
         if (typeof bytes === 'string') {
-            console.error("Unimplemented")
+            console.error("Unimplemented");
         } else {
             this.bytes = bytes;
         }
+        this.nodeHex.innerHTML = utilBytesToHex(bytes);
     }
     this.setAsm = function (asm) {
-        this.nodeAsm.innerHTML = asm.trim();
+        this.asm = asm.trim()
+        this.nodeAsm.innerHTML = this.asm.replace(' ', '&nbsp;');
+        var bytes = Array.from(a.asm(this.asm));
+        this.setHex(bytes);
     }
     this.length = function () {
         return this.bytes.length;
@@ -91,7 +100,10 @@ function Instruction() {
 // Panes
 var paneAssembler = {
     instructions: [],
-    address: 0x10000,
+    address: 0x0,
+    size: 0x1000,
+    mapped: false,
+
     update: function () {
         // Get columns
         var colAddr = $('#assembler > .col-addr');
@@ -112,6 +124,20 @@ var paneAssembler = {
             addr += inst.length();
         }
     },
+    setAddr: function (addr) {
+        if (this.mapped) {
+            e.mem_unmap(this.address, this.size);
+        }
+        this.address = addr;
+        e.mem_map(this.address, this.size, uc.PROT_ALL);
+        for (var i = 0; i < this.instructions.length; i++) {
+            var inst = this.instructions[i];
+            inst.setAddr(addr);
+            addr += inst.length();
+        }
+        pcWrite(this.address);
+        paneRegisters.update();
+    },
     appendAsm: function (asm) {
         asm = asm.split(/[\n\r;]+/);
         for (var i = 0; i < asm.length; i++) {
@@ -124,6 +150,20 @@ var paneAssembler = {
             this.instructions.push(inst);
         }
         this.update();
+    },
+    // Emulation
+    emuStart: function () {
+        var bytes = []
+        var size = this.address;
+        for (var i = 0; i < this.instructions.length; i++) {
+            var inst = this.instructions[i];
+            bytes = bytes.concat(inst.bytes);
+            size += inst.length();
+        }
+        console.log(utilBytesToHex(bytes));
+        e.mem_write(this.address, bytes);
+        e.emu_start(this.address, this.address+size, 0, 0);
+        paneRegisters.update();
     }
 };
 
@@ -131,12 +171,13 @@ var paneRegisters = {
     registers: [],
 
     add: function (reg) {
+        this.registers.push(reg);
         var regs = document.getElementById('registers');
         regs.appendChild(reg.node);
     },
     update: function () {
-        for (var i = 0; i < register.length; i++) {
-            registers[i].update();
+        for (var i = 0; i < this.registers.length; i++) {
+            this.registers[i].update();
         }
     }
 };
@@ -144,20 +185,20 @@ var paneRegisters = {
 
 $(document).ready(function () {
     Split(['#pane-l', '#pane-r'], {
-        gutterSize: 8,
+        gutterSize: 7,
         sizes: [65, 35],
         cursor: 'col-resize'
     });
     Split(['#pane-lt', '#pane-lb'], {
         direction: 'vertical',
         sizes: [65, 35],
-        gutterSize: 8,
+        gutterSize: 7,
         cursor: 'row-resize'
     });
     Split(['#pane-rt', '#pane-rb'], {
         direction: 'vertical',
         sizes: [65, 35],
-        gutterSize: 8,
+        gutterSize: 7,
         cursor: 'row-resize'
     });
 
@@ -165,7 +206,7 @@ $(document).ready(function () {
         '#assembler .col-addr',
         '#assembler .col-hex',
         '#assembler .col-asm'], {
-        gutterSize: 8,
+        gutterSize: 7,
         sizes: [20,30,50],
         cursor: 'col-resize'
     });

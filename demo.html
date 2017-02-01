@@ -28,11 +28,11 @@
       <div id="pane-lt" class="split content">
         <!-- Assembler -->
         <div class="toolbar">
-          <div class="toolbar-button mdi mdi-play" title="Run"></div>
-          <div class="toolbar-button mdi mdi-pause" title="Pause"></div>
-          <div class="toolbar-button mdi mdi-debug-step-into" title="Step into"></div>
-          <div class="toolbar-button mdi mdi-debug-step-over" title="Step over"></div>
-          <div class="toolbar-button mdi mdi-debug-step-out" title="Step out"></div>
+          <div class="toolbar-button" onclick="paneAssembler.emuStart()" title="Run"><i class="mdi mdi-play"></i></div>
+          <div class="toolbar-button" title="Pause"><i class="mdi mdi-pause"></i></div>
+          <div class="toolbar-button" title="Step into"><i class="mdi mdi-debug-step-into"></i></div>
+          <div class="toolbar-button" title="Step over"><i class="mdi mdi-debug-step-over"></i></div>
+          <div class="toolbar-button" title="Step out"><i class="mdi mdi-debug-step-out"></i></div>
         </div>
         <div id="assembler">
           <div class="split split-horizontal col-addr"></div>
@@ -73,12 +73,22 @@
       // Require.JS
       requirejs.config({
           shim: {
-              'demos/demo-arm': ['dist/unicorn-arm.min', 'demos/externals/keystone.min'],
-              'demos/demo-aarch64': ['dist/unicorn-aarch64.min'],
-              'demos/demo-m68k': ['dist/unicorn-m68k.min'],
-              'demos/demo-mips': ['dist/unicorn-mips.min'],
-              'demos/demo-sparc': ['dist/unicorn-sparc.min'],
-              'demos/demo-x86': ['dist/unicorn-x86.min'],
+              'demos/demo-arm': [
+                'dist/unicorn-arm.min',
+                'demos/externals/keystone-arm.min',
+                'demos/externals/keystone-arm.min'],
+              'demos/demo-mips': [
+                'dist/unicorn-mips.min',
+                'demos/externals/keystone-mips.min',
+                'demos/externals/keystone-mips.min'],
+              'demos/demo-sparc': [
+                'dist/unicorn-sparc.min',
+                'demos/externals/keystone-sparc.min',
+                'demos/externals/keystone-sparc.min'],
+              'demos/demo-x86': [
+                'dist/unicorn-x86.min',
+                'demos/externals/keystone-x86.min',
+                'demos/externals/keystone-x86.min'],
           }
       });
       // Get URL anchor-based parameters

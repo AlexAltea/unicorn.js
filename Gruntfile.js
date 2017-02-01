@@ -35,7 +35,7 @@ module.exports = function (grunt) {
         concat: {
             dist: {
                 src: [
-                    '<%= lib.src %>',
+                    'src/libunicorn<%= lib.suffix %>.out.js',
                     'src/unicorn.js',
                     'src/unicorn-arm.js',
                     'src/unicorn-arm64.js',
@@ -44,7 +44,7 @@ module.exports = function (grunt) {
                     'src/unicorn-sparc.js',
                     'src/unicorn-x86.js',
                 ],
-                dest: '<%= lib.dist %>'
+                dest: 'dist/unicorn<%= lib.suffix %>.min.js'
             }
         },
         connect: {
@@ -84,19 +84,6 @@ module.exports = function (grunt) {
     });
 
     // Project tasks
-    grunt.registerTask('build', 'Build for specific architecture', function (arch) {
-        if (typeof arch === 'undefined') {
-            grunt.config.set('lib.src', 'src/libunicorn.out.js');
-            grunt.config.set('lib.dist', 'dist/unicorn.min.js');
-            grunt.task.run('exec:emscripten');
-            grunt.task.run('concat');
-        } else {
-            grunt.config.set('lib.src', 'src/libunicorn-'+arch+'.out.js');
-            grunt.config.set('lib.dist', 'dist/unicorn-'+arch+'.min.js');
-            grunt.task.run('exec:emscripten:'+arch);
-            grunt.task.run('concat');
-        }
-    });
     grunt.registerTask('release', [
         'build',
         'build:arm',
@@ -106,8 +93,24 @@ module.exports = function (grunt) {
         'build:sparc',
         'build:x86',
     ]);
-    grunt.registerTask('serve', [
-        'connect',
-        'watch'
-    ]);
+    grunt.registerTask('build', 'Build for specific architecture', function (arch) {
+        if (typeof arch === 'undefined') {
+            grunt.config.set('lib.suffix', '');
+            grunt.task.run('exec:emscripten');
+            grunt.task.run('concat');
+        } else {
+            grunt.config.set('lib.suffix', '-'+arch);
+            grunt.task.run('exec:emscripten:'+arch);
+            grunt.task.run('concat');
+        }
+    });
+    grunt.registerTask('serve', 'Serve demo of specific architecture', function (arch) {
+        if (typeof arch === 'undefined') {
+            grunt.config.set('lib.suffix', '');
+        } else {
+            grunt.config.set('lib.suffix', '-'+arch);
+        }
+        grunt.task.run('connect');
+        grunt.task.run('watch');
+    });
 };

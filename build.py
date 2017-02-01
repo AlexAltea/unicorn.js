@@ -187,6 +187,7 @@ def patchUnicornJS():
         #define CHECK_N(x, n, ...) n
 
         #define VOID_TYPE_void ()
+        #define VOID_TYPE_noreturn ()
         #define VOID_PROBE(type)            VOID_PROBE_PROXY(VOID_TYPE_##type)
         #define VOID_PROBE_PROXY(...)       VOID_PROBE_PRIMITIVE(__VA_ARGS__)
         #define VOID_PROBE_PRIMITIVE(x)     VOID_PROBE_COMBINE_ x
@@ -341,6 +342,7 @@ def compileUnicorn(targets):
 
     # Emscripten: Make
     os.chdir('unicorn')
+    os.system('make clean')
     if os.name == 'posix':
         cmd = ''
         if targets:

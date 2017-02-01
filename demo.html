@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8"/>
 
-    <title>Unicorn.js: X86</title>
+    <title>Unicorn.js</title>
 
     <!-- External fonts -->
     <link href='//fonts.googleapis.com/css?family=Open+Sans:400italic,600italic,400,600' rel='stylesheet' type='text/css'>
@@ -20,7 +20,7 @@
     <nav class="navbar" role="navigation">
       <a class="navbar-brand" href="..">Unicorn.js</a>
       <span class="navbar-sep"></span>
-      <a class="navbar-demo" href="./demo-x86.html">X86</a>
+      <a class="navbar-demo">Loading...</a>
     </nav>
 
     <!-- UI -->
@@ -34,10 +34,10 @@
           <div class="toolbar-button mdi mdi-debug-step-over" title="Step over"></div>
           <div class="toolbar-button mdi mdi-debug-step-out" title="Step out"></div>
         </div>
-        <div class="assembler">
-          <div class="col-addr"></div>
-          <div class="col-hex"></div>
-          <div class="col-asm"></div>
+        <div id="assembler">
+          <div class="split split-horizontal col-addr"></div>
+          <div class="split split-horizontal col-hex"></div>
+          <div class="split split-horizontal col-asm"></div>
         </div>
       </div>
       <div id="pane-lb" class="split content">

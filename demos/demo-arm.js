@@ -1,4 +1,9 @@
 var e = new uc.Unicorn(uc.ARCH_ARM, uc.MODE_ARM);
+//var a = new ks.Keystone(uc.ARCH_ARM, uc.MODE_ARM);
+
+// Customization
+$('title').html('Unicorn.js: ARM');
+$('.navbar-demo').html('ARM');
 
 // Registers
 paneRegisters.add(new Register('R0', 'i32', uc.ARM_REG_R0));
@@ -12,5 +17,6 @@ paneRegisters.add(new Register('R7', 'i32', uc.ARM_REG_R7));
 
 // Assembler
 paneAssembler.appendAsm(`
-
+    mov  r0, #0x37
+    sub  r1, r2, r3
 `);

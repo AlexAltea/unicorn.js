@@ -64,12 +64,22 @@ nav > a:focus   { outline: none; -moz-outline-style: none; }
 /* Panes */
 .content {
   background-color: #666;
+  font-family: 'Inconsolata';
+  font-size: 14px;
+  color: #EEE;
+}
+#assembler {
+  padding: 5px;
+}
+#registers {
+  padding: 5px;
 }
 
 /* Toolbar */
 .toolbar {
   background-color: #444;
   padding: 4px;
+  height: 20px;
   color: #EEE;
   -webkit-user-select: none; /* Safari */
    -khtml-user-select: none; /* Konqueror HTML */
@@ -78,7 +88,7 @@ nav > a:focus   { outline: none; -moz-outline-style: none; }
           user-select: none; /* Chrome/Opera */
 }
 .toolbar-button {
-  display: inline-block;  
+  display: inline-block;
   width: 20px;
   height: 20px;
   color: #EEE;

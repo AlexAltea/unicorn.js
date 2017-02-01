@@ -60,12 +60,6 @@ module.exports = function (grunt) {
             }
         },
         watch: {
-            building: {
-                files: [
-                    'src/*.js',
-                ],
-                tasks: ['concat'],
-            },
             livereload: {
                 files: [
                     '*.html',
@@ -84,15 +78,6 @@ module.exports = function (grunt) {
     });
 
     // Project tasks
-    grunt.registerTask('release', [
-        'build',
-        'build:arm',
-        'build:aarch64',
-        'build:mips',
-        'build:m68k',
-        'build:sparc',
-        'build:x86',
-    ]);
     grunt.registerTask('build', 'Build for specific architecture', function (arch) {
         if (typeof arch === 'undefined') {
             grunt.config.set('lib.suffix', '');
@@ -104,13 +89,17 @@ module.exports = function (grunt) {
             grunt.task.run('concat');
         }
     });
-    grunt.registerTask('serve', 'Serve demo of specific architecture', function (arch) {
-        if (typeof arch === 'undefined') {
-            grunt.config.set('lib.suffix', '');
-        } else {
-            grunt.config.set('lib.suffix', '-'+arch);
-        }
-        grunt.task.run('connect');
-        grunt.task.run('watch');
-    });
+    grunt.registerTask('release', [
+        'build',
+        'build:arm',
+        'build:aarch64',
+        'build:mips',
+        'build:m68k',
+        'build:sparc',
+        'build:x86',
+    ]);
+    grunt.registerTask('serve', [
+        'connect',
+        'watch',
+    ]);
 };

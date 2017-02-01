@@ -3,7 +3,10 @@
  * Wrapper made by Alexandro Sanchez Bach.
  */
 
-// Extend Unicorn.js namespace with per-architecture members 
+// Emscripten module
+var ModuleUnicorn = new MUnicorn();
+
+// Extend Unicorn.js namespace with per-architecture members
  Object.prototype.extend = function(obj) {
     for (var i in obj) {
         if (obj.hasOwnProperty(i)) {
@@ -102,7 +105,7 @@ var uc = {
     HOOK_MEM_WRITE:           1 << 11,  // Hook memory write events.
     HOOK_MEM_FETCH:           1 << 12,  // Hook memory fetch for execution events
     HOOK_MEM_READ_AFTER:      1 << 13,  // Hook memory read events, but only successful access.
-    
+
     // Hooks (shorthands)
     // Hook type for all events of unmapped memory access
     // > HOOK_MEM_READ_UNMAPPED | HOOK_MEM_WRITE_UNMAPPED | HOOK_MEM_FETCH_UNMAPPED
@@ -128,24 +131,24 @@ var uc = {
 
     // Static
     version: function() {
-        major_ptr = Module._malloc(4);
-        minor_ptr = Module._malloc(4);
-        var ret = Module.ccall('uc_version', 'number',
+        major_ptr = ModuleUnicorn._malloc(4);
+        minor_ptr = ModuleUnicorn._malloc(4);
+        var ret = ModuleUnicorn.ccall('uc_version', 'number',
             ['pointer', 'pointer'], [major_ptr, minor_ptr]);
-        major = Module.getValue(major_ptr, 'i32');
-        minor = Module.getValue(minor_ptr, 'i32');
-        Module._free(major_ptr);
-        Module._free(minor_ptr);
+        major = ModuleUnicorn.getValue(major_ptr, 'i32');
+        minor = ModuleUnicorn.getValue(minor_ptr, 'i32');
+        ModuleUnicorn._free(major_ptr);
+        ModuleUnicorn._free(minor_ptr);
         return ret;
     },
 
     arch_supported: function(arch) {
-        var ret = Module.ccall('uc_arch_supported', 'number', ['number'], [arch]);
+        var ret = ModuleUnicorn.ccall('uc_arch_supported', 'number', ['number'], [arch]);
         return ret;
     },
 
     strerror: function(code) {
-        var ret = Module.ccall('uc_strerror', 'string', ['number'], [code]);
+        var ret = ModuleUnicorn.ccall('uc_strerror', 'string', ['number'], [code]);
         return ret;
     },
 
@@ -155,12 +158,12 @@ var uc = {
     Unicorn: function (arch, mode) {
         this.arch = arch;
         this.mode = mode;
-        this.handle_ptr = Module._malloc(4);
+        this.handle_ptr = ModuleUnicorn._malloc(4);
 
         // Methods
         this.reg_write = function (regid, value) {
-            var handle = Module.getValue(this.handle_ptr, '*');
-            var ret = Module.ccall('uc_reg_write', 'number',
+            var handle = ModuleUnicorn.getValue(this.handle_ptr, '*');
+            var ret = ModuleUnicorn.ccall('uc_reg_write', 'number',
                 ['pointer', 'number', 'pointer'],
                 [handle, regid, this.handle_ptr]
             );
@@ -170,8 +173,8 @@ var uc = {
         }
 
         this.reg_read = function (regid) {
-            var handle = Module.getValue(this.handle_ptr, '*');
-            var ret = Module.ccall('uc_reg_read', 'number',
+            var handle = ModuleUnicorn.getValue(this.handle_ptr, '*');
+            var ret = ModuleUnicorn.ccall('uc_reg_read', 'number',
                 ['pointer', 'number', 'pointer'],
                 [handle, regid, this.handle_ptr]
             );
@@ -183,25 +186,25 @@ var uc = {
         this.mem_write = function (address, bytes) {
             // Allocate bytes buffer and copy data
             var buffer_len = bytes.length;
-            var buffer_ptr = Module._malloc(buffer_len);
-            Module.writeArrayToMemory(bytes, buffer_ptr);
+            var buffer_ptr = ModuleUnicorn._malloc(buffer_len);
+            ModuleUnicorn.writeArrayToMemory(bytes, buffer_ptr);
 
             // Write to memory
-            var handle = Module.getValue(this.handle_ptr, '*');
-            var ret = Module.ccall('uc_mem_write', 'number',
+            var handle = ModuleUnicorn.getValue(this.handle_ptr, '*');
+            var ret = ModuleUnicorn.ccall('uc_mem_write', 'number',
                 ['pointer', 'number', 'number', 'pointer', 'number'],
                 [handle, address, 0, buffer_ptr, buffer_len]
             );
             // Free memory and handle return code
-            Module._free(buffer_ptr);
+            ModuleUnicorn._free(buffer_ptr);
             if (ret != uc.ERR_OK) {
                 console.error('Unicorn.js: Function uc_mem_write failed with code %d.', ret);
             }
         }
 
         this.mem_read = function (address, size) {
-            var handle = Module.getValue(this.handle_ptr, '*');
-            var ret = Module.ccall('uc_mem_read', 'number',
+            var handle = ModuleUnicorn.getValue(this.handle_ptr, '*');
+            var ret = ModuleUnicorn.ccall('uc_mem_read', 'number',
                 ['pointer', 'number', 'number', 'pointer', 'number'],
                 [handle, address, 0, bytes, size]
             );
@@ -211,8 +214,8 @@ var uc = {
         }
 
         this.mem_map = function (address, size, perms) {
-            var handle = Module.getValue(this.handle_ptr, '*');
-            var ret = Module.ccall('uc_mem_map', 'number',
+            var handle = ModuleUnicorn.getValue(this.handle_ptr, '*');
+            var ret = ModuleUnicorn.ccall('uc_mem_map', 'number',
                 ['pointer', 'number', 'number', 'number', 'number'],
                 [handle, address, 0, size, perms]
             );
@@ -222,8 +225,8 @@ var uc = {
         }
 
         this.emu_start = function (begin, until, timeout, count) {
-            var handle = Module.getValue(this.handle_ptr, '*');
-            var ret = Module.ccall('uc_emu_start', 'number',
+            var handle = ModuleUnicorn.getValue(this.handle_ptr, '*');
+            var ret = ModuleUnicorn.ccall('uc_emu_start', 'number',
                 ['pointer', 'number', 'number', 'number', 'number', 'number', 'number', 'number'],
                 [handle, begin, 0, until, 0, timeout, 0, count]
             );
@@ -233,22 +236,22 @@ var uc = {
         }
 
         this.emu_stop = function (begin, until, timeout, count) {
-            var handle = Module.getValue(this.handle_ptr, '*');
-            var ret = Module.ccall('uc_emu_stop', 'number', ['number'], [handle]);
+            var handle = ModuleUnicorn.getValue(this.handle_ptr, '*');
+            var ret = ModuleUnicorn.ccall('uc_emu_stop', 'number', ['number'], [handle]);
             if (ret != uc.ERR_OK) {
                 console.error('Unicorn.js: Function uc_emu_stop failed with code %d.', ret);
             }
         }
 
         this.errno = function() {
-            var handle = Module.getValue(this.handle_ptr, '*');
-            var ret = Module.ccall('uc_errno', 'number', ['pointer'], [handle]);
+            var handle = ModuleUnicorn.getValue(this.handle_ptr, '*');
+            var ret = ModuleUnicorn.ccall('uc_errno', 'number', ['pointer'], [handle]);
             return ret;
         }
 
         this.close = function() {
-            var handle = Module.getValue(this.handle_ptr, '*');
-            var ret = Module.ccall('uc_close', 'number', ['pointer'], [handle]);
+            var handle = ModuleUnicorn.getValue(this.handle_ptr, '*');
+            var ret = ModuleUnicorn.ccall('uc_close', 'number', ['pointer'], [handle]);
             if (ret != uc.ERR_OK) {
                 console.error('Unicorn.js: Function uc_close failed with code %d.', ret);
             }
@@ -257,17 +260,17 @@ var uc = {
         // Helpers
         this.reg_write_int = function (regid, value) {
             // Allocate space for the output value
-            var value_ptr = Module._malloc(4);
-            Module.setValue(value_ptr, value, 'i32');
+            var value_ptr = ModuleUnicorn._malloc(4);
+            ModuleUnicorn.setValue(value_ptr, value, 'i32');
 
             // Register read
-            var handle = Module.getValue(this.handle_ptr, '*');
-            var ret = Module.ccall('uc_reg_write', 'number',
+            var handle = ModuleUnicorn.getValue(this.handle_ptr, '*');
+            var ret = ModuleUnicorn.ccall('uc_reg_write', 'number',
                 ['pointer', 'number', 'pointer'],
                 [handle, regid, value_ptr]
             );
             // Free memory and handle return code
-            Module._free(value_ptr);
+            ModuleUnicorn._free(value_ptr);
             if (ret != uc.ERR_OK) {
                 console.error('Unicorn.js: Function uc_reg_write failed with code %d.', ret);
             }
@@ -275,18 +278,18 @@ var uc = {
 
         this.reg_read_int = function (regid) {
             // Allocate space for the output value
-            var value_ptr = Module._malloc(4);
-            Module.setValue(value_ptr, 0, 'i32');
+            var value_ptr = ModuleUnicorn._malloc(4);
+            ModuleUnicorn.setValue(value_ptr, 0, 'i32');
 
             // Register read
-            var handle = Module.getValue(this.handle_ptr, '*');
-            var ret = Module.ccall('uc_reg_read', 'number',
+            var handle = ModuleUnicorn.getValue(this.handle_ptr, '*');
+            var ret = ModuleUnicorn.ccall('uc_reg_read', 'number',
                 ['pointer', 'number', 'pointer'],
                 [handle, regid, value_ptr]
             );
             // Get register value, free memory and handle return code
-            var value = Module.getValue(value_ptr, 'i32');
-            Module._free(value_ptr);
+            var value = ModuleUnicorn.getValue(value_ptr, 'i32');
+            ModuleUnicorn._free(value_ptr);
             if (ret != uc.ERR_OK) {
                 console.error('Unicorn.js: Function uc_reg_read failed with code %d.', ret);
             }
@@ -295,13 +298,13 @@ var uc = {
 
 
         // Constructor
-        var ret = Module.ccall('uc_open', 'number',
+        var ret = ModuleUnicorn.ccall('uc_open', 'number',
             ['number', 'number', 'pointer'],
             [this.arch, this.mode, this.handle_ptr]
         );
 
         if (ret != uc.ERR_OK) {
-            Module.setValue(this.handle_ptr, 0, '*');
+            ModuleUnicorn.setValue(this.handle_ptr, 0, '*');
             console.error('Unicorn.js: Function uc_open failed with code %d.', ret);
         }
     }

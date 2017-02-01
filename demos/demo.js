@@ -70,11 +70,18 @@ function Instruction() {
     this.nodeAsm = document.createElement("div");
 
     // Methods
-    this.setHex = function (hex) {
-
+    this.setAddr = function (addr) {
+        this.nodeAddr.innerHTML = utilToHex(addr, 8);
+    }
+    this.setHex = function (bytes) {
+        if (typeof bytes === 'string') {
+            console.error("Unimplemented")
+        } else {
+            this.bytes = bytes;
+        }
     }
     this.setAsm = function (asm) {
-
+        this.nodeAsm.innerHTML = asm.trim();
     }
     this.length = function () {
         return this.bytes.length;
@@ -83,7 +90,41 @@ function Instruction() {
 
 // Panes
 var paneAssembler = {
+    instructions: [],
     address: 0x10000,
+    update: function () {
+        // Get columns
+        var colAddr = $('#assembler > .col-addr');
+        var colHex = $('#assembler > .col-hex');
+        var colAsm = $('#assembler > .col-asm');
+        // Remove data
+        colAddr.empty();
+        colHex.empty();
+        colAsm.empty();
+        // Fill data
+        var addr = this.address;
+        for (var i = 0; i < this.instructions.length; i++) {
+            var inst = this.instructions[i];
+            inst.setAddr(addr);
+            colAddr.append(inst.nodeAddr);
+            colHex.append(inst.nodeHex);
+            colAsm.append(inst.nodeAsm);
+            addr += inst.length();
+        }
+    },
+    appendAsm: function (asm) {
+        asm = asm.split(/[\n\r;]+/);
+        for (var i = 0; i < asm.length; i++) {
+            var instAsm = asm[i].trim();
+            if (instAsm.length == 0) {
+                continue;
+            }
+            var inst = new Instruction();
+            inst.setAsm(instAsm);
+            this.instructions.push(inst);
+        }
+        this.update();
+    }
 };
 
 var paneRegisters = {
@@ -118,5 +159,14 @@ $(document).ready(function () {
         sizes: [65, 35],
         gutterSize: 8,
         cursor: 'row-resize'
+    });
+
+    Split([
+        '#assembler .col-addr',
+        '#assembler .col-hex',
+        '#assembler .col-asm'], {
+        gutterSize: 8,
+        sizes: [20,30,50],
+        cursor: 'col-resize'
     });
 });

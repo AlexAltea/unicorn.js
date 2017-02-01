@@ -3,8 +3,8 @@
  * Wrapper made by Alexandro Sanchez Bach.
  */
 
-// Emscripten module
-var ModuleUnicorn = new MUnicorn();
+// Emscripten demodularize
+var MUnicorn = new MUnicorn();
 
 // Extend Unicorn.js namespace with per-architecture members
  Object.prototype.extend = function(obj) {
@@ -131,24 +131,24 @@ var uc = {
 
     // Static
     version: function() {
-        major_ptr = ModuleUnicorn._malloc(4);
-        minor_ptr = ModuleUnicorn._malloc(4);
-        var ret = ModuleUnicorn.ccall('uc_version', 'number',
+        major_ptr = MUnicorn._malloc(4);
+        minor_ptr = MUnicorn._malloc(4);
+        var ret = MUnicorn.ccall('uc_version', 'number',
             ['pointer', 'pointer'], [major_ptr, minor_ptr]);
-        major = ModuleUnicorn.getValue(major_ptr, 'i32');
-        minor = ModuleUnicorn.getValue(minor_ptr, 'i32');
-        ModuleUnicorn._free(major_ptr);
-        ModuleUnicorn._free(minor_ptr);
+        major = MUnicorn.getValue(major_ptr, 'i32');
+        minor = MUnicorn.getValue(minor_ptr, 'i32');
+        MUnicorn._free(major_ptr);
+        MUnicorn._free(minor_ptr);
         return ret;
     },
 
     arch_supported: function(arch) {
-        var ret = ModuleUnicorn.ccall('uc_arch_supported', 'number', ['number'], [arch]);
+        var ret = MUnicorn.ccall('uc_arch_supported', 'number', ['number'], [arch]);
         return ret;
     },
 
     strerror: function(code) {
-        var ret = ModuleUnicorn.ccall('uc_strerror', 'string', ['number'], [code]);
+        var ret = MUnicorn.ccall('uc_strerror', 'string', ['number'], [code]);
         return ret;
     },
 
@@ -158,12 +158,12 @@ var uc = {
     Unicorn: function (arch, mode) {
         this.arch = arch;
         this.mode = mode;
-        this.handle_ptr = ModuleUnicorn._malloc(4);
+        this.handle_ptr = MUnicorn._malloc(4);
 
         // Methods
         this.reg_write = function (regid, value) {
-            var handle = ModuleUnicorn.getValue(this.handle_ptr, '*');
-            var ret = ModuleUnicorn.ccall('uc_reg_write', 'number',
+            var handle = MUnicorn.getValue(this.handle_ptr, '*');
+            var ret = MUnicorn.ccall('uc_reg_write', 'number',
                 ['pointer', 'number', 'pointer'],
                 [handle, regid, this.handle_ptr]
             );
@@ -173,8 +173,8 @@ var uc = {
         }
 
         this.reg_read = function (regid) {
-            var handle = ModuleUnicorn.getValue(this.handle_ptr, '*');
-            var ret = ModuleUnicorn.ccall('uc_reg_read', 'number',
+            var handle = MUnicorn.getValue(this.handle_ptr, '*');
+            var ret = MUnicorn.ccall('uc_reg_read', 'number',
                 ['pointer', 'number', 'pointer'],
                 [handle, regid, this.handle_ptr]
             );
@@ -186,25 +186,25 @@ var uc = {
         this.mem_write = function (address, bytes) {
             // Allocate bytes buffer and copy data
             var buffer_len = bytes.length;
-            var buffer_ptr = ModuleUnicorn._malloc(buffer_len);
-            ModuleUnicorn.writeArrayToMemory(bytes, buffer_ptr);
+            var buffer_ptr = MUnicorn._malloc(buffer_len);
+            MUnicorn.writeArrayToMemory(bytes, buffer_ptr);
 
             // Write to memory
-            var handle = ModuleUnicorn.getValue(this.handle_ptr, '*');
-            var ret = ModuleUnicorn.ccall('uc_mem_write', 'number',
+            var handle = MUnicorn.getValue(this.handle_ptr, '*');
+            var ret = MUnicorn.ccall('uc_mem_write', 'number',
                 ['pointer', 'number', 'number', 'pointer', 'number'],
                 [handle, address, 0, buffer_ptr, buffer_len]
             );
             // Free memory and handle return code
-            ModuleUnicorn._free(buffer_ptr);
+            MUnicorn._free(buffer_ptr);
             if (ret != uc.ERR_OK) {
                 console.error('Unicorn.js: Function uc_mem_write failed with code %d.', ret);
             }
         }
 
         this.mem_read = function (address, size) {
-            var handle = ModuleUnicorn.getValue(this.handle_ptr, '*');
-            var ret = ModuleUnicorn.ccall('uc_mem_read', 'number',
+            var handle = MUnicorn.getValue(this.handle_ptr, '*');
+            var ret = MUnicorn.ccall('uc_mem_read', 'number',
                 ['pointer', 'number', 'number', 'pointer', 'number'],
                 [handle, address, 0, bytes, size]
             );
@@ -214,8 +214,8 @@ var uc = {
         }
 
         this.mem_map = function (address, size, perms) {
-            var handle = ModuleUnicorn.getValue(this.handle_ptr, '*');
-            var ret = ModuleUnicorn.ccall('uc_mem_map', 'number',
+            var handle = MUnicorn.getValue(this.handle_ptr, '*');
+            var ret = MUnicorn.ccall('uc_mem_map', 'number',
                 ['pointer', 'number', 'number', 'number', 'number'],
                 [handle, address, 0, size, perms]
             );
@@ -224,9 +224,20 @@ var uc = {
             }
         }
 
+        this.mem_unmap = function (address, size) {
+            var handle = MUnicorn.getValue(this.handle_ptr, '*');
+            var ret = MUnicorn.ccall('uc_mem_map', 'number',
+                ['pointer', 'number', 'number', 'number'],
+                [handle, address, 0, size]
+            );
+            if (ret != uc.ERR_OK) {
+                console.error('Unicorn.js: Function uc_mem_map failed with code %d.', ret);
+            }
+        }
+
         this.emu_start = function (begin, until, timeout, count) {
-            var handle = ModuleUnicorn.getValue(this.handle_ptr, '*');
-            var ret = ModuleUnicorn.ccall('uc_emu_start', 'number',
+            var handle = MUnicorn.getValue(this.handle_ptr, '*');
+            var ret = MUnicorn.ccall('uc_emu_start', 'number',
                 ['pointer', 'number', 'number', 'number', 'number', 'number', 'number', 'number'],
                 [handle, begin, 0, until, 0, timeout, 0, count]
             );
@@ -236,22 +247,22 @@ var uc = {
         }
 
         this.emu_stop = function (begin, until, timeout, count) {
-            var handle = ModuleUnicorn.getValue(this.handle_ptr, '*');
-            var ret = ModuleUnicorn.ccall('uc_emu_stop', 'number', ['number'], [handle]);
+            var handle = MUnicorn.getValue(this.handle_ptr, '*');
+            var ret = MUnicorn.ccall('uc_emu_stop', 'number', ['number'], [handle]);
             if (ret != uc.ERR_OK) {
                 console.error('Unicorn.js: Function uc_emu_stop failed with code %d.', ret);
             }
         }
 
         this.errno = function() {
-            var handle = ModuleUnicorn.getValue(this.handle_ptr, '*');
-            var ret = ModuleUnicorn.ccall('uc_errno', 'number', ['pointer'], [handle]);
+            var handle = MUnicorn.getValue(this.handle_ptr, '*');
+            var ret = MUnicorn.ccall('uc_errno', 'number', ['pointer'], [handle]);
             return ret;
         }
 
         this.close = function() {
-            var handle = ModuleUnicorn.getValue(this.handle_ptr, '*');
-            var ret = ModuleUnicorn.ccall('uc_close', 'number', ['pointer'], [handle]);
+            var handle = MUnicorn.getValue(this.handle_ptr, '*');
+            var ret = MUnicorn.ccall('uc_close', 'number', ['pointer'], [handle]);
             if (ret != uc.ERR_OK) {
                 console.error('Unicorn.js: Function uc_close failed with code %d.', ret);
             }
@@ -260,17 +271,17 @@ var uc = {
         // Helpers
         this.reg_write_int = function (regid, value) {
             // Allocate space for the output value
-            var value_ptr = ModuleUnicorn._malloc(4);
-            ModuleUnicorn.setValue(value_ptr, value, 'i32');
+            var value_ptr = MUnicorn._malloc(4);
+            MUnicorn.setValue(value_ptr, value, 'i32');
 
             // Register read
-            var handle = ModuleUnicorn.getValue(this.handle_ptr, '*');
-            var ret = ModuleUnicorn.ccall('uc_reg_write', 'number',
+            var handle = MUnicorn.getValue(this.handle_ptr, '*');
+            var ret = MUnicorn.ccall('uc_reg_write', 'number',
                 ['pointer', 'number', 'pointer'],
                 [handle, regid, value_ptr]
             );
             // Free memory and handle return code
-            ModuleUnicorn._free(value_ptr);
+            MUnicorn._free(value_ptr);
             if (ret != uc.ERR_OK) {
                 console.error('Unicorn.js: Function uc_reg_write failed with code %d.', ret);
             }
@@ -278,18 +289,18 @@ var uc = {
 
         this.reg_read_int = function (regid) {
             // Allocate space for the output value
-            var value_ptr = ModuleUnicorn._malloc(4);
-            ModuleUnicorn.setValue(value_ptr, 0, 'i32');
+            var value_ptr = MUnicorn._malloc(4);
+            MUnicorn.setValue(value_ptr, 0, 'i32');
 
             // Register read
-            var handle = ModuleUnicorn.getValue(this.handle_ptr, '*');
-            var ret = ModuleUnicorn.ccall('uc_reg_read', 'number',
+            var handle = MUnicorn.getValue(this.handle_ptr, '*');
+            var ret = MUnicorn.ccall('uc_reg_read', 'number',
                 ['pointer', 'number', 'pointer'],
                 [handle, regid, value_ptr]
             );
             // Get register value, free memory and handle return code
-            var value = ModuleUnicorn.getValue(value_ptr, 'i32');
-            ModuleUnicorn._free(value_ptr);
+            var value = MUnicorn.getValue(value_ptr, 'i32');
+            MUnicorn._free(value_ptr);
             if (ret != uc.ERR_OK) {
                 console.error('Unicorn.js: Function uc_reg_read failed with code %d.', ret);
             }
@@ -298,13 +309,13 @@ var uc = {
 
 
         // Constructor
-        var ret = ModuleUnicorn.ccall('uc_open', 'number',
+        var ret = MUnicorn.ccall('uc_open', 'number',
             ['number', 'number', 'pointer'],
             [this.arch, this.mode, this.handle_ptr]
         );
 
         if (ret != uc.ERR_OK) {
-            ModuleUnicorn.setValue(this.handle_ptr, 0, '*');
+            MUnicorn.setValue(this.handle_ptr, 0, '*');
             console.error('Unicorn.js: Function uc_open failed with code %d.', ret);
         }
     }

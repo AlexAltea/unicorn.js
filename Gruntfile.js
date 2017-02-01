@@ -20,18 +20,6 @@ module.exports = function (grunt) {
                 }
             }
         },
-        uglify: {
-            dist: {
-                options: {
-                    compress: true,
-                },
-                files: {
-                    'dist/unicorn.min.js': [
-                        'src/**/*.js'
-                    ]
-                }
-            }
-        },
         concat: {
             dist: {
                 src: [

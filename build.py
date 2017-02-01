@@ -371,9 +371,9 @@ if __name__ == "__main__":
     if not os.listdir(UNICORN_DIR):
         os.system("git submodule update --init")
     # Compile Unicorn
-    targets = sys.argv[1:]
+    targets = sorted(sys.argv[1:])
     if os.name in ['posix']:
         compileUnicorn(targets)
     else:
         print "Your operating system is not supported by this script:"
-        print "Please, use Emscripten to compile Unicorn manually to src/unicorn.out.js"
+        print "Please, use Emscripten to compile Unicorn manually to src/libunicorn.out.js"

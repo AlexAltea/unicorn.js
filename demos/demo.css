@@ -42,8 +42,6 @@ nav > a:focus   { outline: none; -moz-outline-style: none; }
 /* Separation */
 .split {
   box-sizing: border-box;
-  overflow-y: auto;
-  overflow-x: hidden;
 }
 .gutter {
   background-color: transparent;
@@ -66,17 +64,43 @@ nav > a:focus   { outline: none; -moz-outline-style: none; }
 }
 
 /* Panes */
-.content {
+.pane {
   background-color: #666;
-  font-family: 'Inconsolata';
-  font-size: 14px;
   color: #EEE;
+  font-size: 14px;
+}
+.content {
+  position: relative;
+  overflow-y: auto;
+  width:100%;
+  height:calc(100% - 28px);
 }
 #assembler {
-  padding: 5px;
+  margin: 5px 10px;
+  text-align: left;
+  border-collapse: collapse;
+}
+#assembler th,
+#assembler td {
+  padding-right: 40px;
 }
 #registers {
-  padding: 5px;
+  margin: 5px 10px;
+  text-align: left;
+  border-collapse: collapse;
+}
+#registers th,
+#registers td {
+  padding-right: 20px;
+}
+
+.row-instruction {
+  font-family: 'Inconsolata';
+  font-size: 14px;
+}
+.row-register {
+  font-family: 'Inconsolata';
+  font-size: 14px;
 }
 
 /* Toolbar */
@@ -105,6 +129,4 @@ nav > a:focus   { outline: none; -moz-outline-style: none; }
 .toolbar-button:active { background-color: #777; color: #EEE; }
 .toolbar .mdi {
   text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
-  position: relative;
-  top: 2px;
 }

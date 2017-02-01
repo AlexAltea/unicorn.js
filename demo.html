@@ -25,7 +25,7 @@
 
     <!-- UI -->
     <div id="pane-l" class="split split-horizontal">
-      <div id="pane-lt" class="split content">
+      <div id="pane-lt" class="split pane">
         <!-- Assembler -->
         <div class="toolbar">
           <div class="toolbar-button" onclick="paneAssembler.emuStart()" title="Run"><i class="mdi mdi-play"></i></div>
@@ -34,28 +34,28 @@
           <div class="toolbar-button" title="Step over"><i class="mdi mdi-debug-step-over"></i></div>
           <div class="toolbar-button" title="Step out"><i class="mdi mdi-debug-step-out"></i></div>
         </div>
-        <div id="assembler">
-          <div class="split split-horizontal col-addr"></div>
-          <div class="split split-horizontal col-hex"></div>
-          <div class="split split-horizontal col-asm"></div>
+        <div class="content">
+          <table id="assembler">
+            <tr><th>Address</th><th>Bytes</th><th>Assembly</th></tr>
+          </table>
         </div>
       </div>
-      <div id="pane-lb" class="split content">
+      <div id="pane-lb" class="split pane">
         <div class="toolbar">
           Memory
         </div>
       </div>
     </div>
     <div id="pane-r" class="split split-horizontal">
-      <div id="pane-rt" class="split content">
+      <div id="pane-rt" class="split pane">
         <div class="toolbar">
           Registers
         </div>
-        <div id='registers'>
-
+        <div class="content">
+          <table id="registers"></table>
         </div>
       </div>
-      <div id="pane-rb" class="split content">
+      <div id="pane-rb" class="split pane">
         <div class="toolbar">
           Stack
         </div>

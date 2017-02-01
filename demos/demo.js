@@ -18,6 +18,19 @@ function utilBytesToHex(b) {
  * Register
  */
 function Register(name, type, id) {
+    // Constructor
+    this.name = name;
+    this.type = type;
+    this.id = id;
+
+    this.node = document.createElement("tr");
+    this.nodeName = document.createElement("td");
+    this.nodeValue = document.createElement("td");
+    this.node.className = 'row-instruction';
+    this.node.appendChild(this.nodeName);
+    this.node.appendChild(this.nodeValue);
+    this.nodeName.innerHTML = name
+
     // Helpers
     this._update_int = function () {
         var value = e.reg_read_int(this.id);
@@ -48,18 +61,6 @@ function Register(name, type, id) {
         }
     }
 
-    // Constructor
-    this.name = name;
-    this.type = type;
-    this.id = id;
-
-    this.node = document.createElement("div");
-    this.nodeName = document.createElement("span");
-    this.nodeValue = document.createElement("span");
-    this.nodeName.innerHTML = name
-    this.node.appendChild(this.nodeName);
-    this.node.appendChild(this.nodeValue);
-
     this.update();
 }
 
@@ -70,9 +71,14 @@ function Instruction() {
     this.bytes = [];
     this.asm = "";
 
-    this.nodeAddr = document.createElement("div");
-    this.nodeHex = document.createElement("div");
-    this.nodeAsm = document.createElement("div");
+    this.node = document.createElement("tr");
+    this.nodeAddr = document.createElement("td");
+    this.nodeHex = document.createElement("td");
+    this.nodeAsm = document.createElement("td");
+    this.node.className = 'row-instruction'
+    this.node.appendChild(this.nodeAddr);
+    this.node.appendChild(this.nodeHex);
+    this.node.appendChild(this.nodeAsm);
 
     // Methods
     this.setAddr = function (addr) {
@@ -105,22 +111,14 @@ var paneAssembler = {
     mapped: false,
 
     update: function () {
-        // Get columns
-        var colAddr = $('#assembler > .col-addr');
-        var colHex = $('#assembler > .col-hex');
-        var colAsm = $('#assembler > .col-asm');
-        // Remove data
-        colAddr.empty();
-        colHex.empty();
-        colAsm.empty();
-        // Fill data
+        var table = $("#assembler");
+        table.find(".row-instruction").remove();
+        // Add instruction rows
         var addr = this.address;
         for (var i = 0; i < this.instructions.length; i++) {
             var inst = this.instructions[i];
             inst.setAddr(addr);
-            colAddr.append(inst.nodeAddr);
-            colHex.append(inst.nodeHex);
-            colAsm.append(inst.nodeAsm);
+            table.append(inst.node);
             addr += inst.length();
         }
     },
@@ -197,17 +195,8 @@ $(document).ready(function () {
     });
     Split(['#pane-rt', '#pane-rb'], {
         direction: 'vertical',
-        sizes: [65, 35],
+        sizes: [20, 80],
         gutterSize: 7,
         cursor: 'row-resize'
-    });
-
-    Split([
-        '#assembler .col-addr',
-        '#assembler .col-hex',
-        '#assembler .col-asm'], {
-        gutterSize: 7,
-        sizes: [20,30,50],
-        cursor: 'col-resize'
     });
 });

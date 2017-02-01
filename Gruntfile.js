@@ -79,8 +79,8 @@ module.exports = function (grunt) {
     });
     grunt.registerTask('release', [
         'build',
-        'build:arm',
         'build:aarch64',
+        'build:arm',
         'build:mips',
         'build:m68k',
         'build:sparc',

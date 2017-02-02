@@ -7,7 +7,7 @@ body {
   padding-left: 6px;
   padding-right: 6px;
   padding-bottom: 6px;
-  background-color: #333;
+  background-color: #222;
   height: calc(100% - 50px);
   font-family: 'Open Sans', sans-serif;
 }
@@ -20,7 +20,6 @@ nav {
   float: left;
   padding: 10px;
   width: calc(100% - 20px);
-  background-color: #333;
   color: #FFF;
 }
 .navbar-sep {
@@ -47,15 +46,17 @@ nav > a:focus   { outline: none; -moz-outline-style: none; }
   background-color: transparent;
   background-repeat: no-repeat;
   background-position: 50%;
-  background-color: #333;
+  background-color: #444;
 }
 .gutter.gutter-horizontal {
   cursor: col-resize;
   background-image: url('resources/grips_vertical.png');
+  filter: brightness(0.5);
 }
 .gutter.gutter-vertical {
   cursor: row-resize;
   background-image: url('resources/grips_horizontal.png');
+  filter: brightness(0.5);
 }
 .split.split-horizontal,
 .gutter.gutter-horizontal {
@@ -65,6 +66,7 @@ nav > a:focus   { outline: none; -moz-outline-style: none; }
 
 /* Panes */
 .pane {
+  height: 100%;
   background-color: #666;
   color: #EEE;
   font-size: 14px;
@@ -127,6 +129,16 @@ nav > a:focus   { outline: none; -moz-outline-style: none; }
 }
 .toolbar-button:hover  { background-color: #666; color: #EEE; }
 .toolbar-button:active { background-color: #777; color: #EEE; }
-.toolbar .mdi {
+.toolbar-button.disabled {
+  background-color: #555;
+  color: #999;
+  box-shadow: none;
+  text-shadow: none;
+  cursor: default;
+}
+.toolbar-button .mdi {
   text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
+}
+.toolbar-button.disabled .mdi {
+  text-shadow: none;
 }

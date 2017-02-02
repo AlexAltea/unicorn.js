@@ -28,11 +28,21 @@
       <div id="pane-lt" class="split pane">
         <!-- Assembler -->
         <div class="toolbar">
-          <div class="toolbar-button" onclick="paneAssembler.emuStart()" title="Run"><i class="mdi mdi-play"></i></div>
-          <div class="toolbar-button" title="Pause"><i class="mdi mdi-pause"></i></div>
-          <div class="toolbar-button" title="Step into"><i class="mdi mdi-debug-step-into"></i></div>
-          <div class="toolbar-button" title="Step over"><i class="mdi mdi-debug-step-over"></i></div>
-          <div class="toolbar-button" title="Step out"><i class="mdi mdi-debug-step-out"></i></div>
+          <div class="toolbar-button" onclick="paneAssembler.emuStart()" title="Run">
+            <i class="mdi mdi-play"></i>
+          </div>
+          <div class="toolbar-button disabled" title="Pause">
+            <i class="mdi mdi-pause"></i>
+          </div>
+          <div class="toolbar-button disabled" title="Step into">
+            <i class="mdi mdi-debug-step-into"></i>
+          </div>
+          <div class="toolbar-button disabled" title="Step over">
+            <i class="mdi mdi-debug-step-over"></i>
+          </div>
+          <div class="toolbar-button disabled" title="Step out">
+            <i class="mdi mdi-debug-step-out"></i>
+          </div>
         </div>
         <div class="content">
           <table id="assembler">
@@ -55,11 +65,11 @@
           <table id="registers"></table>
         </div>
       </div>
-      <div id="pane-rb" class="split pane">
+      <!--div id="pane-rb" class="split pane">
         <div class="toolbar">
           Stack
         </div>
-      </div>
+      </div-->
     </div>
 
     <!-- External scripts -->

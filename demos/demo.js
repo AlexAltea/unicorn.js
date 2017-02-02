@@ -34,6 +34,14 @@ function Register(name, type, id) {
     // Helpers
     this._update_int = function () {
         var value = e.reg_read_int(this.id);
+        // Set color
+        if (this.value != value) {
+            this.node.style.color = '#F86';
+        } else {
+            this.node.style.color = '#EEE';
+        }
+        // Set value
+        this.value = value;
         switch (this.type) {
             case 'i8':  this.nodeValue.innerHTML = utilIntToHex(value, 2);
             case 'i16': this.nodeValue.innerHTML = utilIntToHex(value, 4);
@@ -110,6 +118,13 @@ var paneAssembler = {
     size: 0x1000,
     mapped: false,
 
+    bytes: function () {
+        var bytes = [];
+        for (var i = 0; i < this.instructions.length; i++) {
+            bytes = bytes.concat(this.instructions[i].bytes);
+        }
+        return bytes;
+    },
     update: function () {
         var table = $("#assembler");
         table.find(".row-instruction").remove();
@@ -151,17 +166,22 @@ var paneAssembler = {
     },
     // Emulation
     emuStart: function () {
-        var bytes = []
-        var size = this.address;
-        for (var i = 0; i < this.instructions.length; i++) {
-            var inst = this.instructions[i];
-            bytes = bytes.concat(inst.bytes);
-            size += inst.length();
-        }
-        console.log(utilBytesToHex(bytes));
+        var bytes = this.bytes();
         e.mem_write(this.address, bytes);
-        e.emu_start(this.address, this.address+size, 0, 0);
+        e.emu_start(this.address, this.address+bytes.length, 0, 0);
         paneRegisters.update();
+    },
+    emuPause: function () {
+        console.warn("Pause unimplemented");
+    },
+    emuStepInto: function () {
+        console.warn("Step-in unimplemented");
+    },
+    emuStepOver: function () {
+        console.warn("Step-over unimplemented");
+    },
+    emuStepOut: function () {
+        console.warn("Step-out unimplemented");
     }
 };
 
@@ -193,10 +213,11 @@ $(document).ready(function () {
         gutterSize: 7,
         cursor: 'row-resize'
     });
+    /* TODO: Reenable Stack pane
     Split(['#pane-rt', '#pane-rb'], {
         direction: 'vertical',
-        sizes: [20, 80],
+        sizes: [65, 35],
         gutterSize: 7,
         cursor: 'row-resize'
-    });
+    });*/
 });

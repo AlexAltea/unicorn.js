@@ -129,6 +129,10 @@ var uc = {
     // > HOOK_MEM_READ | HOOK_MEM_WRITE | HOOK_MEM_FETCH
     HOOK_MEM_VALID: (1 << 10) | (1 << 11) | (1 << 12),
 
+    // Queries
+    QUERY_MODE:       1,
+    QUERY_PAGE_SIZE:  2,
+
     // Static
     version: function() {
         major_ptr = MUnicorn._malloc(4);
@@ -258,15 +262,38 @@ var uc = {
             }
         }
 
+        this.mem_protect = function (address, size, perms) {
+            var handle = MUnicorn.getValue(this.handle_ptr, '*');
+            var ret = MUnicorn.ccall('uc_mem_protect', 'number',
+                ['pointer', 'number', 'number', 'number', 'number'],
+                [handle, address, 0, size, perms]
+            );
+            if (ret != uc.ERR_OK) {
+                console.error('Unicorn.js: Function uc_mem_protect failed with code %d.', ret);
+            }
+        }
+
+        this.mem_regions = function () {
+            console.error("Unicorn.js: Method mem_regions unimplemented");
+        }
+
         this.mem_unmap = function (address, size) {
             var handle = MUnicorn.getValue(this.handle_ptr, '*');
-            var ret = MUnicorn.ccall('uc_mem_map', 'number',
+            var ret = MUnicorn.ccall('uc_mem_unmap', 'number',
                 ['pointer', 'number', 'number', 'number'],
                 [handle, address, 0, size]
             );
             if (ret != uc.ERR_OK) {
-                console.error('Unicorn.js: Function uc_mem_map failed with code %d.', ret);
+                console.error('Unicorn.js: Function uc_mem_unmap failed with code %d.', ret);
             }
+        }
+
+        this.hook_add = function () {
+            console.error('Unicorn.js: Hooks not implemented');
+        }
+
+        this.hook_del = function () {
+            console.error('Unicorn.js: Hooks not implemented');
         }
 
         this.emu_start = function (begin, until, timeout, count) {
@@ -282,10 +309,26 @@ var uc = {
 
         this.emu_stop = function (begin, until, timeout, count) {
             var handle = MUnicorn.getValue(this.handle_ptr, '*');
-            var ret = MUnicorn.ccall('uc_emu_stop', 'number', ['number'], [handle]);
+            var ret = MUnicorn.ccall('uc_emu_stop', 'number', ['pointer'], [handle]);
             if (ret != uc.ERR_OK) {
                 console.error('Unicorn.js: Function uc_emu_stop failed with code %d.', ret);
             }
+        }
+
+        this.context_alloc = function () {
+            console.error('Unicorn.js: Contexts not implemented');
+        }
+
+        this.context_free = function () {
+            console.error('Unicorn.js: Contexts not implemented');
+        }
+
+        this.context_save = function () {
+            console.error('Unicorn.js: Contexts not implemented');
+        }
+
+        this.context_restore = function () {
+            console.error('Unicorn.js: Contexts not implemented');
         }
 
         this.errno = function() {
@@ -331,6 +374,13 @@ var uc = {
                 console.error('Unicorn.js: Function uc_reg_write failed with code %d.', ret);
             }
         }
+        this.reg_write_i8     = function (regid, value) { this.reg_write_type(regid, 'i8', value); }
+        this.reg_write_i16    = function (regid, value) { this.reg_write_type(regid, 'i16', value); }
+        this.reg_write_i32    = function (regid, value) { this.reg_write_type(regid, 'i32', value); }
+        this.reg_write_i64    = function (regid, value) { this.reg_write_type(regid, 'i64', value); }
+        this.reg_write_float  = function (regid, value) { this.reg_write_type(regid, 'float', value); }
+        this.reg_write_double = function (regid, value) { this.reg_write_type(regid, 'double', value); }
+
         this.reg_read_type = function (regid, type) {
             // Allocate space for the output value
             var value_size = this._sizeof(type);
@@ -351,12 +401,6 @@ var uc = {
             }
             return value;
         }
-        this.reg_write_i8     = function (regid, value) { this.reg_write_type(regid, 'i8', value); }
-        this.reg_write_i16    = function (regid, value) { this.reg_write_type(regid, 'i16', value); }
-        this.reg_write_i32    = function (regid, value) { this.reg_write_type(regid, 'i32', value); }
-        this.reg_write_i64    = function (regid, value) { this.reg_write_type(regid, 'i64', value); }
-        this.reg_write_float  = function (regid, value) { this.reg_write_type(regid, 'float', value); }
-        this.reg_write_double = function (regid, value) { this.reg_write_type(regid, 'double', value); }
         this.reg_read_i8      = function (regid) { return this.reg_read_type(regid, 'i8'); }
         this.reg_read_i16     = function (regid) { return this.reg_read_type(regid, 'i16'); }
         this.reg_read_i32     = function (regid) { return this.reg_read_type(regid, 'i32'); }
@@ -364,13 +408,38 @@ var uc = {
         this.reg_read_float   = function (regid) { return this.reg_read_type(regid, 'float'); }
         this.reg_read_double  = function (regid) { return this.reg_read_type(regid, 'double'); }
 
+        this.query_type = function (query_type, result_type) {
+            // Allocate space for the output value
+            var result_size = this._sizeof(result_type);
+            var result_ptr = MUnicorn._malloc(result_size);
+            MUnicorn.setValue(value_ptr, 0, result_type);
+            // Make query
+            var handle = MUnicorn.getValue(this.handle_ptr, '*');
+            var ret = MUnicorn.ccall('uc_query', 'number',
+                ['pointer', 'number', 'pointer'],
+                [handle, query_type, result_ptr]
+            );
+            // Get result value, free memory and handle return code
+            var result = MUnicorn.getValue(result_ptr, result_type);
+            MUnicorn._free(result_ptr);
+            if (ret != uc.ERR_OK) {
+                console.error('Unicorn.js: Function uc_query failed with code %d.', ret);
+            }
+            return result;
+        }
+        this.query_i8      = function (type) { return this.query_type(type, 'i8'); }
+        this.query_i16     = function (type) { return this.query_type(type, 'i16'); }
+        this.query_i32     = function (type) { return this.query_type(type, 'i32'); }
+        this.query_i64     = function (type) { return this.query_type(type, 'i64'); }
+        this.query_float   = function (type) { return this.query_type(type, 'float'); }
+        this.query_double  = function (type) { return this.query_type(type, 'double'); }
+
 
         // Constructor
         var ret = MUnicorn.ccall('uc_open', 'number',
             ['number', 'number', 'pointer'],
             [this.arch, this.mode, this.handle_ptr]
         );
-
         if (ret != uc.ERR_OK) {
             MUnicorn.setValue(this.handle_ptr, 0, '*');
             console.error('Unicorn.js: Function uc_open failed with code %d.', ret);

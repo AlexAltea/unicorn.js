@@ -161,26 +161,46 @@ var uc = {
         this.handle_ptr = MUnicorn._malloc(4);
 
         // Methods
-        this.reg_write = function (regid, value) {
+        this.reg_write = function (regid, bytes) {
+            // Allocate bytes buffer and copy data
+            var buffer_len = bytes.length;
+            var buffer_ptr = MUnicorn._malloc(buffer_len);
+            MUnicorn.writeArrayToMemory(bytes, buffer_ptr);
+            // Register write
             var handle = MUnicorn.getValue(this.handle_ptr, '*');
             var ret = MUnicorn.ccall('uc_reg_write', 'number',
                 ['pointer', 'number', 'pointer'],
-                [handle, regid, this.handle_ptr]
+                [handle, regid, buffer_ptr]
             );
+            // Free memory and handle return code
+            MUnicorn._free(buffer_ptr);
             if (ret != uc.ERR_OK) {
                 console.error('Unicorn.js: Function uc_reg_write failed with code %d.', ret);
             }
         }
 
-        this.reg_read = function (regid) {
+        this.reg_read = function (regid, size) {
+            // Allocate space for the output value
+            var buffer_ptr = MUnicorn._malloc(size);
+            for (var i = 0; i < size; i++) {
+                MUnicorn.setValue(buffer_ptr + i, 0, 'i8');
+            }
+            // Register read
             var handle = MUnicorn.getValue(this.handle_ptr, '*');
             var ret = MUnicorn.ccall('uc_reg_read', 'number',
                 ['pointer', 'number', 'pointer'],
-                [handle, regid, this.handle_ptr]
+                [handle, regid, buffer_ptr]
             );
+            // Get register value, free memory and handle return code
+            var value = new Uint8Array(size);
+            for (var i = 0; i < size; i++) {
+                value[i] = MUnicorn.getValue(buffer_ptr + i, 'i8');
+            }
+            MUnicorn._free(buffer_ptr);
             if (ret != uc.ERR_OK) {
                 console.error('Unicorn.js: Function uc_reg_read failed with code %d.', ret);
             }
+            return value;
         }
 
         this.mem_write = function (address, bytes) {
@@ -269,12 +289,23 @@ var uc = {
         }
 
         // Helpers
-        this.reg_write_int = function (regid, value) {
+        this._sizeof = function (type) {
+            switch (type) {
+                case 'i8':     return 1;
+                case 'i16':    return 2;
+                case 'i32':    return 4;
+                case 'i64':    return 8;
+                case 'float':  return 4;
+                case 'double': return 8;
+                default:       return 0;
+            }
+        }
+        this.reg_write_type = function (regid, type, value) {
             // Allocate space for the output value
-            var value_ptr = MUnicorn._malloc(4);
-            MUnicorn.setValue(value_ptr, value, 'i32');
-
-            // Register read
+            var value_size = this._sizeof(type);
+            var value_ptr = MUnicorn._malloc(value_size);
+            MUnicorn.setValue(value_ptr, value, type);
+            // Register write
             var handle = MUnicorn.getValue(this.handle_ptr, '*');
             var ret = MUnicorn.ccall('uc_reg_write', 'number',
                 ['pointer', 'number', 'pointer'],
@@ -286,11 +317,11 @@ var uc = {
                 console.error('Unicorn.js: Function uc_reg_write failed with code %d.', ret);
             }
         }
-
-        this.reg_read_int = function (regid) {
+        this.reg_read_type = function (regid, type) {
             // Allocate space for the output value
-            var value_ptr = MUnicorn._malloc(4);
-            MUnicorn.setValue(value_ptr, 0, 'i32');
+            var value_size = this._sizeof(type);
+            var value_ptr = MUnicorn._malloc(value_size);
+            MUnicorn.setValue(value_ptr, 0, type);
 
             // Register read
             var handle = MUnicorn.getValue(this.handle_ptr, '*');
@@ -299,13 +330,25 @@ var uc = {
                 [handle, regid, value_ptr]
             );
             // Get register value, free memory and handle return code
-            var value = MUnicorn.getValue(value_ptr, 'i32');
+            var value = MUnicorn.getValue(value_ptr, type);
             MUnicorn._free(value_ptr);
             if (ret != uc.ERR_OK) {
                 console.error('Unicorn.js: Function uc_reg_read failed with code %d.', ret);
             }
             return value;
         }
+        this.reg_write_i8     = function (regid, type, value) { return this.reg_write_type(regid, 'i8', value); }
+        this.reg_write_i16    = function (regid, type, value) { return this.reg_write_type(regid, 'i16', value); }
+        this.reg_write_i32    = function (regid, type, value) { return this.reg_write_type(regid, 'i32', value); }
+        this.reg_write_i64    = function (regid, type, value) { return this.reg_write_type(regid, 'i64', value); }
+        this.reg_write_float  = function (regid, type, value) { return this.reg_write_type(regid, 'float', value); }
+        this.reg_write_double = function (regid, type, value) { return this.reg_write_type(regid, 'double', value); }
+        this.reg_read_i8      = function (regid, type) { return this.reg_read_type(regid, 'i8'); }
+        this.reg_read_i16     = function (regid, type) { return this.reg_read_type(regid, 'i16'); }
+        this.reg_read_i32     = function (regid, type) { return this.reg_read_type(regid, 'i32'); }
+        this.reg_read_i64     = function (regid, type) { return this.reg_read_type(regid, 'i64'); }
+        this.reg_read_float   = function (regid, type) { return this.reg_read_type(regid, 'float'); }
+        this.reg_read_double  = function (regid, type) { return this.reg_read_type(regid, 'double'); }
 
 
         // Constructor

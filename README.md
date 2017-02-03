@@ -28,8 +28,8 @@ var code = [
 var e = new uc.Unicorn(uc.ARCH_ARM, uc.MODE_ARM);
 
 // Write registers and memory
-e.reg_write_int(uc.ARM_REG_R2, 0x456);
-e.reg_write_int(uc.ARM_REG_R3, 0x123);
+e.reg_write_i32(uc.ARM_REG_R2, 0x456);
+e.reg_write_i32(uc.ARM_REG_R3, 0x123);
 e.mem_map(addr, 4*1024, uc.PROT_ALL);
 e.mem_write(addr, code)
 
@@ -39,8 +39,8 @@ var until = addr + code.length;
 e.emu_start(begin, until, 0, 0);
 
 // Read registers
-var r0 = e.reg_read_int(uc.ARM_REG_R0);  // 0x37
-var r1 = e.reg_read_int(uc.ARM_REG_R1);  // 0x333
+var r0 = e.reg_read_i32(uc.ARM_REG_R0);  // 0x37
+var r1 = e.reg_read_i32(uc.ARM_REG_R1);  // 0x333
 ```
 
 ## Building

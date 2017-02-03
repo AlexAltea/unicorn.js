@@ -223,14 +223,28 @@ var uc = {
         }
 
         this.mem_read = function (address, size) {
+            // Allocate space for the output value
+            var buffer_ptr = MUnicorn._malloc(size);
+            for (var i = 0; i < size; i++) {
+                MUnicorn.setValue(buffer_ptr + i, 0, 'i8');
+            }
+
+            // Read from memory
             var handle = MUnicorn.getValue(this.handle_ptr, '*');
             var ret = MUnicorn.ccall('uc_mem_read', 'number',
                 ['pointer', 'number', 'number', 'pointer', 'number'],
-                [handle, address, 0, bytes, size]
+                [handle, address, 0, buffer_ptr, size]
             );
+            // Get register value, free memory and handle return code
+            var buffer = new Uint8Array(size);
+            for (var i = 0; i < size; i++) {
+                buffer[i] = MUnicorn.getValue(buffer_ptr + i, 'i8');
+            }
+            MUnicorn._free(buffer_ptr);
             if (ret != uc.ERR_OK) {
                 console.error('Unicorn.js: Function uc_mem_read failed with code %d.', ret);
             }
+            return buffer;
         }
 
         this.mem_map = function (address, size, perms) {
@@ -337,18 +351,18 @@ var uc = {
             }
             return value;
         }
-        this.reg_write_i8     = function (regid, type, value) { return this.reg_write_type(regid, 'i8', value); }
-        this.reg_write_i16    = function (regid, type, value) { return this.reg_write_type(regid, 'i16', value); }
-        this.reg_write_i32    = function (regid, type, value) { return this.reg_write_type(regid, 'i32', value); }
-        this.reg_write_i64    = function (regid, type, value) { return this.reg_write_type(regid, 'i64', value); }
-        this.reg_write_float  = function (regid, type, value) { return this.reg_write_type(regid, 'float', value); }
-        this.reg_write_double = function (regid, type, value) { return this.reg_write_type(regid, 'double', value); }
-        this.reg_read_i8      = function (regid, type) { return this.reg_read_type(regid, 'i8'); }
-        this.reg_read_i16     = function (regid, type) { return this.reg_read_type(regid, 'i16'); }
-        this.reg_read_i32     = function (regid, type) { return this.reg_read_type(regid, 'i32'); }
-        this.reg_read_i64     = function (regid, type) { return this.reg_read_type(regid, 'i64'); }
-        this.reg_read_float   = function (regid, type) { return this.reg_read_type(regid, 'float'); }
-        this.reg_read_double  = function (regid, type) { return this.reg_read_type(regid, 'double'); }
+        this.reg_write_i8     = function (regid, value) { this.reg_write_type(regid, 'i8', value); }
+        this.reg_write_i16    = function (regid, value) { this.reg_write_type(regid, 'i16', value); }
+        this.reg_write_i32    = function (regid, value) { this.reg_write_type(regid, 'i32', value); }
+        this.reg_write_i64    = function (regid, value) { this.reg_write_type(regid, 'i64', value); }
+        this.reg_write_float  = function (regid, value) { this.reg_write_type(regid, 'float', value); }
+        this.reg_write_double = function (regid, value) { this.reg_write_type(regid, 'double', value); }
+        this.reg_read_i8      = function (regid) { return this.reg_read_type(regid, 'i8'); }
+        this.reg_read_i16     = function (regid) { return this.reg_read_type(regid, 'i16'); }
+        this.reg_read_i32     = function (regid) { return this.reg_read_type(regid, 'i32'); }
+        this.reg_read_i64     = function (regid) { return this.reg_read_type(regid, 'i64'); }
+        this.reg_read_float   = function (regid) { return this.reg_read_type(regid, 'float'); }
+        this.reg_read_double  = function (regid) { return this.reg_read_type(regid, 'double'); }
 
 
         // Constructor

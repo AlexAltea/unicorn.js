@@ -25,15 +25,32 @@ function Register(name, type, id) {
 
     this.node = document.createElement("tr");
     this.nodeName = document.createElement("td");
+    this.nodeHex = document.createElement("td");
     this.nodeValue = document.createElement("td");
-    this.node.className = 'row-instruction';
+    this.node.className = 'row-register';
     this.node.appendChild(this.nodeName);
+    this.node.appendChild(this.nodeHex);
     this.node.appendChild(this.nodeValue);
     this.nodeName.innerHTML = name
 
+    // Events
+    this.nodeHex.ondblclick = (function (reg) {
+        return function() {
+            paneRegisters.update();
+            var content = reg.nodeHex.innerHTML;
+            var input = document.createElement("input");
+            input.type = "text";
+            input.value = content;
+            input.style.width = (reg.nodeHex.offsetWidth - 20) + 'px';
+            reg.nodeHex.innerHTML = '';
+            reg.nodeHex.appendChild(input);
+            input.select();
+        }
+    })(this);
+
     // Helpers
     this._update_int = function () {
-        var value = e.reg_read_int(this.id);
+        var value = e.reg_read_i32(this.id);
         // Set color
         if (this.value != value) {
             this.node.style.color = '#F86';
@@ -42,10 +59,11 @@ function Register(name, type, id) {
         }
         // Set value
         this.value = value;
+        this.nodeValue.innerHTML = value.toString();
         switch (this.type) {
-            case 'i8':  this.nodeValue.innerHTML = utilIntToHex(value, 2);
-            case 'i16': this.nodeValue.innerHTML = utilIntToHex(value, 4);
-            case 'i32': this.nodeValue.innerHTML = utilIntToHex(value, 8);
+            case 'i8':  this.nodeHex.innerHTML = utilIntToHex(value, 2);
+            case 'i16': this.nodeHex.innerHTML = utilIntToHex(value, 4);
+            case 'i32': this.nodeHex.innerHTML = utilIntToHex(value, 8);
         }
     }
     this._update_float = function () {

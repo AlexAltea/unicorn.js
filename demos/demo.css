@@ -73,36 +73,55 @@ nav > a:focus   { outline: none; -moz-outline-style: none; }
 }
 .content {
   position: relative;
-  overflow-y: auto;
+  overflow-y: scroll;
   width:100%;
   height:calc(100% - 28px);
 }
-#assembler {
-  margin: 5px 10px;
-  text-align: left;
-  border-collapse: collapse;
+.content::-webkit-scrollbar {
+  width: 10px;
 }
-#assembler th,
-#assembler td {
-  padding-right: 40px;
+.content::-webkit-scrollbar-track {
+  background: #666;
+  border-radius: 20px;
 }
-#registers {
-  margin: 5px 10px;
-  text-align: left;
-  border-collapse: collapse;
+.content::-webkit-scrollbar-thumb {
+  background: #444;
+  border-radius: 20px;
 }
-#registers th,
-#registers td {
-  padding-right: 20px;
+.content input[type="text"]{
+  font-family: 'Inconsolata';
+  font-size: 14px;
+  color: #EEE;
+  background-color: rgba(255,255,255, 0.1);
+  border: none;
 }
 
+#assembler {
+  margin: 0px 10px;
+  width: calc(100% - 20px);
+  text-align: left;
+  border-collapse: collapse;
+}
 .row-instruction {
   font-family: 'Inconsolata';
   font-size: 14px;
 }
+.row-instruction:hover {
+  background-color: rgba(256,256,256, 0.1);
+}
+
+#registers {
+  margin: 0px 10px;
+  width: calc(100% - 20px);
+  text-align: left;
+  border-collapse: collapse;
+}
 .row-register {
   font-family: 'Inconsolata';
   font-size: 14px;
+}
+.row-register:hover {
+  background-color: rgba(256,256,256, 0.1);
 }
 
 /* Toolbar */
@@ -117,6 +136,12 @@ nav > a:focus   { outline: none; -moz-outline-style: none; }
       -ms-user-select: none; /* IE/Edge */
           user-select: none; /* Chrome/Opera */
 }
+.toolbar-sep {
+  margin-left: 2px;
+  border-left: 1px solid #555;
+  margin-right: 5px;
+  width: 0px;
+}
 .toolbar-button {
   display: inline-block;
   width: 20px;
@@ -127,8 +152,8 @@ nav > a:focus   { outline: none; -moz-outline-style: none; }
   cursor: pointer;
   box-shadow: 0px 0px 3px rgba(0,0,0,0.5);
 }
-.toolbar-button:hover  { background-color: #666; color: #EEE; }
-.toolbar-button:active { background-color: #777; color: #EEE; }
+.toolbar-button:hover  { background-color: #666; }
+.toolbar-button:active { color: #DDD; }
 .toolbar-button.disabled {
   background-color: #555;
   color: #999;
@@ -137,7 +162,7 @@ nav > a:focus   { outline: none; -moz-outline-style: none; }
   cursor: default;
 }
 .toolbar-button .mdi {
-  text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
+  text-shadow: 1px 1px 0px rgba(0,0,0,0.5);
 }
 .toolbar-button.disabled .mdi {
   text-shadow: none;

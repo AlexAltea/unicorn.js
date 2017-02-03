@@ -34,6 +34,7 @@
           <div class="toolbar-button disabled" title="Pause">
             <i class="mdi mdi-pause"></i>
           </div>
+          <span class="toolbar-sep"></span>
           <div class="toolbar-button disabled" title="Step into">
             <i class="mdi mdi-debug-step-into"></i>
           </div>
@@ -43,10 +44,21 @@
           <div class="toolbar-button disabled" title="Step out">
             <i class="mdi mdi-debug-step-out"></i>
           </div>
+          <span class="toolbar-sep"></span>
+          <div class="toolbar-button" title="Copy assembly">
+            <i class="mdi mdi-content-copy"></i>
+          </div>
+          <div class="toolbar-button" title="Copy assembly">
+            <i class="mdi mdi-content-paste"></i>
+          </div>
         </div>
         <div class="content">
           <table id="assembler">
-            <tr><th>Address</th><th>Bytes</th><th>Assembly</th></tr>
+            <tr>
+              <th width="15%">Address</th>
+              <th width="25%">Bytes</th>
+              <th width="60%">Assembly</th>
+            </tr>
           </table>
         </div>
       </div>
@@ -62,7 +74,13 @@
           Registers
         </div>
         <div class="content">
-          <table id="registers"></table>
+          <table id="registers">
+            <tr style="height:0px;">
+              <th width="15%">Reg</th>
+              <th width="25%">Value</th>
+              <th width="60%">Number</th>
+            </tr>
+          </table>
         </div>
       </div>
       <!--div id="pane-rb" class="split pane">
@@ -86,19 +104,19 @@
               'demos/demo-arm': [
                 'dist/unicorn-arm.min',
                 'demos/externals/keystone-arm.min',
-                'demos/externals/keystone-arm.min'],
+                'demos/externals/capstone-arm.min'],
               'demos/demo-mips': [
                 'dist/unicorn-mips.min',
                 'demos/externals/keystone-mips.min',
-                'demos/externals/keystone-mips.min'],
+                'demos/externals/capstone-mips.min'],
               'demos/demo-sparc': [
                 'dist/unicorn-sparc.min',
                 'demos/externals/keystone-sparc.min',
-                'demos/externals/keystone-sparc.min'],
+                'demos/externals/capstone-sparc.min'],
               'demos/demo-x86': [
                 'dist/unicorn-x86.min',
                 'demos/externals/keystone-x86.min',
-                'demos/externals/keystone-x86.min'],
+                'demos/externals/capstone-x86.min'],
           }
       });
       // Get URL anchor-based parameters

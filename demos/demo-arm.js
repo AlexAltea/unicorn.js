@@ -1,12 +1,13 @@
 var e = new uc.Unicorn(uc.ARCH_ARM, uc.MODE_ARM);
-var a = new ks.Keystone(uc.ARCH_ARM, uc.MODE_ARM);
+var a = new ks.Keystone(ks.ARCH_ARM, ks.MODE_ARM);
+var d = new cs.Capstone(cs.ARCH_ARM, cs.MODE_ARM);
 
 // Instruction Pointer
 function pcRead() {
-    return e.reg_read_int(uc.ARM_REG_PC);
+    return e.reg_read_i32(uc.ARM_REG_PC);
 }
 function pcWrite(value) {
-    return e.reg_write_int(uc.ARM_REG_PC, value);
+    return e.reg_write_i32(uc.ARM_REG_PC, value);
 }
 
 // Customization

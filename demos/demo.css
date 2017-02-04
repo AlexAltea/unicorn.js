@@ -11,6 +11,13 @@ body {
   height: calc(100% - 50px);
   font-family: 'Open Sans', sans-serif;
 }
+a {
+  color: #ACE;
+  text-decoration: none;
+}
+a:hover {
+  color: #79B;
+}
 
 /* Navigation bar */
 nav {
@@ -95,33 +102,32 @@ nav > a:focus   { outline: none; -moz-outline-style: none; }
   background-color: rgba(255,255,255, 0.1);
   border: none;
 }
-
-#assembler {
+.content > table {
   margin: 0px 10px;
   width: calc(100% - 20px);
   text-align: left;
   border-collapse: collapse;
 }
+
 .row-instruction {
   font-family: 'Inconsolata';
   font-size: 14px;
 }
 .row-instruction:hover {
-  background-color: rgba(256,256,256, 0.1);
+  background-color: rgba(255,255,255, 0.1);
 }
 
-#registers {
-  margin: 0px 10px;
-  width: calc(100% - 20px);
-  text-align: left;
-  border-collapse: collapse;
-}
 .row-register {
   font-family: 'Inconsolata';
   font-size: 14px;
 }
 .row-register:hover {
-  background-color: rgba(256,256,256, 0.1);
+  background-color: rgba(255,255,255, 0.1);
+}
+
+.row-memory {
+  font-family: 'Inconsolata';
+  font-size: 14px;
 }
 
 /* Toolbar */
@@ -130,6 +136,7 @@ nav > a:focus   { outline: none; -moz-outline-style: none; }
   padding: 4px;
   height: 20px;
   color: #EEE;
+  cursor: pointer;
   -webkit-user-select: none; /* Safari */
    -khtml-user-select: none; /* Konqueror HTML */
      -moz-user-select: none; /* Firefox */
@@ -158,12 +165,5 @@ nav > a:focus   { outline: none; -moz-outline-style: none; }
   background-color: #555;
   color: #999;
   box-shadow: none;
-  text-shadow: none;
   cursor: default;
-}
-.toolbar-button .mdi {
-  text-shadow: 1px 1px 0px rgba(0,0,0,0.5);
-}
-.toolbar-button.disabled .mdi {
-  text-shadow: none;
 }

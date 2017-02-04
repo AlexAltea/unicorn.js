@@ -12,6 +12,13 @@ function utilBytesToHex(b) {
         return utilIntToHex(b, 2);
     }).join(' ');
 }
+function utilByteToStr(n) {
+    if (n >= 0x20 && n <= 0x7E) {
+        return String.fromCharCode(n);
+    } else {
+        return '.';
+    }
+}
 
 // Classes
 /**
@@ -22,6 +29,10 @@ function Register(name, type, id) {
     this.name = name;
     this.type = type;
     this.id = id;
+
+    // Data
+    this.dataHex = "";
+    this.dataValue = "";
 
     this.node = document.createElement("tr");
     this.nodeName = document.createElement("td");
@@ -36,14 +47,25 @@ function Register(name, type, id) {
     // Events
     this.nodeHex.ondblclick = (function (reg) {
         return function() {
-            paneRegisters.update();
-            var content = reg.nodeHex.innerHTML;
+            // Check if already in edit-mode
+            if ($(this).find('input').length) {
+                return;
+            }
+            paneRegisters.restore();
+            var content = this.firstChild.innerHTML;
             var input = document.createElement("input");
             input.type = "text";
             input.value = content;
-            input.style.width = (reg.nodeHex.offsetWidth - 20) + 'px';
+            input.style.width = reg.nodeHex.firstChild.offsetWidth + 'px';
+            reg.node.style.color = '#EEE';
             reg.nodeHex.innerHTML = '';
             reg.nodeHex.appendChild(input);
+            $(input).on('keyup', function (e) {
+                if (e.keyCode == 13) {
+                    reg.set(this.value);
+                    reg.update();
+                }
+            });
             input.select();
         }
     })(this);
@@ -51,19 +73,19 @@ function Register(name, type, id) {
     // Helpers
     this._update_int = function () {
         var value = e.reg_read_i32(this.id);
+        var valueStr = value.toString();
         // Set color
-        if (this.value != value) {
-            this.node.style.color = '#F86';
+        if (this.dataValue != valueStr) {
+            this.node.style.color = '#FA8';
         } else {
             this.node.style.color = '#EEE';
         }
         // Set value
-        this.value = value;
-        this.nodeValue.innerHTML = value.toString();
+        this.dataValue = value.toString();
         switch (this.type) {
-            case 'i8':  this.nodeHex.innerHTML = utilIntToHex(value, 2);
-            case 'i16': this.nodeHex.innerHTML = utilIntToHex(value, 4);
-            case 'i32': this.nodeHex.innerHTML = utilIntToHex(value, 8);
+            case 'i8':  this.dataHex = utilIntToHex(value, 2);
+            case 'i16': this.dataHex = utilIntToHex(value, 4);
+            case 'i32': this.dataHex = utilIntToHex(value, 8);
         }
     }
     this._update_float = function () {
@@ -84,6 +106,17 @@ function Register(name, type, id) {
                 this._update_float();
             case 'v128':
                 this._update_vector();
+        }
+        this.restore();
+    }
+    this.restore = function () {
+        this.nodeHex.innerHTML = '<span>'+this.dataHex+'</span>';
+        this.nodeValue.innerHTML = '<span>'+this.dataValue+'</span>';
+    }
+    this.set = function (value) {
+        switch (this.type) {
+        default:
+            e.reg_write_type(this.id, this.type, 16);
         }
     }
 
@@ -120,7 +153,7 @@ function Instruction() {
     }
     this.setAsm = function (asm) {
         this.asm = asm.trim()
-        this.nodeAsm.innerHTML = this.asm.replace(' ', '&nbsp;');
+        this.nodeAsm.innerHTML = this.asm.replace(/ /g, '&nbsp;');
         var bytes = Array.from(a.asm(this.asm));
         this.setHex(bytes);
     }
@@ -200,7 +233,15 @@ var paneAssembler = {
     },
     emuStepOut: function () {
         console.warn("Step-out unimplemented");
-    }
+    },
+    // Clipboard
+    clipCopyAsm: function () {
+        var asm = "";
+        this.instructions.forEach(function (instr) {
+            asm += instr.asm + "\n";
+        });
+        clipboard.copy(asm);
+    },
 };
 
 var paneRegisters = {
@@ -212,22 +253,60 @@ var paneRegisters = {
         regs.appendChild(reg.node);
     },
     update: function () {
-        for (var i = 0; i < this.registers.length; i++) {
-            this.registers[i].update();
-        }
+        this.registers.forEach(function (reg) {
+            reg.update();
+        });
+    },
+    restore: function () {
+        this.registers.forEach(function (reg) {
+            reg.restore();
+        });
     }
+};
+
+var paneMemory = {
+    address: 0x10000,
+    size_w: 16,
+    size_h: 10,
+
+    update: function () {
+        var memory = $('#memory');
+        var buffer = e.mem_read(this.address, this.size_w * this.size_h);
+        memory.slice(1).remove();
+        for (var y = 0; y < this.size_h; y++) {
+            var code = '<tr class="row-memory">';
+            // Address
+            code += '<td>'
+            code += utilIntToHex(this.address + y*this.size_h, 8);
+            code += '</td>'
+            // Bytes
+            code += '<td>'
+            for (var x = 0; x < this.size_w; x++) {
+                code += utilIntToHex(buffer[y*this.size_h + x], 2) + ' ';
+            }
+            code += '</td>'
+            // ASCII
+            code += '<td>'
+            for (var x = 0; x < this.size_w; x++) {
+                code += utilByteToStr(buffer[y*this.size_h + x]);
+            }
+            code += '</td>'
+            code += '</tr>'
+            memory.append(code);
+        }
+    },
 };
 
 
 $(document).ready(function () {
-    Split(['#pane-l', '#pane-r'], {
+    Split(['#pane-h', '#pane-l', '#pane-r'], {
         gutterSize: 7,
-        sizes: [65, 35],
+        sizes: [25, 50, 25],
         cursor: 'col-resize'
     });
     Split(['#pane-lt', '#pane-lb'], {
         direction: 'vertical',
-        sizes: [65, 35],
+        sizes: [60, 40],
         gutterSize: 7,
         cursor: 'row-resize'
     });

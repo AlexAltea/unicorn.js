@@ -31,6 +31,7 @@ paneRegisters.add(new Register('R12', 'i32', uc.ARM_REG_R12));
 paneRegisters.add(new Register('SP',  'i32', uc.ARM_REG_R13));
 paneRegisters.add(new Register('LR',  'i32', uc.ARM_REG_R14));
 paneRegisters.add(new Register('PC',  'i32', uc.ARM_REG_R15));
+paneRegisters.update();
 
 // Initialization
 paneAssembler.setAddr(0x10000);
@@ -40,4 +41,4 @@ paneAssembler.appendAsm(`
     mov  r3, #0x11
     sub  r1, r2, r3
 `);
-
+paneMemory.update();

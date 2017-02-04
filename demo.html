@@ -20,10 +20,43 @@
     <nav class="navbar" role="navigation">
       <a class="navbar-brand" href="..">Unicorn.js</a>
       <span class="navbar-sep"></span>
-      <a class="navbar-demo">Loading...</a>
+      <span class="navbar-demo">Loading...</span>
     </nav>
 
     <!-- UI -->
+    <div id="pane-h" class="split split-horizontal pane">
+      <div class="toolbar">
+        Information
+      </div>
+      <div style="padding:0px 10px;" >
+        <p>
+          Welcome to the Unicorn.js demo!
+        </p>
+        <p>
+          Modify registers by double-clicking on their value, entering the new value in hexadecimal and pressing enter.
+          Run the entire assembly snippet by pressing start.
+        </p>
+        <p>
+          Make sure you check out the other demos: <br>
+          <a role="button" href="demo.html?arch=arm">ARM</a>,
+          <a role="button" href="demo.html?arch=mips">MIPS</a>,
+          <a role="button" href="demo.html?arch=sparc">SPARC</a>,
+          <a role="button" href="demo.html?arch=x86">X86</a>.
+        </p>
+        <h2>Pending</h2>
+        <ul>
+          <li>Support for JavaScript callback on hooks, i.e. <code>uc_hook_add</code> and <code>uc_hook_del</code>.</li>
+          <li>Support for breakpoints</li>
+          <li>Fixing the memory panel and editing memory from there.</li>
+          <li>Saving editor sessions</li>
+          <li></li>
+        </ul>
+        Finally, boost my ego by clicking here:
+        <hr style="border-color:#777">
+        <iframe src="https://ghbtns.com/github-btn.html?user=AlexAltea&type=follow&count=false" frameborder="0" scrolling="0" width="132px" height="20px"></iframe>
+        <iframe src="https://ghbtns.com/github-btn.html?user=AlexAltea&repo=unicorn.js&type=star&count=true" frameborder="0" scrolling="0" width="80px" height="20px"></iframe>
+      </div>
+    </div>
     <div id="pane-l" class="split split-horizontal">
       <div id="pane-lt" class="split pane">
         <!-- Assembler -->
@@ -45,19 +78,23 @@
             <i class="mdi mdi-debug-step-out"></i>
           </div>
           <span class="toolbar-sep"></span>
-          <div class="toolbar-button" title="Copy assembly">
-            <i class="mdi mdi-content-copy"></i>
+          <div class="toolbar-button disabled" title="Set breakpoints">
+            <i class="mdi mdi-checkbox-multiple-blank-circle"></i>
           </div>
-          <div class="toolbar-button" title="Copy assembly">
-            <i class="mdi mdi-content-paste"></i>
+          <div class="toolbar-button disabled" title="Delete all breakpoints">
+            <i class="mdi mdi-checkbox-multiple-blank-circle-outline"></i>
+          </div>
+          <span class="toolbar-sep"></span>
+          <div class="toolbar-button" onclick="paneAssembler.clipCopyAsm()" title="Copy assembly">
+            <i class="mdi mdi-content-copy"></i>
           </div>
         </div>
         <div class="content">
           <table id="assembler">
             <tr>
-              <th width="15%">Address</th>
-              <th width="25%">Bytes</th>
-              <th width="60%">Assembly</th>
+              <th width="80px">Address</th>
+              <th width="150px">Bytes</th>
+              <th>Assembly</th>
             </tr>
           </table>
         </div>
@@ -65,6 +102,15 @@
       <div id="pane-lb" class="split pane">
         <div class="toolbar">
           Memory
+        </div>
+        <div class="content">
+          <table id="memory">
+            <tr>
+              <th width="80px">Address</th>
+              <th width="354px">Bytes</th>
+              <th>ASCII</th>
+            </tr>
+          </table>
         </div>
       </div>
     </div>
@@ -76,9 +122,9 @@
         <div class="content">
           <table id="registers">
             <tr style="height:0px;">
-              <th width="15%">Reg</th>
-              <th width="25%">Value</th>
-              <th width="60%">Number</th>
+              <th width="60px">Reg</th>
+              <th width="100px">Value</th>
+              <th>Number</th>
             </tr>
           </table>
         </div>
@@ -91,6 +137,7 @@
     </div>
 
     <!-- External scripts -->
+    <script src="demos/externals/clipboard.min.js"></script>
     <script src="//code.jquery.com/jquery-3.1.1.min.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/require.js/2.3.2/require.min.js"></script>
     <script src="demos/externals/split.min.js"></script>
@@ -119,23 +166,23 @@
                 'demos/externals/capstone-x86.min'],
           }
       });
-      // Get URL anchor-based parameters
-      var query = {};
-      var params = window.location.hash.substr(1);
-      params.split("&").forEach(function(part) {
-        var item = part.split("=");
-        query[item[0]] = decodeURIComponent(item[1]);
-      });
+      // Get URL parameters
+      function gup(name) {
+          url = location.href;
+          name = name.replace(/[\[]/,"\\\[").replace(/[\]]/,"\\\]");
+          var regexS = "[\\?&]"+name+"=([^&#]*)";
+          var regex = new RegExp(regexS);
+          var results = regex.exec(url);
+          return results == null ? null : results[1];
+      }
 
       // Get needed scripts from URL anchor-based parameters
       var scripts = []
-      switch (query['arch']) {
-      case 'arm':
-        requirejs(['demos/demo-arm']);
-        break;
-      case 'x86':
-        requirejs(['demos/demo-x86']);
-        break;
+      switch (gup('arch')) {
+      case 'arm':   requirejs(['demos/demo-arm']);   break;
+      case 'mips':  requirejs(['demos/demo-mips']);  break;
+      case 'sparc': requirejs(['demos/demo-sparc']); break;
+      case 'x86':   requirejs(['demos/demo-x86']);   break;
       default:
         window.location = './index.html';
       }

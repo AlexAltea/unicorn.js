@@ -1,13 +1,13 @@
 var e = new uc.Unicorn(uc.ARCH_X86, uc.MODE_32);
-var a = new ks.Keystone(ks.ARCH_X86, uc.MODE_32);
-var d = new ks.Keystone(ks.ARCH_X86, uc.MODE_32);
+var a = new ks.Keystone(ks.ARCH_X86, ks.MODE_32);
+var d = new cs.Capstone(cs.ARCH_X86, cs.MODE_32);
 
 // Instruction Pointer
 function pcRead() {
-    return e.reg_read_int(uc.X86_REG_EIP);
+    return e.reg_read_i32(uc.X86_REG_EIP);
 }
 function pcWrite(value) {
-    return e.reg_write_int(uc.X86_REG_EIP, value);
+    return e.reg_write_i32(uc.X86_REG_EIP, value);
 }
 
 // Customization
@@ -24,3 +24,16 @@ paneRegisters.add(new Register('ESP',  'i32', uc.X86_REG_ESP));
 paneRegisters.add(new Register('ESI',  'i32', uc.X86_REG_ESI));
 paneRegisters.add(new Register('EDI',  'i32', uc.X86_REG_EDI));
 paneRegisters.add(new Register('EIP',  'i32', uc.X86_REG_EIP));
+paneRegisters.update();
+
+// Initialization
+//e.reg_write_i32(uc.X86_REG_ECX, 30);
+paneAssembler.setAddr(0x10000);
+paneAssembler.appendAsm(`
+    mov   eax, 0
+    mov   edx, 1
+    mov   edx, 30
+    xadd  eax, edx
+    loop  -3
+`);
+paneMemory.update();

@@ -32,9 +32,12 @@
         <p>
           Welcome to the Unicorn.js demo!
         </p>
+        <p style="color:#AAA">
+          <b>Disclaimer</b>: This is an early proof-of-concept. <br> Bugs might (and will) occur.
         <p>
           Modify registers by double-clicking on their value, entering the new value in hexadecimal and pressing enter.
           Run the entire assembly snippet by pressing start.
+          Edit the assembly by either double-clicking on the instructions, or by pasting your own.
         </p>
         <p>
           Make sure you check out the other demos: <br>
@@ -89,8 +92,14 @@
             <i class="mdi mdi-checkbox-multiple-blank-circle-outline"></i>
           </div>
           <span class="toolbar-sep"></span>
-          <div class="toolbar-button" onclick="paneAssembler.clipCopyAsm()" title="Copy assembly">
+          <div class="toolbar-button" onclick="paneAssembler.editCopy()" title="Copy assembly">
             <i class="mdi mdi-content-copy"></i>
+          </div>
+          <div class="toolbar-button" onclick="paneAssembler.editPaste()" title="Paste assembly">
+            <i class="mdi mdi-content-paste"></i>
+          </div>
+          <div class="toolbar-button" onclick="paneAssembler.editRemove()" title="Remove assembly">
+            <i class="mdi mdi-eraser"></i>
           </div>
         </div>
         <div class="content">

@@ -1,6 +1,9 @@
 // Utils
 function utilIntToHex(n, pad) {
     pad = (typeof pad !== 'undefined') ? pad : 1;
+    if (n < 0) {
+        n += Math.pow(2,32);
+    }
     var s = Number(n).toString(16).toUpperCase();
     while (s.length < pad) {
         s = '0' + s;
@@ -131,7 +134,10 @@ function Register(name, type, id) {
  */
 function Instruction() {
     this.bytes = [];
-    this.asm = "";
+
+    // Data
+    this.dataHex = "";
+    this.dataAsm = "";
 
     this.node = document.createElement("tr");
     this.nodeAddr = document.createElement("td");
@@ -141,6 +147,30 @@ function Instruction() {
     this.node.appendChild(this.nodeAddr);
     this.node.appendChild(this.nodeHex);
     this.node.appendChild(this.nodeAsm);
+
+    // Events
+    this.nodeAsm.ondblclick = (function (instr) {
+        return function() {
+            // Check if already in edit-mode
+            if ($(this).find('input').length) {
+                return;
+            }
+            paneAssembler.restore();
+            var input = document.createElement("input");
+            input.type = "text";
+            input.value = instr.dataAsm;
+            input.style.width = '100%';
+            instr.node.style.color = '#EEE';
+            instr.nodeAsm.innerHTML = '';
+            instr.nodeAsm.appendChild(input);
+            $(input).on('keyup', function (e) {
+                if (e.keyCode == 13) {
+                    instr.setAsm(this.value);
+                }
+            });
+            input.select();
+        }
+    })(this);
 
     // Methods
     this.setAddr = function (addr) {
@@ -152,13 +182,19 @@ function Instruction() {
         } else {
             this.bytes = bytes;
         }
-        this.nodeHex.innerHTML = utilBytesToHex(bytes);
+        this.dataHex = utilBytesToHex(bytes);
+        this.restore();
     }
     this.setAsm = function (asm) {
-        this.asm = asm.trim()
-        this.nodeAsm.innerHTML = this.asm.replace(/ /g, '&nbsp;');
-        var bytes = Array.from(a.asm(this.asm));
+        this.dataAsm = asm.trim();
+        var bytes = Array.from(a.asm(this.dataAsm));
         this.setHex(bytes);
+        this.restore();
+    }
+    this.restore = function () {
+        var asm = this.dataAsm.replace(/ /g, '&nbsp;');
+        this.nodeHex.innerHTML = '<span>' + this.dataHex + '</span>';
+        this.nodeAsm.innerHTML = '<span>' + asm + '</span>';
     }
     this.length = function () {
         return this.bytes.length;
@@ -218,6 +254,11 @@ var paneAssembler = {
         }
         this.update();
     },
+    restore: function () {
+        this.instructions.forEach(function (reg) {
+            reg.restore();
+        });
+    },
     // Emulation
     emuStart: function () {
         var bytes = this.bytes();
@@ -240,13 +281,24 @@ var paneAssembler = {
         console.warn("Step-out unimplemented");
     },
     // Clipboard
-    clipCopyAsm: function () {
+    editCopy: function () {
         var asm = "";
         this.instructions.forEach(function (instr) {
             asm += instr.asm + "\n";
         });
         clipboard.copy(asm);
     },
+    editPaste: function () {
+        var asm = window.prompt("Paste assembly code here:");
+        console.log(asm)
+        if (asm) {
+            paneAssembler.appendAsm(asm);
+        }
+    },
+    editRemove: function () {
+        this.instructions = [];
+        this.update();
+    }
 };
 
 var paneRegisters = {

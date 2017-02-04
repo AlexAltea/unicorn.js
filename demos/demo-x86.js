@@ -32,7 +32,7 @@ paneAssembler.setAddr(0x10000);
 paneAssembler.appendAsm(`
     mov   eax, 0
     mov   edx, 1
-    mov   edx, 30
+    mov   ecx, 30
     xadd  eax, edx
     loop  -3
 `);

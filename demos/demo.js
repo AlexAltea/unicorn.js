@@ -62,7 +62,7 @@ function Register(name, type, id) {
             reg.nodeHex.appendChild(input);
             $(input).on('keyup', function (e) {
                 if (e.keyCode == 13) {
-                    reg.set(this.value);
+                    reg.set(parseInt(this.value, 16));
                     reg.update();
                 }
             });
@@ -83,9 +83,9 @@ function Register(name, type, id) {
         // Set value
         this.dataValue = value.toString();
         switch (this.type) {
-            case 'i8':  this.dataHex = utilIntToHex(value, 2);
-            case 'i16': this.dataHex = utilIntToHex(value, 4);
-            case 'i32': this.dataHex = utilIntToHex(value, 8);
+            case 'i8':  this.dataHex = utilIntToHex(value, 2); break;
+            case 'i16': this.dataHex = utilIntToHex(value, 4); break;
+            case 'i32': this.dataHex = utilIntToHex(value, 8); break;
         }
     }
     this._update_float = function () {
@@ -102,10 +102,13 @@ function Register(name, type, id) {
             case 'i16':
             case 'i32':
                 this._update_int();
+                break;
             case 'f32':
                 this._update_float();
+                break;
             case 'v128':
                 this._update_vector();
+                break;
         }
         this.restore();
     }
@@ -116,7 +119,7 @@ function Register(name, type, id) {
     this.set = function (value) {
         switch (this.type) {
         default:
-            e.reg_write_type(this.id, this.type, 16);
+            e.reg_write_type(this.id, this.type, value);
         }
     }
 
@@ -218,9 +221,11 @@ var paneAssembler = {
     // Emulation
     emuStart: function () {
         var bytes = this.bytes();
-        e.mem_write(this.address, bytes);
-        e.emu_start(this.address, this.address+bytes.length, 0, 0);
-        paneRegisters.update();
+        if (bytes.length > 0) {
+            e.mem_write(this.address, bytes);
+            e.emu_start(this.address, this.address+bytes.length, 0, 0);
+            paneRegisters.update();
+        }
     },
     emuPause: function () {
         console.warn("Pause unimplemented");

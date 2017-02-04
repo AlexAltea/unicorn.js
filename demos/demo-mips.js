@@ -1,5 +1,5 @@
 var e = new uc.Unicorn(uc.ARCH_MIPS, uc.MODE_MIPS32 | uc.MODE_BIG_ENDIAN);
-var a = new ks.Keystone(ks.ARCH_MIPS, ks.MODE_MIPS32 | ks.MODE_BIG_ENDIAN);
+var a = new ks.Keystone(ks.ARCH_MIPS, ks.MODE_MIPS32 | uc.MODE_BIG_ENDIAN); // TODO
 var d = new cs.Capstone(cs.ARCH_MIPS, cs.MODE_MIPS32 | cs.MODE_BIG_ENDIAN);
 
 // Instruction Pointer

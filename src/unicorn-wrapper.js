@@ -53,7 +53,8 @@ var uc = {
             // Free memory and handle return code
             MUnicorn._free(buffer_ptr);
             if (ret != uc.ERR_OK) {
-                console.error('Unicorn.js: Function uc_reg_write failed with code %d.', ret);
+                var error = 'Unicorn.js: Function uc_reg_write failed with code ' + ret + ':\n' + uc.strerror(ret);
+                throw error;
             }
         }
 
@@ -76,7 +77,8 @@ var uc = {
             }
             MUnicorn._free(buffer_ptr);
             if (ret != uc.ERR_OK) {
-                console.error('Unicorn.js: Function uc_reg_read failed with code %d.', ret);
+                var error = 'Unicorn.js: Function uc_reg_read failed with code ' + ret + ':\n' + uc.strerror(ret);
+                throw error;
             }
             return value;
         }
@@ -96,7 +98,8 @@ var uc = {
             // Free memory and handle return code
             MUnicorn._free(buffer_ptr);
             if (ret != uc.ERR_OK) {
-                console.error('Unicorn.js: Function uc_mem_write failed with code %d.', ret);
+                var error = 'Unicorn.js: Function uc_mem_write failed with code ' + ret + ':\n' + uc.strerror(ret);
+                throw error;
             }
         }
 
@@ -120,7 +123,8 @@ var uc = {
             }
             MUnicorn._free(buffer_ptr);
             if (ret != uc.ERR_OK) {
-                console.error('Unicorn.js: Function uc_mem_read failed with code %d.', ret);
+                var error = 'Unicorn.js: Function uc_mem_read failed with code ' + ret + ':\n' + uc.strerror(ret);
+                throw error;
             }
             return buffer;
         }
@@ -132,7 +136,8 @@ var uc = {
                 [handle, address, 0, size, perms]
             );
             if (ret != uc.ERR_OK) {
-                console.error('Unicorn.js: Function uc_mem_map failed with code %d.', ret);
+                var error = 'Unicorn.js: Function uc_mem_map failed with code ' + ret + ':\n' + uc.strerror(ret);
+                throw error;
             }
         }
 
@@ -143,7 +148,8 @@ var uc = {
                 [handle, address, 0, size, perms]
             );
             if (ret != uc.ERR_OK) {
-                console.error('Unicorn.js: Function uc_mem_protect failed with code %d.', ret);
+                var error = 'Unicorn.js: Function uc_mem_protect failed with code ' + ret + ':\n' + uc.strerror(ret);
+                throw error;
             }
         }
 
@@ -158,7 +164,8 @@ var uc = {
                 [handle, address, 0, size]
             );
             if (ret != uc.ERR_OK) {
-                console.error('Unicorn.js: Function uc_mem_unmap failed with code %d.', ret);
+                var error = 'Unicorn.js: Function uc_mem_unmap failed with code ' + ret + ':\n' + uc.strerror(ret);
+                throw error;
             }
         }
 
@@ -177,7 +184,8 @@ var uc = {
                 [handle, begin, 0, until, 0, timeout, 0, count]
             );
             if (ret != uc.ERR_OK) {
-                console.error('Unicorn.js: Function uc_emu_start failed with code %d.', ret);
+                var error = 'Unicorn.js: Function uc_emu_start failed with code ' + ret + ':\n' + uc.strerror(ret);
+                throw error;
             }
         }
 
@@ -185,7 +193,8 @@ var uc = {
             var handle = MUnicorn.getValue(this.handle_ptr, '*');
             var ret = MUnicorn.ccall('uc_emu_stop', 'number', ['pointer'], [handle]);
             if (ret != uc.ERR_OK) {
-                console.error('Unicorn.js: Function uc_emu_stop failed with code %d.', ret);
+                var error = 'Unicorn.js: Function uc_emu_stop failed with code ' + ret + ':\n' + uc.strerror(ret);
+                throw error;
             }
         }
 
@@ -215,7 +224,8 @@ var uc = {
             var handle = MUnicorn.getValue(this.handle_ptr, '*');
             var ret = MUnicorn.ccall('uc_close', 'number', ['pointer'], [handle]);
             if (ret != uc.ERR_OK) {
-                console.error('Unicorn.js: Function uc_close failed with code %d.', ret);
+                var error = 'Unicorn.js: Function uc_close failed with code ' + ret + ':\n' + uc.strerror(ret);
+                throw error;
             }
         }
 
@@ -245,7 +255,8 @@ var uc = {
             // Free memory and handle return code
             MUnicorn._free(value_ptr);
             if (ret != uc.ERR_OK) {
-                console.error('Unicorn.js: Function uc_reg_write failed with code %d.', ret);
+                var error = 'Unicorn.js: Function uc_reg_write failed with code ' + ret + ':\n' + uc.strerror(ret);
+                throw error;
             }
         }
         this.reg_write_i8     = function (regid, value) { this.reg_write_type(regid, 'i8', value); }
@@ -271,7 +282,8 @@ var uc = {
             var value = MUnicorn.getValue(value_ptr, type);
             MUnicorn._free(value_ptr);
             if (ret != uc.ERR_OK) {
-                console.error('Unicorn.js: Function uc_reg_read failed with code %d.', ret);
+                var error = 'Unicorn.js: Function uc_reg_read failed with code ' + ret + ':\n' + uc.strerror(ret);
+                throw error;
             }
             return value;
         }
@@ -297,7 +309,8 @@ var uc = {
             var result = MUnicorn.getValue(result_ptr, result_type);
             MUnicorn._free(result_ptr);
             if (ret != uc.ERR_OK) {
-                console.error('Unicorn.js: Function uc_query failed with code %d.', ret);
+                var error = 'Unicorn.js: Function uc_query failed with code ' + ret + ':\n' + uc.strerror(ret);
+                throw error;
             }
             return result;
         }
@@ -316,7 +329,8 @@ var uc = {
         );
         if (ret != uc.ERR_OK) {
             MUnicorn.setValue(this.handle_ptr, 0, '*');
-            console.error('Unicorn.js: Function uc_open failed with code %d.', ret);
+            var error = 'Unicorn.js: Function uc_open failed with code ' + ret + ':\n' + uc.strerror(ret);
+            throw error;
         }
     }
 };

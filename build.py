@@ -37,10 +37,32 @@ EXPORTED_FUNCTIONS = [
     '_uc_context_restore',
 ]
 
+EXPORTED_CONSTANTS = [
+    'bindings/python/unicorn/arm64_const.py',
+    'bindings/python/unicorn/arm_const.py',
+    'bindings/python/unicorn/m68k_const.py',
+    'bindings/python/unicorn/mips_const.py',
+    'bindings/python/unicorn/sparc_const.py',
+    'bindings/python/unicorn/x86_const.py',
+    'bindings/python/unicorn/unicorn_const.py',
+    'bindings/python/unicorn/arm64_const.py',
+]
+
 # Directories
 UNICORN_DIR = os.path.abspath("unicorn")
 UNICORN_QEMU_DIR = os.path.join(UNICORN_DIR, "qemu")
 ORIGINAL_QEMU_DIR = os.path.abspath("externals/qemu-2.2.1")
+
+def generateConstants():
+    out = open('src/unicorn-constants.js', 'w')
+    for path in EXPORTED_CONSTANTS:
+        path = os.path.join(UNICORN_DIR, path)
+        with open(path, 'r') as f:
+            code = f.read()
+            code = code.replace('\nUC_', '\nuc.')
+            code = code.replace('#', '//')
+        out.write(code)
+    out.close()
 
 #############
 # Utilities #
@@ -373,6 +395,7 @@ if __name__ == "__main__":
     # Compile Unicorn
     targets = sorted(sys.argv[1:])
     if os.name in ['posix']:
+        generateConstants()
         compileUnicorn(targets)
     else:
         print "Your operating system is not supported by this script:"

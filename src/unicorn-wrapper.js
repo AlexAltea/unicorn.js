@@ -33,7 +33,7 @@ var uc = {
     /**
      * Unicorn object
      */
-    Unicorn: function (arch, mode) {
+    Unicorn: function (arch, mode, handle) {
         this.arch = arch;
         this.mode = mode;
         this.handle_ptr = MUnicorn._malloc(4);
@@ -169,12 +169,57 @@ var uc = {
             }
         }
 
-        this.hook_add = function () {
-            console.error('Unicorn.js: Hooks not implemented');
+        this.hook_add = function (type, user_callback, user_data, begin, end) {
+            // Wrap callback
+            switch (type) {
+                // uc_cb_hookcode_t
+                case uc.HOOK_CODE:
+                case uc.HOOK_BLOCK:
+                    var callback = (function (e, data) {
+                        return function (handle, addr_lo, addr_hi, size, user_data) {
+                            var e = uc.Unicorn(undefined, undefined, handle);
+                            user_callback(e, addr_lo, size, data);
+                        }
+                    })(user_data);
+                    break;
+                default:
+                    throw 'Unicorn.js: Unimplemented hook type'
+            }
+            // Set hook
+            MUnicorn.Runtime.addFunction(callback);
+            var handle = MUnicorn.getValue(this.handle_ptr, '*');
+            var hook_ptr = MUnicorn._malloc(4);
+            var ret = MUnicorn.ccall('uc_hook_add', 'number',
+                ['pointer', 'pointer', 'number', 'pointer', 'pointer',
+                    'number', 'number', 'number', 'number'],
+                [handle, hook_ptr, type, callback, 0,
+                    begin, 0, end, 0]
+            );
+            if (ret != uc.ERR_OK) {
+                MUnicorn.Runtime.removeFunction(callback);
+                MUnicorn._free(hook_ptr);
+                var error = 'Unicorn.js: Function uc_mem_unmap failed with code ' + ret + ':\n' + uc.strerror(ret);
+                throw error;
+            }
+            var hook = {
+                handle: MUnicorn.getValue(hook_ptr, '*'),
+                callback: callback
+            };
+            MUnicorn._free(hook_ptr);
+            return hook
         }
 
         this.hook_del = function () {
-            console.error('Unicorn.js: Hooks not implemented');
+            var handle = MUnicorn.getValue(this.handle_ptr, '*');
+            var ret = MUnicorn.ccall('uc_hook_del', 'number',
+                ['pointer', 'pointer'],
+                [handle, hook.handle]
+            );
+            if (ret != uc.ERR_OK) {
+                var error = 'Unicorn.js: Function uc_mem_unmap failed with code ' + ret + ':\n' + uc.strerror(ret);
+                throw error;
+            }
+            MUnicorn.Runtime.removeFunction(hook.callback);
         }
 
         this.emu_start = function (begin, until, timeout, count) {
@@ -323,14 +368,18 @@ var uc = {
 
 
         // Constructor
-        var ret = MUnicorn.ccall('uc_open', 'number',
-            ['number', 'number', 'pointer'],
-            [this.arch, this.mode, this.handle_ptr]
-        );
-        if (ret != uc.ERR_OK) {
-            MUnicorn.setValue(this.handle_ptr, 0, '*');
-            var error = 'Unicorn.js: Function uc_open failed with code ' + ret + ':\n' + uc.strerror(ret);
-            throw error;
+        if (typeof handle === 'undefined') {
+            var ret = MUnicorn.ccall('uc_open', 'number',
+                ['number', 'number', 'pointer'],
+                [this.arch, this.mode, this.handle_ptr]
+            );
+            if (ret != uc.ERR_OK) {
+                MUnicorn.setValue(this.handle_ptr, 0, '*');
+                var error = 'Unicorn.js: Function uc_open failed with code ' + ret + ':\n' + uc.strerror(ret);
+                throw error;
+            }
+        } else {
+            MUnicorn.setValue(this.handle_ptr, handle, '*');
         }
     }
 };

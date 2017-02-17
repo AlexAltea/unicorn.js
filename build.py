@@ -378,6 +378,7 @@ def compileUnicorn(targets):
     cmd += ' -Os --memory-init-file 0'
     cmd += ' unicorn/libunicorn.a'
     cmd += ' -s EXPORTED_FUNCTIONS=\"[\''+ '\', \''.join(EXPORTED_FUNCTIONS) +'\']\"'
+    cmd += ' -s RESERVED_FUNCTION_POINTERS=256'
     cmd += ' -s ALLOW_MEMORY_GROWTH=1'
     cmd += ' -s MODULARIZE=1'
     cmd += ' -s EXPORT_NAME="\'MUnicorn\'"'

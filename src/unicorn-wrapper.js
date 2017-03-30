@@ -173,6 +173,21 @@ var uc = {
             var handle = MUnicorn.getValue(this.handle_ptr, '*');
             // Wrap callback
             switch (type) {
+                case uc.HOOK_INSN:
+                    var callback = (function (handle, user_data) {
+                        return function (_, _) {
+                            user_callback(handle, user_data);
+                        }
+                    })(this, user_data);
+                    break;
+                // uc_cb_hookintr_t
+                case uc.HOOK_INTR:
+                    var callback = (function (handle, user_data) {
+                        return function (_, intno, _) {
+                            user_callback(handle, intno, user_data);
+                        }
+                    })(this, user_data);
+                    break;
                 // uc_cb_hookcode_t
                 case uc.HOOK_CODE:
                 case uc.HOOK_BLOCK:
@@ -183,7 +198,33 @@ var uc = {
                     })(this, user_data);
                     break;
                 default:
-                    throw 'Unicorn.js: Unimplemented hook type'
+                    // uc_cb_hookmem_t
+                    if ((type & uc.HOOK_MEM_READ) ||
+                        (type & uc.HOOK_MEM_WRITE) ||
+                        (type & uc.HOOK_MEM_FETCH) ||
+                        (type & uc.HOOK_MEM_READ_AFTER)) {
+                        var callback = (function (handle, user_data) {
+                            return function (_, type, addr_lo, addr_hi, size, value_lo, value_hi, _) {
+                                user_callback(handle, type, addr_lo, addr_hi, size,  value_lo, value_hi, user_data);
+                            }
+                        })(this, user_data);
+                    }
+                    // uc_cb_eventmem_t
+                    if ((type & uc.HOOK_MEM_READ_UNMAPPED) ||
+                        (type & uc.HOOK_MEM_WRITE_UNMAPPED) ||
+                        (type & uc.HOOK_MEM_FETCH_UNMAPPED) ||
+                        (type & uc.HOOK_MEM_READ_PROT) ||
+                        (type & uc.HOOK_MEM_WRITE_PROT) ||
+                        (type & uc.HOOK_MEM_FETCH_PROT)) {
+                        var callback = (function (handle, user_data) {
+                            return function (_, type, addr_lo, addr_hi, size, value_lo, value_hi, _) {
+                                return user_callback(handle, type, addr_lo, addr_hi, size,  value_lo, value_hi, user_data);
+                            }
+                        })(this, user_data);
+                    }
+            }
+            if (typeof callback === 'undefined') {
+                throw 'Unicorn.js: Unimplemented hook type'
             }
             // Set hook
             var callback_ptr = MUnicorn.Runtime.addFunction(callback);

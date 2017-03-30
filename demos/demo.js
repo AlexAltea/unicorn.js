@@ -284,7 +284,7 @@ var paneAssembler = {
     editCopy: function () {
         var asm = "";
         this.instructions.forEach(function (instr) {
-            asm += instr.asm + "\n";
+            asm += instr.dataAsm + "\n";
         });
         clipboard.copy(asm);
     },

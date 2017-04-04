@@ -205,7 +205,7 @@ var uc = {
                         (type & uc.HOOK_MEM_READ_AFTER)) {
                         var callback = (function (handle, user_data) {
                             return function (_, type, addr_lo, addr_hi, size, value_lo, value_hi, _) {
-                                user_callback(handle, type, addr_lo, addr_hi, size,  value_lo, value_hi, user_data);
+                                user_callback(handle, type, addr_lo, addr_hi, size, value_lo, value_hi, user_data);
                             }
                         })(this, user_data);
                     }

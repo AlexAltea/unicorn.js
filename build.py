@@ -217,6 +217,11 @@ def patchUnicornJS():
 
         #define IS_VOID(type) CHECK(VOID_PROBE(type))
 
+        #define A1 (a1 | ((uint64_t)a2  << 32))
+        #define A2 (a3 | ((uint64_t)a4  << 32))
+        #define A3 (a5 | ((uint64_t)a6  << 32))
+        #define A4 (a7 | ((uint64_t)a8  << 32))
+        #define A5 (a9 | ((uint64_t)a10 << 32))
 
         #define GEN_ADAPTER_0_VOID(name) \
             HELPER(name)(); return 0;
@@ -230,9 +235,9 @@ def patchUnicornJS():
         }
 
         #define GEN_ADAPTER_1_VOID(name, t1) \
-            HELPER(name)((dh_ctype(t1))a1); return 0;
+            HELPER(name)((dh_ctype(t1))A1); return 0;
         #define GEN_ADAPTER_1_NONVOID(name, t1) \
-            return HELPER(name)((dh_ctype(t1))a1);
+            return HELPER(name)((dh_ctype(t1))A1);
         #define GEN_ADAPTER_1(name, ret, t1) \
         static uint32_t glue(adapter_helper_, name)( \
           uint32_t a1, uint32_t a2, uint32_t a3, uint32_t a4, uint32_t a5, \
@@ -241,9 +246,9 @@ def patchUnicornJS():
         }
 
         #define GEN_ADAPTER_2_VOID(name, t1, t2) \
-            HELPER(name)((dh_ctype(t1))a1, (dh_ctype(t2))a2); return 0;
+            HELPER(name)((dh_ctype(t1))A1, (dh_ctype(t2))A2); return 0;
         #define GEN_ADAPTER_2_NONVOID(name, t1, t2) \
-            return HELPER(name)((dh_ctype(t1))a1, (dh_ctype(t2))a2);
+            return HELPER(name)((dh_ctype(t1))A1, (dh_ctype(t2))A2);
         #define GEN_ADAPTER_2(name, ret, t1, t2) \
         static uint32_t glue(adapter_helper_, name)( \
           uint32_t a1, uint32_t a2, uint32_t a3, uint32_t a4, uint32_t a5, \
@@ -252,9 +257,9 @@ def patchUnicornJS():
         }
 
         #define GEN_ADAPTER_3_VOID(name, t1, t2, t3) \
-            HELPER(name)((dh_ctype(t1))a1, (dh_ctype(t2))a2, (dh_ctype(t3))a3); return 0;
+            HELPER(name)((dh_ctype(t1))A1, (dh_ctype(t2))A2, (dh_ctype(t3))A3); return 0;
         #define GEN_ADAPTER_3_NONVOID(name, t1, t2, t3) \
-            return HELPER(name)((dh_ctype(t1))a1, (dh_ctype(t2))a2, (dh_ctype(t3))a3);
+            return HELPER(name)((dh_ctype(t1))A1, (dh_ctype(t2))A2, (dh_ctype(t3))A3);
         #define GEN_ADAPTER_3(name, ret, t1, t2, t3) \
         static uint32_t glue(adapter_helper_, name)( \
           uint32_t a1, uint32_t a2, uint32_t a3, uint32_t a4, uint32_t a5, \
@@ -263,9 +268,9 @@ def patchUnicornJS():
         }
 
         #define GEN_ADAPTER_4_VOID(name, t1, t2, t3, t4) \
-            HELPER(name)((dh_ctype(t1))a1, (dh_ctype(t2))a2, (dh_ctype(t3))a3, (dh_ctype(t4))a4); return 0;
+            HELPER(name)((dh_ctype(t1))A1, (dh_ctype(t2))A2, (dh_ctype(t3))A3, (dh_ctype(t4))A4); return 0;
         #define GEN_ADAPTER_4_NONVOID(name, t1, t2, t3, t4) \
-            return HELPER(name)((dh_ctype(t1))a1, (dh_ctype(t2))a2, (dh_ctype(t3))a3, (dh_ctype(t4))a4);
+            return HELPER(name)((dh_ctype(t1))A1, (dh_ctype(t2))A2, (dh_ctype(t3))A3, (dh_ctype(t4))A4);
         #define GEN_ADAPTER_4(name, ret, t1, t2, t3, t4) \
         static uint32_t glue(adapter_helper_, name)( \
           uint32_t a1, uint32_t a2, uint32_t a3, uint32_t a4, uint32_t a5, \
@@ -274,9 +279,9 @@ def patchUnicornJS():
         }
 
         #define GEN_ADAPTER_5_VOID(name, t1, t2, t3, t4, t5) \
-            HELPER(name)((dh_ctype(t1))a1, (dh_ctype(t2))a2, (dh_ctype(t3))a3, (dh_ctype(t4))a4, (dh_ctype(t5))a5); return 0;
+            HELPER(name)((dh_ctype(t1))A1, (dh_ctype(t2))A2, (dh_ctype(t3))A3, (dh_ctype(t4))A4, (dh_ctype(t5))A5); return 0;
         #define GEN_ADAPTER_5_NONVOID(name, t1, t2, t3, t4, t5) \
-            return HELPER(name)((dh_ctype(t1))a1, (dh_ctype(t2))a2, (dh_ctype(t3))a3, (dh_ctype(t4))a4, (dh_ctype(t5))a5);
+            return HELPER(name)((dh_ctype(t1))A1, (dh_ctype(t2))A2, (dh_ctype(t3))A3, (dh_ctype(t4))A4, (dh_ctype(t5))A5);
         #define GEN_ADAPTER_5(name, ret, t1, t2, t3, t4, t5) \
         static uint32_t glue(adapter_helper_, name)( \
           uint32_t a1, uint32_t a2, uint32_t a3, uint32_t a4, uint32_t a5, \

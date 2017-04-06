@@ -312,9 +312,13 @@ def patchUnicornJS():
          #define DEF_HELPER_FLAGS_5(name, flags, ret, t1, t2, t3, t4, t5)        \\
          GEN_ADAPTER_5(name, ret, t1, t2, t3, t4, t5) \\""",
     })
+    replace(os.path.join(UNICORN_QEMU_DIR, "include/exec/helper-tcg.h"), {
+        "func = HELPER(NAME)":
+        "func = glue(adapter_helper_, NAME)"
+    })
     # Fix register allocation for arguments
     replace(os.path.join(UNICORN_QEMU_DIR, "tcg/tcg.c"), {
-        "int is_64bit = "
+        "int is_64bit = ":
         "int is_64bit = 1;//"
     }),
     # Fix unaligned reads

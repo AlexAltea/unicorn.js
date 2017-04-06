@@ -312,6 +312,11 @@ def patchUnicornJS():
          #define DEF_HELPER_FLAGS_5(name, flags, ret, t1, t2, t3, t4, t5)        \\
          GEN_ADAPTER_5(name, ret, t1, t2, t3, t4, t5) \\""",
     })
+    # Fix register allocation for arguments
+    replace(os.path.join(UNICORN_QEMU_DIR, "tcg/tcg.c"), {
+        "int is_64bit = "
+        "int is_64bit = 1;//"
+    }),
     # Fix unaligned reads
     replace(os.path.join(UNICORN_QEMU_DIR, "tci.c"), {
         "static tcg_target_ulong tci_read_i(uint8_t **tb_ptr)":

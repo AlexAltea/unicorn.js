@@ -171,6 +171,15 @@ var uc = {
 
         this.hook_add = function (type, user_callback, user_data, begin, end) {
             var handle = MUnicorn.getValue(this.handle_ptr, '*');
+            // Default arguments
+            if (typeof user_data === 'undefined') {
+                user_data = {}
+            }
+            if (typeof begin === 'undefined' &&
+                typeof end === 'undefined') {
+                begin = 1;
+                end = 0;
+            }
             // Wrap callback
             switch (type) {
                 case uc.HOOK_INSN:
@@ -218,7 +227,7 @@ var uc = {
                         (type & uc.HOOK_MEM_FETCH_PROT)) {
                         var callback = (function (handle, user_data) {
                             return function (_, type, addr_lo, addr_hi, size, value_lo, value_hi, _) {
-                                return user_callback(handle, type, addr_lo, addr_hi, size,  value_lo, value_hi, user_data);
+                                return user_callback(handle, type, addr_lo, addr_hi, size, value_lo, value_hi, user_data);
                             }
                         })(this, user_data);
                     }

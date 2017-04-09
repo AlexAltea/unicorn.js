@@ -171,15 +171,6 @@ var uc = {
 
         this.hook_add = function (type, user_callback, user_data, begin, end) {
             var handle = MUnicorn.getValue(this.handle_ptr, '*');
-            // Default arguments
-            if (typeof user_data === 'undefined') {
-                user_data = {}
-            }
-            if (typeof begin === 'undefined' &&
-                typeof end === 'undefined') {
-                begin = 1;
-                end = 0;
-            }
             // Wrap callback
             switch (type) {
                 case uc.HOOK_INSN:
@@ -208,13 +199,31 @@ var uc = {
                     break;
                 default:
                     // uc_cb_hookmem_t
-                    if ((type & uc.HOOK_MEM_READ) ||
-                        (type & uc.HOOK_MEM_WRITE) ||
-                        (type & uc.HOOK_MEM_FETCH) ||
+                    if ((type & uc.HOOK_MEM_READ)) {
+                        var callback = (function (handle, user_data) {
+                            return function (_, type, addr_lo, addr_hi, size, value_addr, _) {
+                                var result = user_callback(handle, type, addr_lo, addr_hi, size, user_data);
+                                var bypassed = result[0];
+                                var value_lo = result[1];
+                                var value_hi = result[2];
+                                MUnicorn.setValue(value_addr + 0, value_lo, 'i32');
+                                MUnicorn.setValue(value_addr + 4, value_hi, 'i32');
+                                return bypassed;
+                            }
+                        })(this, user_data);
+                    }
+                    if ((type & uc.HOOK_MEM_FETCH) ||
                         (type & uc.HOOK_MEM_READ_AFTER)) {
                         var callback = (function (handle, user_data) {
                             return function (_, type, addr_lo, addr_hi, size, value_lo, value_hi, _) {
                                 user_callback(handle, type, addr_lo, addr_hi, size, value_lo, value_hi, user_data);
+                            }
+                        })(this, user_data);
+                    }
+                    if ((type & uc.HOOK_MEM_WRITE)) {
+                        var callback = (function (handle, user_data) {
+                            return function (_, type, addr_lo, addr_hi, size, value_lo, value_hi, _) {
+                                return user_callback(handle, type, addr_lo, addr_hi, size, value_lo, value_hi, user_data);
                             }
                         })(this, user_data);
                     }

@@ -367,6 +367,25 @@ def patchUnicornJS():
     })
 
 
+def patchUnicornMemBypass():
+    # New callback type
+    insert(os.path.join(UNICORN_DIR, "include/unicorn/unicorn.h"),
+        "} uc_hook_type;", [
+            "typedef bool (*uc_cb_hookmemr_t)(uc_engine *uc, uc_mem_type type, uint64_t address, int size, int64_t *value, void *user_data);",
+            "typedef bool (*uc_cb_hookmemw_t)(uc_engine *uc, uc_mem_type type, uint64_t address, int size, int64_t value, void *user_data);"
+        ]
+    )
+    # Update code
+    replace(os.path.join(UNICORN_QEMU_DIR, "softmmu_template.h"), {
+        "((uc_cb_hookmem_t)hook->callback)(env->uc, UC_MEM_READ, addr, DATA_SIZE, 0, hook->user_data);":
+        "if (((uc_cb_hookmemr_t)hook->callback)(env->uc, UC_MEM_READ, addr, DATA_SIZE, &res, hook->user_data)) return res;",
+
+        "((uc_cb_hookmem_t)hook->callback)(uc, UC_MEM_WRITE, addr, DATA_SIZE, val, hook->user_data);":
+        "if (((uc_cb_hookmemw_t)hook->callback)(uc, UC_MEM_WRITE, addr, DATA_SIZE, val, hook->user_data)) return;",
+    })
+
+
+
 ############
 # Building #
 ############
@@ -375,6 +394,7 @@ def compileUnicorn(targets):
     # Patching Unicorn's QEMU fork
     patchUnicornTCI()
     patchUnicornJS()
+    patchUnicornMemBypass()
 
     # Emscripten: Make
     os.chdir('unicorn')

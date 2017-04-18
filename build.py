@@ -137,26 +137,26 @@ for d in xrange(5):
 
 PATCH_UNALIGNED_MEMACCESS = """
 #define UNALIGNED_READ16_LE(addr) ( \\
-    ((uint16_t)(*((char*)(addr) + 0)) <<  0) |  \\
-    ((uint16_t)(*((char*)(addr) + 1)) <<  8)    \\
+    ((uint16_t)(*((uint8_t*)(addr) + 0)) <<  0) |  \\
+    ((uint16_t)(*((uint8_t*)(addr) + 1)) <<  8)    \\
 )
 
 #define UNALIGNED_READ32_LE(addr) ( \\
-    ((uint32_t)(*((char*)(addr) + 0)) <<  0) |  \\
-    ((uint32_t)(*((char*)(addr) + 1)) <<  8) |  \\
-    ((uint32_t)(*((char*)(addr) + 2)) << 16) |  \\
-    ((uint32_t)(*((char*)(addr) + 3)) << 24)    \\
+    ((uint32_t)(*((uint8_t*)(addr) + 0)) <<  0) |  \\
+    ((uint32_t)(*((uint8_t*)(addr) + 1)) <<  8) |  \\
+    ((uint32_t)(*((uint8_t*)(addr) + 2)) << 16) |  \\
+    ((uint32_t)(*((uint8_t*)(addr) + 3)) << 24)    \\
 )
 
 #define UNALIGNED_READ64_LE(addr) ( \\
-    ((uint64_t)(*((char*)(addr) + 0)) <<  0) |  \\
-    ((uint64_t)(*((char*)(addr) + 1)) <<  8) |  \\
-    ((uint64_t)(*((char*)(addr) + 2)) << 16) |  \\
-    ((uint64_t)(*((char*)(addr) + 3)) << 24) |  \\
-    ((uint64_t)(*((char*)(addr) + 4)) << 32) |  \\
-    ((uint64_t)(*((char*)(addr) + 5)) << 40) |  \\
-    ((uint64_t)(*((char*)(addr) + 6)) << 48) |  \\
-    ((uint64_t)(*((char*)(addr) + 7)) << 56)    \\
+    ((uint64_t)(*((uint8_t*)(addr) + 0)) <<  0) |  \\
+    ((uint64_t)(*((uint8_t*)(addr) + 1)) <<  8) |  \\
+    ((uint64_t)(*((uint8_t*)(addr) + 2)) << 16) |  \\
+    ((uint64_t)(*((uint8_t*)(addr) + 3)) << 24) |  \\
+    ((uint64_t)(*((uint8_t*)(addr) + 4)) << 32) |  \\
+    ((uint64_t)(*((uint8_t*)(addr) + 5)) << 40) |  \\
+    ((uint64_t)(*((uint8_t*)(addr) + 6)) << 48) |  \\
+    ((uint64_t)(*((uint8_t*)(addr) + 7)) << 56)    \\
 )
 """
 

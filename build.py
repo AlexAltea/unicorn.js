@@ -99,6 +99,15 @@ def insert(path, match, strings):
     fin.close()
     fout.close()
 
+# Append strings at the end of the file
+def append(path, code):
+    pathBak = path + ".bak"
+    if os.path.exists(pathBak):
+        return
+    shutil.copy(path, pathBak)
+    with open(path, 'a') as f:
+        f.write(code)
+
 # Copy directory contents to another folder without overwriting files
 def copytree(src, dst, symlinks=False, ignore=None):
     if not os.path.exists(dst):
@@ -124,6 +133,31 @@ for d in xrange(5):
         f = f.replace('\\\\', '/')
         m = re.match(r'qemu\/([0-9A-Za-z_]+)\-softmmu.*', f)
         shutil.move(f, f[:-2] + '-' + m.group(1) + '.o')
+"""
+
+PATCH_UNALIGNED_MEMACCESS = """
+#define UNALIGNED_READ16_LE(addr) ( \
+    ((uint16_t)(*((char*)(addr) + 0)) <<  0) |  \
+    ((uint16_t)(*((char*)(addr) + 1)) <<  8)    \
+)
+
+#define UNALIGNED_READ32_LE(addr) ( \
+    ((uint32_t)(*((char*)(addr) + 0)) <<  0) |  \
+    ((uint32_t)(*((char*)(addr) + 1)) <<  8) |  \
+    ((uint32_t)(*((char*)(addr) + 2)) << 16) |  \
+    ((uint32_t)(*((char*)(addr) + 3)) << 24)    \
+)
+
+#define UNALIGNED_READ64_LE(addr) ( \
+    ((uint64_t)(*((char*)(addr) + 0)) <<  0) |  \
+    ((uint64_t)(*((char*)(addr) + 1)) <<  8) |  \
+    ((uint64_t)(*((char*)(addr) + 2)) << 16) |  \
+    ((uint64_t)(*((char*)(addr) + 3)) << 24) |  \
+    ((uint64_t)(*((char*)(addr) + 4)) << 32) |  \
+    ((uint64_t)(*((char*)(addr) + 5)) << 40) |  \
+    ((uint64_t)(*((char*)(addr) + 6)) << 48) |  \
+    ((uint64_t)(*((char*)(addr) + 7)) << 56)    \
+)
 """
 
 def patchUnicornTCI():
@@ -320,50 +354,19 @@ def patchUnicornJS():
     replace(os.path.join(UNICORN_QEMU_DIR, "tcg/tcg.c"), {
         "int is_64bit = ":
         "int is_64bit = 1;//"
-    }),
+    })
     # Fix unaligned reads
+    append(os.path.join(UNICORN_QEMU_DIR, "include/qemu-common.h"),
+        PATCH_UNALIGNED_MEMACCESS)
     replace(os.path.join(UNICORN_QEMU_DIR, "tci.c"), {
-        "static tcg_target_ulong tci_read_i(uint8_t **tb_ptr)":
-        """
-        static tcg_target_ulong tci_read_i(uint8_t **tb_ptr) {
-            tcg_target_ulong value =
-                *((*tb_ptr)+0) <<  0 |
-                *((*tb_ptr)+1) <<  8 |
-                *((*tb_ptr)+2) << 16 |
-                *((*tb_ptr)+3) << 24;
-            *tb_ptr += sizeof(value);
-            return value;
-        }
-        static tcg_target_ulong tci_read_i_old(uint8_t **tb_ptr)
-        """,
-
-        "static uint32_t tci_read_i32(uint8_t **tb_ptr)":
-        """
-        static uint32_t tci_read_i32(uint8_t **tb_ptr) {
-            uint32_t value =
-                *((*tb_ptr)+0) <<  0 |
-                *((*tb_ptr)+1) <<  8 |
-                *((*tb_ptr)+2) << 16 |
-                *((*tb_ptr)+3) << 24;
-            *tb_ptr += sizeof(value);
-            return value;
-        }
-        static uint32_t tci_read_i32_old(uint8_t **tb_ptr)
-        """,
-
-        "static int32_t tci_read_s32(uint8_t **tb_ptr)":
-        """
-        static int32_t tci_read_s32(uint8_t **tb_ptr) {
-            int32_t value =
-                *((*tb_ptr)+0) <<  0 |
-                *((*tb_ptr)+1) <<  8 |
-                *((*tb_ptr)+2) << 16 |
-                *((*tb_ptr)+3) << 24;
-            *tb_ptr += sizeof(value);
-            return value;
-        }
-        static int32_t tci_read_s32_old(uint8_t **tb_ptr)
-        """,
+        "*(tcg_target_ulong *)(*tb_ptr)":
+        "UNALIGNED_READ32_LE(*tb_ptr)",
+        "*(uint32_t *)(*tb_ptr)":
+        "UNALIGNED_READ32_LE(*tb_ptr)",
+        "*(int32_t *)(*tb_ptr)":
+        "UNALIGNED_READ32_LE(*tb_ptr)",
+        "*(uint64_t *)tb_ptr":
+        "UNALIGNED_READ64_LE(tb_ptr)",
     })
 
 

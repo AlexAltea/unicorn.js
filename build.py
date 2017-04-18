@@ -136,27 +136,27 @@ for d in xrange(5):
 """
 
 PATCH_UNALIGNED_MEMACCESS = """
-#define UNALIGNED_READ16_LE(addr) ( \
-    ((uint16_t)(*((char*)(addr) + 0)) <<  0) |  \
-    ((uint16_t)(*((char*)(addr) + 1)) <<  8)    \
+#define UNALIGNED_READ16_LE(addr) ( \\
+    ((uint16_t)(*((char*)(addr) + 0)) <<  0) |  \\
+    ((uint16_t)(*((char*)(addr) + 1)) <<  8)    \\
 )
 
-#define UNALIGNED_READ32_LE(addr) ( \
-    ((uint32_t)(*((char*)(addr) + 0)) <<  0) |  \
-    ((uint32_t)(*((char*)(addr) + 1)) <<  8) |  \
-    ((uint32_t)(*((char*)(addr) + 2)) << 16) |  \
-    ((uint32_t)(*((char*)(addr) + 3)) << 24)    \
+#define UNALIGNED_READ32_LE(addr) ( \\
+    ((uint32_t)(*((char*)(addr) + 0)) <<  0) |  \\
+    ((uint32_t)(*((char*)(addr) + 1)) <<  8) |  \\
+    ((uint32_t)(*((char*)(addr) + 2)) << 16) |  \\
+    ((uint32_t)(*((char*)(addr) + 3)) << 24)    \\
 )
 
-#define UNALIGNED_READ64_LE(addr) ( \
-    ((uint64_t)(*((char*)(addr) + 0)) <<  0) |  \
-    ((uint64_t)(*((char*)(addr) + 1)) <<  8) |  \
-    ((uint64_t)(*((char*)(addr) + 2)) << 16) |  \
-    ((uint64_t)(*((char*)(addr) + 3)) << 24) |  \
-    ((uint64_t)(*((char*)(addr) + 4)) << 32) |  \
-    ((uint64_t)(*((char*)(addr) + 5)) << 40) |  \
-    ((uint64_t)(*((char*)(addr) + 6)) << 48) |  \
-    ((uint64_t)(*((char*)(addr) + 7)) << 56)    \
+#define UNALIGNED_READ64_LE(addr) ( \\
+    ((uint64_t)(*((char*)(addr) + 0)) <<  0) |  \\
+    ((uint64_t)(*((char*)(addr) + 1)) <<  8) |  \\
+    ((uint64_t)(*((char*)(addr) + 2)) << 16) |  \\
+    ((uint64_t)(*((char*)(addr) + 3)) << 24) |  \\
+    ((uint64_t)(*((char*)(addr) + 4)) << 32) |  \\
+    ((uint64_t)(*((char*)(addr) + 5)) << 40) |  \\
+    ((uint64_t)(*((char*)(addr) + 6)) << 48) |  \\
+    ((uint64_t)(*((char*)(addr) + 7)) << 56)    \\
 )
 """
 
@@ -257,70 +257,70 @@ def patchUnicornJS():
         #define A4 (a7 | ((uint64_t)a8  << 32))
         #define A5 (a9 | ((uint64_t)a10 << 32))
 
-        #define GEN_ADAPTER_0_VOID(name) \
+        #define GEN_ADAPTER_0_VOID(name) \\
             HELPER(name)(); return 0;
-        #define GEN_ADAPTER_0_NONVOID(name) \
+        #define GEN_ADAPTER_0_NONVOID(name) \\
             return HELPER(name)();
-        #define GEN_ADAPTER_0(name, ret) \
-        static uint32_t glue(adapter_helper_, name)( \
-          uint32_t a1, uint32_t a2, uint32_t a3, uint32_t a4, uint32_t a5, \
-          uint32_t a6, uint32_t a7, uint32_t a8, uint32_t a9, uint32_t a10) { \
-            IIF(IS_VOID(ret)) (GEN_ADAPTER_0_VOID(name), GEN_ADAPTER_0_NONVOID(name)) \
+        #define GEN_ADAPTER_0(name, ret) \\
+        static uint32_t glue(adapter_helper_, name)( \\
+          uint32_t a1, uint32_t a2, uint32_t a3, uint32_t a4, uint32_t a5, \\
+          uint32_t a6, uint32_t a7, uint32_t a8, uint32_t a9, uint32_t a10) { \\
+            IIF(IS_VOID(ret)) (GEN_ADAPTER_0_VOID(name), GEN_ADAPTER_0_NONVOID(name)) \\
         }
 
-        #define GEN_ADAPTER_1_VOID(name, t1) \
+        #define GEN_ADAPTER_1_VOID(name, t1) \\
             HELPER(name)((dh_ctype(t1))A1); return 0;
-        #define GEN_ADAPTER_1_NONVOID(name, t1) \
+        #define GEN_ADAPTER_1_NONVOID(name, t1) \\
             return HELPER(name)((dh_ctype(t1))A1);
-        #define GEN_ADAPTER_1(name, ret, t1) \
-        static uint32_t glue(adapter_helper_, name)( \
-          uint32_t a1, uint32_t a2, uint32_t a3, uint32_t a4, uint32_t a5, \
-          uint32_t a6, uint32_t a7, uint32_t a8, uint32_t a9, uint32_t a10) { \
-            IIF(IS_VOID(ret)) (GEN_ADAPTER_1_VOID(name, t1), GEN_ADAPTER_1_NONVOID(name, t1)) \
+        #define GEN_ADAPTER_1(name, ret, t1) \\
+        static uint32_t glue(adapter_helper_, name)( \\
+          uint32_t a1, uint32_t a2, uint32_t a3, uint32_t a4, uint32_t a5, \\
+          uint32_t a6, uint32_t a7, uint32_t a8, uint32_t a9, uint32_t a10) { \\
+            IIF(IS_VOID(ret)) (GEN_ADAPTER_1_VOID(name, t1), GEN_ADAPTER_1_NONVOID(name, t1)) \\
         }
 
-        #define GEN_ADAPTER_2_VOID(name, t1, t2) \
+        #define GEN_ADAPTER_2_VOID(name, t1, t2) \\
             HELPER(name)((dh_ctype(t1))A1, (dh_ctype(t2))A2); return 0;
-        #define GEN_ADAPTER_2_NONVOID(name, t1, t2) \
+        #define GEN_ADAPTER_2_NONVOID(name, t1, t2) \\
             return HELPER(name)((dh_ctype(t1))A1, (dh_ctype(t2))A2);
-        #define GEN_ADAPTER_2(name, ret, t1, t2) \
-        static uint32_t glue(adapter_helper_, name)( \
-          uint32_t a1, uint32_t a2, uint32_t a3, uint32_t a4, uint32_t a5, \
-          uint32_t a6, uint32_t a7, uint32_t a8, uint32_t a9, uint32_t a10) { \
-            IIF(IS_VOID(ret)) (GEN_ADAPTER_2_VOID(name, t1, t2), GEN_ADAPTER_2_NONVOID(name, t1, t2)) \
+        #define GEN_ADAPTER_2(name, ret, t1, t2) \\
+        static uint32_t glue(adapter_helper_, name)( \\
+          uint32_t a1, uint32_t a2, uint32_t a3, uint32_t a4, uint32_t a5, \\
+          uint32_t a6, uint32_t a7, uint32_t a8, uint32_t a9, uint32_t a10) { \\
+            IIF(IS_VOID(ret)) (GEN_ADAPTER_2_VOID(name, t1, t2), GEN_ADAPTER_2_NONVOID(name, t1, t2)) \\
         }
 
-        #define GEN_ADAPTER_3_VOID(name, t1, t2, t3) \
+        #define GEN_ADAPTER_3_VOID(name, t1, t2, t3) \\
             HELPER(name)((dh_ctype(t1))A1, (dh_ctype(t2))A2, (dh_ctype(t3))A3); return 0;
-        #define GEN_ADAPTER_3_NONVOID(name, t1, t2, t3) \
+        #define GEN_ADAPTER_3_NONVOID(name, t1, t2, t3) \\
             return HELPER(name)((dh_ctype(t1))A1, (dh_ctype(t2))A2, (dh_ctype(t3))A3);
-        #define GEN_ADAPTER_3(name, ret, t1, t2, t3) \
-        static uint32_t glue(adapter_helper_, name)( \
-          uint32_t a1, uint32_t a2, uint32_t a3, uint32_t a4, uint32_t a5, \
-          uint32_t a6, uint32_t a7, uint32_t a8, uint32_t a9, uint32_t a10) { \
-            IIF(IS_VOID(ret)) (GEN_ADAPTER_3_VOID(name, t1, t2, t3), GEN_ADAPTER_3_NONVOID(name, t1, t2, t3)) \
+        #define GEN_ADAPTER_3(name, ret, t1, t2, t3) \\
+        static uint32_t glue(adapter_helper_, name)( \\
+          uint32_t a1, uint32_t a2, uint32_t a3, uint32_t a4, uint32_t a5, \\
+          uint32_t a6, uint32_t a7, uint32_t a8, uint32_t a9, uint32_t a10) { \\
+            IIF(IS_VOID(ret)) (GEN_ADAPTER_3_VOID(name, t1, t2, t3), GEN_ADAPTER_3_NONVOID(name, t1, t2, t3)) \\
         }
 
-        #define GEN_ADAPTER_4_VOID(name, t1, t2, t3, t4) \
+        #define GEN_ADAPTER_4_VOID(name, t1, t2, t3, t4) \\
             HELPER(name)((dh_ctype(t1))A1, (dh_ctype(t2))A2, (dh_ctype(t3))A3, (dh_ctype(t4))A4); return 0;
-        #define GEN_ADAPTER_4_NONVOID(name, t1, t2, t3, t4) \
+        #define GEN_ADAPTER_4_NONVOID(name, t1, t2, t3, t4) \\
             return HELPER(name)((dh_ctype(t1))A1, (dh_ctype(t2))A2, (dh_ctype(t3))A3, (dh_ctype(t4))A4);
-        #define GEN_ADAPTER_4(name, ret, t1, t2, t3, t4) \
-        static uint32_t glue(adapter_helper_, name)( \
-          uint32_t a1, uint32_t a2, uint32_t a3, uint32_t a4, uint32_t a5, \
-          uint32_t a6, uint32_t a7, uint32_t a8, uint32_t a9, uint32_t a10) { \
-            IIF(IS_VOID(ret)) (GEN_ADAPTER_4_VOID(name, t1, t2, t3, t4), GEN_ADAPTER_4_NONVOID(name, t1, t2, t3, t4)) \
+        #define GEN_ADAPTER_4(name, ret, t1, t2, t3, t4) \\
+        static uint32_t glue(adapter_helper_, name)( \\
+          uint32_t a1, uint32_t a2, uint32_t a3, uint32_t a4, uint32_t a5, \\
+          uint32_t a6, uint32_t a7, uint32_t a8, uint32_t a9, uint32_t a10) { \\
+            IIF(IS_VOID(ret)) (GEN_ADAPTER_4_VOID(name, t1, t2, t3, t4), GEN_ADAPTER_4_NONVOID(name, t1, t2, t3, t4)) \\
         }
 
-        #define GEN_ADAPTER_5_VOID(name, t1, t2, t3, t4, t5) \
+        #define GEN_ADAPTER_5_VOID(name, t1, t2, t3, t4, t5) \\
             HELPER(name)((dh_ctype(t1))A1, (dh_ctype(t2))A2, (dh_ctype(t3))A3, (dh_ctype(t4))A4, (dh_ctype(t5))A5); return 0;
-        #define GEN_ADAPTER_5_NONVOID(name, t1, t2, t3, t4, t5) \
+        #define GEN_ADAPTER_5_NONVOID(name, t1, t2, t3, t4, t5) \\
             return HELPER(name)((dh_ctype(t1))A1, (dh_ctype(t2))A2, (dh_ctype(t3))A3, (dh_ctype(t4))A4, (dh_ctype(t5))A5);
-        #define GEN_ADAPTER_5(name, ret, t1, t2, t3, t4, t5) \
-        static uint32_t glue(adapter_helper_, name)( \
-          uint32_t a1, uint32_t a2, uint32_t a3, uint32_t a4, uint32_t a5, \
-          uint32_t a6, uint32_t a7, uint32_t a8, uint32_t a9, uint32_t a10) { \
-            IIF(IS_VOID(ret)) (GEN_ADAPTER_5_VOID(name, t1, t2, t3, t4, t5), GEN_ADAPTER_5_NONVOID(name, t1, t2, t3, t4, t5)) \
+        #define GEN_ADAPTER_5(name, ret, t1, t2, t3, t4, t5) \\
+        static uint32_t glue(adapter_helper_, name)( \\
+          uint32_t a1, uint32_t a2, uint32_t a3, uint32_t a4, uint32_t a5, \\
+          uint32_t a6, uint32_t a7, uint32_t a8, uint32_t a9, uint32_t a10) { \\
+            IIF(IS_VOID(ret)) (GEN_ADAPTER_5_VOID(name, t1, t2, t3, t4, t5), GEN_ADAPTER_5_NONVOID(name, t1, t2, t3, t4, t5)) \\
         }
         """,
 

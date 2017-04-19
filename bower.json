@@ -1,6 +1,6 @@
 {
   "name": "unicornjs",
-  "version": "0.9.0",
+  "version": "1.0.0",
   "description": "Unicorn CPU emulator framework port for JavaScript",
   "homepage": "http://alexaltea.github.io/unicorn.js/",
   "authors": [

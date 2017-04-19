@@ -182,6 +182,7 @@ PATCH_HELPER_ADAPTER_GEN = """
 #define CHECK(...) CHECK_N(__VA_ARGS__, 0)
 #define CHECK_N(x, n, ...) n
 
+// Void type detection
 #define VOID_TYPE_void ()
 #define VOID_TYPE_noreturn ()
 #define VOID_PROBE(type)            VOID_PROBE_PROXY(VOID_TYPE_##type)
@@ -189,6 +190,27 @@ PATCH_HELPER_ADAPTER_GEN = """
 #define VOID_PROBE_PRIMITIVE(x)     VOID_PROBE_COMBINE_ x
 #define VOID_PROBE_COMBINE_(...)    PROBE(~)
 #define IS_VOID(type)               CHECK(VOID_PROBE(type))
+
+// Global helper detection
+#define GLOB_NAME_uc_tracecode ()
+#define GLOB_NAME_div_i32 ()
+#define GLOB_NAME_rem_i32 ()
+#define GLOB_NAME_divu_i32 ()
+#define GLOB_NAME_remu_i32 ()
+#define GLOB_NAME_div_i64 ()
+#define GLOB_NAME_rem_i64 ()
+#define GLOB_NAME_divu_i64 ()
+#define GLOB_NAME_remu_i64 ()
+#define GLOB_NAME_shl_i64 ()
+#define GLOB_NAME_shr_i64 ()
+#define GLOB_NAME_sar_i64 ()
+#define GLOB_NAME_mulsh_i64 ()
+#define GLOB_NAME_muluh_i64 ()
+#define GLOB_PROBE(name)            GLOB_PROBE_PROXY(GLOB_NAME_##name)
+#define GLOB_PROBE_PROXY(...)       GLOB_PROBE_PRIMITIVE(__VA_ARGS__)
+#define GLOB_PROBE_PRIMITIVE(x)     GLOB_PROBE_COMBINE_ x
+#define GLOB_PROBE_COMBINE_(...)    PROBE(~)
+#define IS_GLOB(name)               CHECK(GLOB_PROBE(name))
 
 // Arguments
 #define A1 (a1 | ((uint64_t)a2  << 32))
@@ -205,7 +227,7 @@ PATCH_HELPER_ADAPTER_GEN = """
     HELPER(name)(); return 0;
 #define GEN_ADAPTER_0_NONVOID(name) \\
     return HELPER(name)();
-#define GEN_ADAPTER_0(name, ret) \\
+#define GEN_ADAPTER_0_DEFINE(name, ret) \\
 uint32_t glue(adapter_helper_, name)(GEN_ADAPTER_ARGS) { \\
     IIF(IS_VOID(ret)) (GEN_ADAPTER_0_VOID(name), GEN_ADAPTER_0_NONVOID(name)) \\
 }
@@ -214,7 +236,7 @@ uint32_t glue(adapter_helper_, name)(GEN_ADAPTER_ARGS) { \\
     HELPER(name)((dh_ctype(t1))A1); return 0;
 #define GEN_ADAPTER_1_NONVOID(name, t1) \\
     return HELPER(name)((dh_ctype(t1))A1);
-#define GEN_ADAPTER_1(name, ret, t1) \\
+#define GEN_ADAPTER_1_DEFINE(name, ret, t1) \\
 uint32_t glue(adapter_helper_, name)(GEN_ADAPTER_ARGS) { \\
     IIF(IS_VOID(ret)) (GEN_ADAPTER_1_VOID(name, t1), GEN_ADAPTER_1_NONVOID(name, t1)) \\
 }
@@ -223,7 +245,7 @@ uint32_t glue(adapter_helper_, name)(GEN_ADAPTER_ARGS) { \\
     HELPER(name)((dh_ctype(t1))A1, (dh_ctype(t2))A2); return 0;
 #define GEN_ADAPTER_2_NONVOID(name, t1, t2) \\
     return HELPER(name)((dh_ctype(t1))A1, (dh_ctype(t2))A2);
-#define GEN_ADAPTER_2(name, ret, t1, t2) \\
+#define GEN_ADAPTER_2_DEFINE(name, ret, t1, t2) \\
 uint32_t glue(adapter_helper_, name)(GEN_ADAPTER_ARGS) { \\
     IIF(IS_VOID(ret)) (GEN_ADAPTER_2_VOID(name, t1, t2), GEN_ADAPTER_2_NONVOID(name, t1, t2)) \\
 }
@@ -232,7 +254,7 @@ uint32_t glue(adapter_helper_, name)(GEN_ADAPTER_ARGS) { \\
     HELPER(name)((dh_ctype(t1))A1, (dh_ctype(t2))A2, (dh_ctype(t3))A3); return 0;
 #define GEN_ADAPTER_3_NONVOID(name, t1, t2, t3) \\
     return HELPER(name)((dh_ctype(t1))A1, (dh_ctype(t2))A2, (dh_ctype(t3))A3);
-#define GEN_ADAPTER_3(name, ret, t1, t2, t3) \\
+#define GEN_ADAPTER_3_DEFINE(name, ret, t1, t2, t3) \\
 uint32_t glue(adapter_helper_, name)(GEN_ADAPTER_ARGS) { \\
     IIF(IS_VOID(ret)) (GEN_ADAPTER_3_VOID(name, t1, t2, t3), GEN_ADAPTER_3_NONVOID(name, t1, t2, t3)) \\
 }
@@ -241,7 +263,7 @@ uint32_t glue(adapter_helper_, name)(GEN_ADAPTER_ARGS) { \\
     HELPER(name)((dh_ctype(t1))A1, (dh_ctype(t2))A2, (dh_ctype(t3))A3, (dh_ctype(t4))A4); return 0;
 #define GEN_ADAPTER_4_NONVOID(name, t1, t2, t3, t4) \\
     return HELPER(name)((dh_ctype(t1))A1, (dh_ctype(t2))A2, (dh_ctype(t3))A3, (dh_ctype(t4))A4);
-#define GEN_ADAPTER_4(name, ret, t1, t2, t3, t4) \\
+#define GEN_ADAPTER_4_DEFINE(name, ret, t1, t2, t3, t4) \\
 uint32_t glue(adapter_helper_, name)(GEN_ADAPTER_ARGS) { \\
     IIF(IS_VOID(ret)) (GEN_ADAPTER_4_VOID(name, t1, t2, t3, t4), GEN_ADAPTER_4_NONVOID(name, t1, t2, t3, t4)) \\
 }
@@ -250,10 +272,33 @@ uint32_t glue(adapter_helper_, name)(GEN_ADAPTER_ARGS) { \\
     HELPER(name)((dh_ctype(t1))A1, (dh_ctype(t2))A2, (dh_ctype(t3))A3, (dh_ctype(t4))A4, (dh_ctype(t5))A5); return 0;
 #define GEN_ADAPTER_5_NONVOID(name, t1, t2, t3, t4, t5) \\
     return HELPER(name)((dh_ctype(t1))A1, (dh_ctype(t2))A2, (dh_ctype(t3))A3, (dh_ctype(t4))A4, (dh_ctype(t5))A5);
-#define GEN_ADAPTER_5(name, ret, t1, t2, t3, t4, t5) \\
+#define GEN_ADAPTER_5_DEFINE(name, ret, t1, t2, t3, t4, t5) \\
 uint32_t glue(adapter_helper_, name)(GEN_ADAPTER_ARGS) { \\
     IIF(IS_VOID(ret)) (GEN_ADAPTER_5_VOID(name, t1, t2, t3, t4, t5), GEN_ADAPTER_5_NONVOID(name, t1, t2, t3, t4, t5)) \\
 }
+
+#define GEN_ADATER_BLANK
+#ifdef GEN_ADATER_DEFINE
+#define GEN_ADAPTER_0(name, ret) \\
+    IIF(IS_GLOB(name)) (GEN_ADATER_BLANK, GEN_ADAPTER_0_DEFINE(name, ret))
+#define GEN_ADAPTER_1(name, ret, t1) \\
+    IIF(IS_GLOB(name)) (GEN_ADATER_BLANK, GEN_ADAPTER_1_DEFINE(name, ret, t1))
+#define GEN_ADAPTER_2(name, ret, t1, t2) \\
+    IIF(IS_GLOB(name)) (GEN_ADATER_BLANK, GEN_ADAPTER_2_DEFINE(name, ret, t1, t2))
+#define GEN_ADAPTER_3(name, ret, t1, t2, t3) \\
+    IIF(IS_GLOB(name)) (GEN_ADATER_BLANK, GEN_ADAPTER_3_DEFINE(name, ret, t1, t2, t3))
+#define GEN_ADAPTER_4(name, ret, t1, t2, t3, t4) \\
+    IIF(IS_GLOB(name)) (GEN_ADATER_BLANK, GEN_ADAPTER_4_DEFINE(name, ret, t1, t2, t3, t4))
+#define GEN_ADAPTER_5(name, ret, t1, t2, t3, t4, t5) \\
+    IIF(IS_GLOB(name)) (GEN_ADATER_BLANK, GEN_ADAPTER_5_DEFINE(name, ret, t1, t2, t3, t4, t5))
+#else
+#define GEN_ADAPTER_0(name, ret) GEN_ADATER_BLANK
+#define GEN_ADAPTER_1(name, ret, t1) GEN_ADATER_BLANK
+#define GEN_ADAPTER_2(name, ret, t1, t2) GEN_ADATER_BLANK
+#define GEN_ADAPTER_3(name, ret, t1, t2, t3) GEN_ADATER_BLANK
+#define GEN_ADAPTER_4(name, ret, t1, t2, t3, t4) GEN_ADATER_BLANK
+#define GEN_ADAPTER_5(name, ret, t1, t2, t3, t4, t5) GEN_ADATER_BLANK
+#endif
 """
 
 def patchUnicornTCI():
@@ -324,29 +369,29 @@ def patchUnicornJS():
             "(GCompareFunc) compare_func) (l1->data, l2->data)",
     })
     # Fix QEMU function pointer issues
-    replace(os.path.join(UNICORN_QEMU_DIR, "include/exec/helper-gen.h"), {
+    replace(os.path.join(UNICORN_QEMU_DIR, "include/exec/helper-proto.h"), {
         # Adapter helpers
         "#include <exec/helper-head.h>":
         "#include <exec/helper-head.h>\n" + PATCH_HELPER_ADAPTER_PROTO,
         # Declare adapters
         "#define DEF_HELPER_FLAGS_0(name, flags, ret) \\":"""
          #define DEF_HELPER_FLAGS_0(name, flags, ret) \\
-         GEN_ADAPTER_DECLARE(name)""",
+         GEN_ADAPTER_DECLARE(name) \\""",
         "#define DEF_HELPER_FLAGS_1(name, flags, ret, t1) \\":"""
          #define DEF_HELPER_FLAGS_1(name, flags, ret, t1) \\
-         GEN_ADAPTER_DECLARE(name)""",
+         GEN_ADAPTER_DECLARE(name) \\""",
         "#define DEF_HELPER_FLAGS_2(name, flags, ret, t1, t2) \\":"""
          #define DEF_HELPER_FLAGS_2(name, flags, ret, t1, t2) \\
-         GEN_ADAPTER_DECLARE(name)""",
+         GEN_ADAPTER_DECLARE(name) \\""",
         "#define DEF_HELPER_FLAGS_3(name, flags, ret, t1, t2, t3) \\":"""
-         #define DEF_HELPER_FLAGS_3(name, flags, ret, t1, t2, t3,) \\
-         GEN_ADAPTER_DECLARE(name)""",
+         #define DEF_HELPER_FLAGS_3(name, flags, ret, t1, t2, t3) \\
+         GEN_ADAPTER_DECLARE(name) \\""",
         "#define DEF_HELPER_FLAGS_4(name, flags, ret, t1, t2, t3, t4) \\":"""
          #define DEF_HELPER_FLAGS_4(name, flags, ret, t1, t2, t3, t4) \\
-         GEN_ADAPTER_DECLARE(name)""",
+         GEN_ADAPTER_DECLARE(name) \\""",
         "#define DEF_HELPER_FLAGS_5(name, flags, ret, t1, t2, t3, t4, t5) \\":"""
          #define DEF_HELPER_FLAGS_5(name, flags, ret, t1, t2, t3, t4, t5) \\
-         GEN_ADAPTER_DECLARE(name)""",
+         GEN_ADAPTER_DECLARE(name) \\""",
     })
     replace(os.path.join(UNICORN_QEMU_DIR, "include/exec/helper-gen.h"), {
         # Adapter helpers
@@ -375,9 +420,37 @@ def patchUnicornJS():
          #define DEF_HELPER_FLAGS_5(name, flags, ret, t1, t2, t3, t4, t5)        \\
          GEN_ADAPTER_5(name, ret, t1, t2, t3, t4, t5) \\""",
     })
+    replace(os.path.join(UNICORN_QEMU_DIR, "tcg-runtime.c"), {
+        # Adapter helpers
+        '#include "exec/helper-head.h"':
+        '#include "exec/helper-head.h"\n' +
+        PATCH_HELPER_ADAPTER_GEN,
+        # Add uc_tracecode to globals
+        '#include "tcg-runtime.h"':"""
+        #undef DEF_HELPER_FLAGS_2
+        #define DEF_HELPER_FLAGS_2(name, flags, ret, t1, t2) \\
+            dh_ctype(ret) HELPER(name) (dh_ctype(t1), dh_ctype(t2)); \\
+            uint32_t glue(adapter_helper_, name)(GEN_ADAPTER_ARGS); \\
+            GEN_ADAPTER_2_DEFINE(name, ret, t1, t2)
+        #define DEF_HELPER_FLAGS_4(name, flags, ret, t1, t2, t3, t4) \\
+            dh_ctype(ret) HELPER(name) (dh_ctype(t1), dh_ctype(t2), dh_ctype(t3), dh_ctype(t4)); \\
+            uint32_t glue(adapter_helper_, name)(GEN_ADAPTER_ARGS); \\
+            GEN_ADAPTER_4_DEFINE(name, ret, t1, t2, t3, t4)
+        DEF_HELPER_4(uc_tracecode, void, i32, i32, ptr, i64)
+        #include "tcg-runtime.h"
+        """,
+    })
     replace(os.path.join(UNICORN_QEMU_DIR, "include/exec/helper-tcg.h"), {
         "func = HELPER(NAME)":
         "func = glue(adapter_helper_, NAME)"
+    })
+    os.remove(os.path.join(UNICORN_QEMU_DIR, "header_gen.py.bak"))
+    replace(os.path.join(UNICORN_QEMU_DIR, "header_gen.py"), {
+        '       print("#define %s %s_%s" %(s, s, arch))':
+        '       print("#define %s %s_%s" %(s, s, arch))\n'
+        '       if s.startswith("helper_"):\n'
+        '           s = "adapter_" + s\n'
+        '           print("#define %s %s_%s" %(s, s, arch))',
     })
     # Fix register allocation for arguments
     replace(os.path.join(UNICORN_QEMU_DIR, "tcg/tcg.c"), {

@@ -4,6 +4,7 @@
 # This scripts compiles the original Unicorn framework to JavaScript
 
 import os
+import glob
 import shutil
 import stat
 import sys
@@ -107,6 +108,19 @@ def append(path, code):
     shutil.copy(path, pathBak)
     with open(path, 'a') as f:
         f.write(code)
+
+# Prepend strings at the beginning of the file
+def prepend(path, code):
+    pathBak = path + ".bak"
+    if os.path.exists(pathBak):
+        return
+    shutil.move(path, pathBak)
+    fin = open(pathBak, 'r')
+    fout = open(path, 'w')
+    fout.write(code)
+    fout.write(fin.read())
+    fout.close()
+    fin.close()
 
 # Copy directory contents to another folder without overwriting files
 def copytree(src, dst, symlinks=False, ignore=None):
@@ -277,27 +291,27 @@ uint32_t glue(adapter_helper_, name)(GEN_ADAPTER_ARGS) { \\
     IIF(IS_VOID(ret)) (GEN_ADAPTER_5_VOID(name, t1, t2, t3, t4, t5), GEN_ADAPTER_5_NONVOID(name, t1, t2, t3, t4, t5)) \\
 }
 
-#define GEN_ADATER_BLANK
-#ifdef GEN_ADATER_DEFINE
+#define GEN_ADAPTER_BLANK
+#ifdef GEN_ADAPTER_DEFINE
 #define GEN_ADAPTER_0(name, ret) \\
-    IIF(IS_GLOB(name)) (GEN_ADATER_BLANK, GEN_ADAPTER_0_DEFINE(name, ret))
+    IIF(IS_GLOB(name)) (GEN_ADAPTER_BLANK, GEN_ADAPTER_0_DEFINE(name, ret))
 #define GEN_ADAPTER_1(name, ret, t1) \\
-    IIF(IS_GLOB(name)) (GEN_ADATER_BLANK, GEN_ADAPTER_1_DEFINE(name, ret, t1))
+    IIF(IS_GLOB(name)) (GEN_ADAPTER_BLANK, GEN_ADAPTER_1_DEFINE(name, ret, t1))
 #define GEN_ADAPTER_2(name, ret, t1, t2) \\
-    IIF(IS_GLOB(name)) (GEN_ADATER_BLANK, GEN_ADAPTER_2_DEFINE(name, ret, t1, t2))
+    IIF(IS_GLOB(name)) (GEN_ADAPTER_BLANK, GEN_ADAPTER_2_DEFINE(name, ret, t1, t2))
 #define GEN_ADAPTER_3(name, ret, t1, t2, t3) \\
-    IIF(IS_GLOB(name)) (GEN_ADATER_BLANK, GEN_ADAPTER_3_DEFINE(name, ret, t1, t2, t3))
+    IIF(IS_GLOB(name)) (GEN_ADAPTER_BLANK, GEN_ADAPTER_3_DEFINE(name, ret, t1, t2, t3))
 #define GEN_ADAPTER_4(name, ret, t1, t2, t3, t4) \\
-    IIF(IS_GLOB(name)) (GEN_ADATER_BLANK, GEN_ADAPTER_4_DEFINE(name, ret, t1, t2, t3, t4))
+    IIF(IS_GLOB(name)) (GEN_ADAPTER_BLANK, GEN_ADAPTER_4_DEFINE(name, ret, t1, t2, t3, t4))
 #define GEN_ADAPTER_5(name, ret, t1, t2, t3, t4, t5) \\
-    IIF(IS_GLOB(name)) (GEN_ADATER_BLANK, GEN_ADAPTER_5_DEFINE(name, ret, t1, t2, t3, t4, t5))
+    IIF(IS_GLOB(name)) (GEN_ADAPTER_BLANK, GEN_ADAPTER_5_DEFINE(name, ret, t1, t2, t3, t4, t5))
 #else
-#define GEN_ADAPTER_0(name, ret) GEN_ADATER_BLANK
-#define GEN_ADAPTER_1(name, ret, t1) GEN_ADATER_BLANK
-#define GEN_ADAPTER_2(name, ret, t1, t2) GEN_ADATER_BLANK
-#define GEN_ADAPTER_3(name, ret, t1, t2, t3) GEN_ADATER_BLANK
-#define GEN_ADAPTER_4(name, ret, t1, t2, t3, t4) GEN_ADATER_BLANK
-#define GEN_ADAPTER_5(name, ret, t1, t2, t3, t4, t5) GEN_ADATER_BLANK
+#define GEN_ADAPTER_0(name, ret) GEN_ADAPTER_BLANK
+#define GEN_ADAPTER_1(name, ret, t1) GEN_ADAPTER_BLANK
+#define GEN_ADAPTER_2(name, ret, t1, t2) GEN_ADAPTER_BLANK
+#define GEN_ADAPTER_3(name, ret, t1, t2, t3) GEN_ADAPTER_BLANK
+#define GEN_ADAPTER_4(name, ret, t1, t2, t3, t4) GEN_ADAPTER_BLANK
+#define GEN_ADAPTER_5(name, ret, t1, t2, t3, t4, t5) GEN_ADAPTER_BLANK
 #endif
 """
 
@@ -444,14 +458,24 @@ def patchUnicornJS():
         "func = HELPER(NAME)":
         "func = glue(adapter_helper_, NAME)"
     })
-    os.remove(os.path.join(UNICORN_QEMU_DIR, "header_gen.py.bak"))
-    replace(os.path.join(UNICORN_QEMU_DIR, "header_gen.py"), {
-        '       print("#define %s %s_%s" %(s, s, arch))':
-        '       print("#define %s %s_%s" %(s, s, arch))\n'
-        '       if s.startswith("helper_"):\n'
-        '           s = "adapter_" + s\n'
-        '           print("#define %s %s_%s" %(s, s, arch))',
-    })
+    # Add arch-suffixes to adapters
+    header_gen_patched = False
+    with open(os.path.join(UNICORN_QEMU_DIR, "header_gen.py"), 'r') as f:
+        if 'adapter_' in f.read():
+            header_gen_patched = True
+    if header_gen_patched == False:
+        os.remove(os.path.join(UNICORN_QEMU_DIR, "header_gen.py.bak"))
+        replace(os.path.join(UNICORN_QEMU_DIR, "header_gen.py"), {
+            '      print("#define %s %s_%s" %(s, s, arch))':
+            '      print("#define %s %s_%s" %(s, s, arch))\n'
+            '      if s.startswith("helper_"):\n'
+            '          s = "adapter_" + s\n'
+            '          print("#define %s %s_%s" %(s, s, arch))',
+        })
+    # Define adapters
+    translate_pat = os.path.join(UNICORN_QEMU_DIR, "target-*/translate.c")
+    for fpath in glob.glob(translate_pat):
+        prepend(fpath, '#define GEN_ADAPTER_DEFINE\n')
     # Fix register allocation for arguments
     replace(os.path.join(UNICORN_QEMU_DIR, "tcg/tcg.c"), {
         "int is_64bit = ":

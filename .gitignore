@@ -3,10 +3,3 @@ node_modules/
 
 # Emscripten builds
 *.out.js
-
-# Unicorn.js
-/dist/*.js
-!/dist/unicorn-arm.min.js
-!/dist/unicorn-mips.min.js
-!/dist/unicorn-sparc.min.js
-!/dist/unicorn-x86.min.js

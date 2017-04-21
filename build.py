@@ -172,6 +172,29 @@ PATCH_UNALIGNED_MEMACCESS = """
     ((uint64_t)(*((uint8_t*)(addr) + 6)) << 48) |  \\
     ((uint64_t)(*((uint8_t*)(addr) + 7)) << 56)    \\
 )
+
+#define UNALIGNED_WRITE16_LE(addr, value) { \\
+    *((uint8_t*)(addr) + 0) = ((value) >>  0) & 0xFF; \\
+    *((uint8_t*)(addr) + 1) = ((value) >>  8) & 0xFF; \\
+}
+
+#define UNALIGNED_WRITE32_LE(addr, value) { \\
+    *((uint8_t*)(addr) + 0) = ((value) >>  0) & 0xFF; \\
+    *((uint8_t*)(addr) + 1) = ((value) >>  8) & 0xFF; \\
+    *((uint8_t*)(addr) + 2) = ((value) >> 16) & 0xFF; \\
+    *((uint8_t*)(addr) + 3) = ((value) >> 24) & 0xFF; \\
+}
+
+#define UNALIGNED_WRITE64_LE(addr, value) { \\
+    *((uint8_t*)(addr) + 0) = ((value) >>  0) & 0xFF; \\
+    *((uint8_t*)(addr) + 1) = ((value) >>  8) & 0xFF; \\
+    *((uint8_t*)(addr) + 2) = ((value) >> 16) & 0xFF; \\
+    *((uint8_t*)(addr) + 3) = ((value) >> 24) & 0xFF; \\
+    *((uint8_t*)(addr) + 4) = ((value) >> 32) & 0xFF; \\
+    *((uint8_t*)(addr) + 5) = ((value) >> 40) & 0xFF; \\
+    *((uint8_t*)(addr) + 6) = ((value) >> 48) & 0xFF; \\
+    *((uint8_t*)(addr) + 7) = ((value) >> 56) & 0xFF; \\
+}
 """
 
 PATCH_HELPER_ADAPTER_PROTO = """
@@ -484,6 +507,10 @@ def patchUnicornJS():
     # Fix unaligned reads
     append(os.path.join(UNICORN_QEMU_DIR, "include/qemu-common.h"),
         PATCH_UNALIGNED_MEMACCESS)
+    replace(os.path.join(UNICORN_QEMU_DIR, "include/exec/exec-all.h"), {
+        "    *(uint32_t *)jmp_addr = addr - (jmp_addr + 4);":
+        "    UNALIGNED_WRITE32_LE(jmp_addr, addr - (jmp_addr + 4));"
+    })
     replace(os.path.join(UNICORN_QEMU_DIR, "tci.c"), {
         "*(tcg_target_ulong *)(*tb_ptr)":
         "UNALIGNED_READ32_LE(*tb_ptr)",

@@ -14,4 +14,4 @@ and specialized libraries for each of the available architectures:
 * `unicorn-sparc.min.js`
 * `unicorn-x86.min.js`
 
-Pre-compiled versions are usually available at the [releases](https://github.com/AlexAltea/unicorn.js/releases) page.
+Pre-compiled versions are available at the [releases](https://github.com/AlexAltea/unicorn.js/releases) page.

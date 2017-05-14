@@ -502,7 +502,19 @@ def patchUnicornJS():
     # Fix register allocation for arguments
     replace(os.path.join(UNICORN_QEMU_DIR, "tcg/tcg.c"), {
         "int is_64bit = ":
-        "int is_64bit = 1;//"
+        "int is_64bit = 1;//",
+        "sizemask =  info->sizemask;":"""
+         sizemask =  info->sizemask;
+
+         for (i = 0; i < nargs; i++) {
+             int is_64bit = sizemask & (1 << (i+1)*2);
+             if (!is_64bit) {
+                 TCGArg ext_arg = tcg_temp_new_i64(s);
+                 tcg_gen_ext32u_i64(s, ext_arg, args[i]);
+                 args[i] = GET_TCGV_I64(ext_arg);
+             }
+         }
+        """
     })
     # Fix unaligned reads
     append(os.path.join(UNICORN_QEMU_DIR, "include/qemu-common.h"),

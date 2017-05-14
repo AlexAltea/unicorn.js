@@ -503,8 +503,8 @@ def patchUnicornJS():
     replace(os.path.join(UNICORN_QEMU_DIR, "tcg/tcg.c"), {
         "int is_64bit = ":
         "int is_64bit = 1;//",
-        "sizemask =  info->sizemask;":"""
-         sizemask =  info->sizemask;
+        "sizemask = info->sizemask;":"""
+         sizemask = info->sizemask;
 
          for (i = 0; i < nargs; i++) {
              int is_64bit = sizemask & (1 << (i+1)*2);

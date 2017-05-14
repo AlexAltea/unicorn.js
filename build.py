@@ -503,6 +503,7 @@ def patchUnicornJS():
     replace(os.path.join(UNICORN_QEMU_DIR, "tcg/tcg.c"), {
         "int is_64bit = ":
         "int is_64bit = 1;//",
+        # Explicit casts of non-64bit arguments in tcg_gen_callN
         "sizemask = info->sizemask;":"""
          sizemask = info->sizemask;
 

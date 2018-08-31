@@ -586,15 +586,33 @@ def compileUnicorn(targets):
     os.system(cmd)
 
 
+def exit_usage():
+    print "Usage: %s <action> [<targets>...]\n" % (sys.argv[0])
+    print "List of actions:"
+    print " - patch: Patch Unicorn only"
+    print " - build: Patch Unicorn and build Unicorn.js"
+    exit(1)
+
 if __name__ == "__main__":
     # Initialize Unicorn submodule if necessary
     if not os.listdir(UNICORN_DIR):
         os.system("git submodule update --init")
     # Compile Unicorn
-    targets = sorted(sys.argv[1:])
-    if os.name in ['posix']:
-        generateConstants()
-        compileUnicorn(targets)
+    if len(sys.argv) < 2:
+        exit_usage()
+    action = sys.argv[1]
+    if action == 'patch':
+        patchUnicornTCI()
+        patchUnicornJS()
+    elif action == 'build':
+        patchUnicornTCI()
+        patchUnicornJS()
+        targets = sorted(sys.argv[2:])
+        if os.name in ['posix']:
+            generateConstants()
+            compileUnicorn(targets)
+        else:
+            print "Your operating system is not supported by this script:"
+            print "Please, use Emscripten to compile Unicorn manually to src/libunicorn.out.js"
     else:
-        print "Your operating system is not supported by this script:"
-        print "Please, use Emscripten to compile Unicorn manually to src/libunicorn.out.js"
+        exit_usage()

@@ -533,6 +533,20 @@ def patchUnicornJS():
         "UNALIGNED_READ32_LE(*tb_ptr)",
         "*(uint64_t *)tb_ptr":
         "UNALIGNED_READ64_LE(tb_ptr)",
+        # Stores
+        "*(uint16_t *)(t1 + t2) = t0":
+        "UNALIGNED_WRITE16_LE(t1 + t2, t0)",
+        "*(uint32_t *)(t1 + t2) = t0":
+        "UNALIGNED_WRITE32_LE(t1 + t2, t0)",
+        "*(uint64_t *)(t1 + t2) = t0":
+        "UNALIGNED_WRITE64_LE(t1 + t2, t0)",
+        # Loads
+        "*(uint32_t *)(t1 + t2)":
+        "UNALIGNED_READ32_LE(t1 + t2)",
+        "*(uint64_t *)(t1 + t2)":
+        "UNALIGNED_READ64_LE(t1 + t2)",
+        "*(int32_t *)(t1 + t2)":
+        "(int32_t)UNALIGNED_READ32_LE(t1 + t2)",
     })
 
 

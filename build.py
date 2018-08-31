@@ -203,7 +203,7 @@ PATCH_HELPER_ADAPTER_PROTO = """
   uint32_t a6, uint32_t a7, uint32_t a8, uint32_t a9, uint32_t a10
 
 #define GEN_ADAPTER_DECLARE(name) \\
-    uint32_t glue(adapter_helper_, name)(GEN_ADAPTER_ARGS);
+    uint64_t glue(adapter_helper_, name)(GEN_ADAPTER_ARGS);
 """
 
 PATCH_HELPER_ADAPTER_GEN = """
@@ -265,7 +265,7 @@ PATCH_HELPER_ADAPTER_GEN = """
 #define GEN_ADAPTER_0_NONVOID(name) \\
     return HELPER(name)();
 #define GEN_ADAPTER_0_DEFINE(name, ret) \\
-uint32_t glue(adapter_helper_, name)(GEN_ADAPTER_ARGS) { \\
+uint64_t glue(adapter_helper_, name)(GEN_ADAPTER_ARGS) { \\
     IIF(IS_VOID(ret)) (GEN_ADAPTER_0_VOID(name), GEN_ADAPTER_0_NONVOID(name)) \\
 }
 
@@ -274,7 +274,7 @@ uint32_t glue(adapter_helper_, name)(GEN_ADAPTER_ARGS) { \\
 #define GEN_ADAPTER_1_NONVOID(name, t1) \\
     return HELPER(name)((dh_ctype(t1))A1);
 #define GEN_ADAPTER_1_DEFINE(name, ret, t1) \\
-uint32_t glue(adapter_helper_, name)(GEN_ADAPTER_ARGS) { \\
+uint64_t glue(adapter_helper_, name)(GEN_ADAPTER_ARGS) { \\
     IIF(IS_VOID(ret)) (GEN_ADAPTER_1_VOID(name, t1), GEN_ADAPTER_1_NONVOID(name, t1)) \\
 }
 
@@ -283,7 +283,7 @@ uint32_t glue(adapter_helper_, name)(GEN_ADAPTER_ARGS) { \\
 #define GEN_ADAPTER_2_NONVOID(name, t1, t2) \\
     return HELPER(name)((dh_ctype(t1))A1, (dh_ctype(t2))A2);
 #define GEN_ADAPTER_2_DEFINE(name, ret, t1, t2) \\
-uint32_t glue(adapter_helper_, name)(GEN_ADAPTER_ARGS) { \\
+uint64_t glue(adapter_helper_, name)(GEN_ADAPTER_ARGS) { \\
     IIF(IS_VOID(ret)) (GEN_ADAPTER_2_VOID(name, t1, t2), GEN_ADAPTER_2_NONVOID(name, t1, t2)) \\
 }
 
@@ -292,7 +292,7 @@ uint32_t glue(adapter_helper_, name)(GEN_ADAPTER_ARGS) { \\
 #define GEN_ADAPTER_3_NONVOID(name, t1, t2, t3) \\
     return HELPER(name)((dh_ctype(t1))A1, (dh_ctype(t2))A2, (dh_ctype(t3))A3);
 #define GEN_ADAPTER_3_DEFINE(name, ret, t1, t2, t3) \\
-uint32_t glue(adapter_helper_, name)(GEN_ADAPTER_ARGS) { \\
+uint64_t glue(adapter_helper_, name)(GEN_ADAPTER_ARGS) { \\
     IIF(IS_VOID(ret)) (GEN_ADAPTER_3_VOID(name, t1, t2, t3), GEN_ADAPTER_3_NONVOID(name, t1, t2, t3)) \\
 }
 
@@ -301,7 +301,7 @@ uint32_t glue(adapter_helper_, name)(GEN_ADAPTER_ARGS) { \\
 #define GEN_ADAPTER_4_NONVOID(name, t1, t2, t3, t4) \\
     return HELPER(name)((dh_ctype(t1))A1, (dh_ctype(t2))A2, (dh_ctype(t3))A3, (dh_ctype(t4))A4);
 #define GEN_ADAPTER_4_DEFINE(name, ret, t1, t2, t3, t4) \\
-uint32_t glue(adapter_helper_, name)(GEN_ADAPTER_ARGS) { \\
+uint64_t glue(adapter_helper_, name)(GEN_ADAPTER_ARGS) { \\
     IIF(IS_VOID(ret)) (GEN_ADAPTER_4_VOID(name, t1, t2, t3, t4), GEN_ADAPTER_4_NONVOID(name, t1, t2, t3, t4)) \\
 }
 
@@ -310,7 +310,7 @@ uint32_t glue(adapter_helper_, name)(GEN_ADAPTER_ARGS) { \\
 #define GEN_ADAPTER_5_NONVOID(name, t1, t2, t3, t4, t5) \\
     return HELPER(name)((dh_ctype(t1))A1, (dh_ctype(t2))A2, (dh_ctype(t3))A3, (dh_ctype(t4))A4, (dh_ctype(t5))A5);
 #define GEN_ADAPTER_5_DEFINE(name, ret, t1, t2, t3, t4, t5) \\
-uint32_t glue(adapter_helper_, name)(GEN_ADAPTER_ARGS) { \\
+uint64_t glue(adapter_helper_, name)(GEN_ADAPTER_ARGS) { \\
     IIF(IS_VOID(ret)) (GEN_ADAPTER_5_VOID(name, t1, t2, t3, t4, t5), GEN_ADAPTER_5_NONVOID(name, t1, t2, t3, t4, t5)) \\
 }
 
@@ -467,11 +467,11 @@ def patchUnicornJS():
         #undef DEF_HELPER_FLAGS_2
         #define DEF_HELPER_FLAGS_2(name, flags, ret, t1, t2) \\
             dh_ctype(ret) HELPER(name) (dh_ctype(t1), dh_ctype(t2)); \\
-            uint32_t glue(adapter_helper_, name)(GEN_ADAPTER_ARGS); \\
+            uint64_t glue(adapter_helper_, name)(GEN_ADAPTER_ARGS); \\
             GEN_ADAPTER_2_DEFINE(name, ret, t1, t2)
         #define DEF_HELPER_FLAGS_4(name, flags, ret, t1, t2, t3, t4) \\
             dh_ctype(ret) HELPER(name) (dh_ctype(t1), dh_ctype(t2), dh_ctype(t3), dh_ctype(t4)); \\
-            uint32_t glue(adapter_helper_, name)(GEN_ADAPTER_ARGS); \\
+            uint64_t glue(adapter_helper_, name)(GEN_ADAPTER_ARGS); \\
             GEN_ADAPTER_4_DEFINE(name, ret, t1, t2, t3, t4)
         DEF_HELPER_4(uc_tracecode, void, i32, i32, ptr, i64)
         #include "tcg-runtime.h"

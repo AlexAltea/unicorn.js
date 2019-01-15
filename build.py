@@ -392,8 +392,8 @@ def patchUnicornJS():
     with open(os.path.join(UNICORN_DIR, name), "wt") as f:
         f.write(REPLACE_OBJECTS)
     replace(os.path.join(UNICORN_DIR, "Makefile"), {
-        "$(MAKE) -C qemu -j 4":
-        "$(MAKE) -C qemu -j 4\r\n\t@python " + name,
+        "$(MAKE) -C qemu $(SMP_MFLAGS)":
+        "$(MAKE) -C qemu $(SMP_MFLAGS)\r\n\t@python " + name,
     })
     # Replace sigsetjmp/siglongjump with setjmp/longjmp
     replace(os.path.join(UNICORN_QEMU_DIR, "cpu-exec.c"), {
@@ -571,13 +571,16 @@ def compileUnicorn(targets):
     os.chdir('..')
 
     # Compile static library to JavaScript
+    methods = ['ccall', 'getValue', 'setValue', 'addFunction', 'removeFunction', 'writeArrayToMemory']
     cmd = 'emcc'
     cmd += ' -Os --memory-init-file 0'
     cmd += ' unicorn/libunicorn.a'
     cmd += ' -s EXPORTED_FUNCTIONS=\"[\''+ '\', \''.join(EXPORTED_FUNCTIONS) +'\']\"'
+    cmd += ' -s EXTRA_EXPORTED_RUNTIME_METHODS=\"[\''+ '\', \''.join(methods) +'\']\"'
     cmd += ' -s RESERVED_FUNCTION_POINTERS=256'
     cmd += ' -s ALLOW_MEMORY_GROWTH=1'
     cmd += ' -s MODULARIZE=1'
+    cmd += ' -s WASM=0'
     cmd += ' -s EXPORT_NAME="\'MUnicorn\'"'
     if targets:
         cmd += ' -o src/libunicorn-%s.out.js' % ('-'.join(targets))

@@ -93,12 +93,15 @@ var uc = {
             var buffer_len = bytes.length;
             var buffer_ptr = MUnicorn._malloc(buffer_len);
             MUnicorn.writeArrayToMemory(bytes, buffer_ptr);
+            
+            // Convert address types
+            var [addr_lo, addr_hi] = this.__address(address);
 
             // Write to memory
             var handle = MUnicorn.getValue(this.handle_ptr, '*');
             var ret = MUnicorn.ccall('uc_mem_write', 'number',
                 ['pointer', 'number', 'number', 'pointer', 'number'],
-                [handle, address, 0, buffer_ptr, buffer_len]
+                [handle, addr_lo, addr_hi, buffer_ptr, buffer_len]
             );
             // Free memory and handle return code
             MUnicorn._free(buffer_ptr);
@@ -114,12 +117,15 @@ var uc = {
             for (var i = 0; i < size; i++) {
                 MUnicorn.setValue(buffer_ptr + i, 0, 'i8');
             }
+            
+            // Convert address types
+            var [addr_lo, addr_hi] = this.__address(address);
 
             // Read from memory
             var handle = MUnicorn.getValue(this.handle_ptr, '*');
             var ret = MUnicorn.ccall('uc_mem_read', 'number',
                 ['pointer', 'number', 'number', 'pointer', 'number'],
-                [handle, address, 0, buffer_ptr, size]
+                [handle, addr_lo, addr_hi, buffer_ptr, size]
             );
             // Get register value, free memory and handle return code
             var buffer = new Uint8Array(size);
@@ -135,10 +141,13 @@ var uc = {
         }
 
         this.mem_map = function (address, size, perms) {
+            // Convert address types
+            var [addr_lo, addr_hi] = this.__address(address);
+            
             var handle = MUnicorn.getValue(this.handle_ptr, '*');
             var ret = MUnicorn.ccall('uc_mem_map', 'number',
                 ['pointer', 'number', 'number', 'number', 'number'],
-                [handle, address, 0, size, perms]
+                [handle, addr_lo, addr_hi, size, perms]
             );
             if (ret != uc.ERR_OK) {
                 var error = 'Unicorn.js: Function uc_mem_map failed with code ' + ret + ':\n' + uc.strerror(ret);
@@ -147,10 +156,13 @@ var uc = {
         }
 
         this.mem_protect = function (address, size, perms) {
+            // Convert address types
+            var [addr_lo, addr_hi] = this.__address(address);
+            
             var handle = MUnicorn.getValue(this.handle_ptr, '*');
             var ret = MUnicorn.ccall('uc_mem_protect', 'number',
                 ['pointer', 'number', 'number', 'number', 'number'],
-                [handle, address, 0, size, perms]
+                [handle, addr_lo, addr_hi, size, perms]
             );
             if (ret != uc.ERR_OK) {
                 var error = 'Unicorn.js: Function uc_mem_protect failed with code ' + ret + ':\n' + uc.strerror(ret);
@@ -163,10 +175,13 @@ var uc = {
         }
 
         this.mem_unmap = function (address, size) {
+            // Convert address types
+            var [addr_lo, addr_hi] = this.__address(address);
+            
             var handle = MUnicorn.getValue(this.handle_ptr, '*');
             var ret = MUnicorn.ccall('uc_mem_unmap', 'number',
                 ['pointer', 'number', 'number', 'number'],
-                [handle, address, 0, size]
+                [handle, addr_lo, addr_hi, size]
             );
             if (ret != uc.ERR_OK) {
                 var error = 'Unicorn.js: Function uc_mem_unmap failed with code ' + ret + ':\n' + uc.strerror(ret);
@@ -354,6 +369,10 @@ var uc = {
                 throw error;
             }
         }
+        this.__address = function (address) {
+            var address_obj = new ElfUInt64(address);
+            return [address_obj.chunks[0] + (address_obj.chunks[1]<<16), address_obj.chunks[2] + (address_obj.chunks[3]<<16)];
+        }
         this._sizeof = function (type) {
             switch (type) {
                 case 'i8':     return 1;
@@ -373,8 +392,6 @@ var uc = {
             var value_obj = new (ElfUInt(value_size*8))(value);
             for (var i = 0; i < value_size/2; i++) {
                 MUnicorn.setValue(value_ptr + i*2, value_obj.chunks[i], 'i16');
-                console.log(value_ptr + i*2);
-                console.log(value_obj.chunks[i])
             }
             // Register write
             var handle = MUnicorn.getValue(this.handle_ptr, '*');
@@ -410,6 +427,9 @@ var uc = {
             );
             // Get register value, free memory and handle return code
             var value = MUnicorn.getValue(value_ptr, type);
+            if (type === 'i64') {
+                    value = [value, MUnicorn.getValue(value_ptr+4, 'i32')]
+            }
             // Convert integer types
             if (type.includes('i')) {
                 value = this.__integer(value, value_size*8);
@@ -441,6 +461,9 @@ var uc = {
             );
             // Get result value, free memory and handle return code
             var result = MUnicorn.getValue(result_ptr, result_type);
+            if (type === 'i64') {
+                result = [result, MUnicorn.getValue(result_ptr+4, 'i32')]
+            }
             // Convert integer types
             if (type.includes('i')) {
                 result = this.__integer(result, result_size*8);
@@ -461,14 +484,15 @@ var uc = {
         
         // Configuration
         this.get_integer_type = function () {
+            // Using ELF_INT_NUMBER as default for 32 bit backward compatibility
             if (this.integer_type == null) {
-                // Using ELF_INT_NUMBER as default for back compatibility
                 return ELF_INT_NUMBER;
             }
             return this.integer_type;
         }
 
         this.set_integer_type = function (type) {
+            // Please Use ELF_INT_STRING/ELF_INT_OBJECT for 64 bit support
             this.integer_type = type;
         }
 

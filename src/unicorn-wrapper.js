@@ -365,9 +365,11 @@ var uc = {
             var value_size = this._sizeof(type);
             var value_ptr = MUnicorn._malloc(value_size);
             // Convert integer types
-            var value_obj = new (ElfUInt(value_size))(value);
+            var value_obj = new (ElfUInt(value_size*8))(value);
             for (var i = 0; i < value_size/2; i++) {
                 MUnicorn.setValue(value_ptr + i*2, value_obj.chunks[i], 'i16');
+                console.log(value_ptr + i*2);
+                console.log(value_obj.chunks[i])
             }
             // Register write
             var handle = MUnicorn.getValue(this.handle_ptr, '*');
@@ -405,7 +407,7 @@ var uc = {
             var value = MUnicorn.getValue(value_ptr, type);
             // Convert integer types
             if (type.includes('i')) {
-                value = this.__integer(value, value_size);
+                value = this.__integer(value, value_size*8);
             }
             MUnicorn._free(value_ptr);
             if (ret != uc.ERR_OK) {
@@ -436,7 +438,7 @@ var uc = {
             var result = MUnicorn.getValue(result_ptr, result_type);
             // Convert integer types
             if (type.includes('i')) {
-                result = this.__integer(result, result_size);
+                result = this.__integer(result, result_size*8);
             }
             MUnicorn._free(result_ptr);
             if (ret != uc.ERR_OK) {

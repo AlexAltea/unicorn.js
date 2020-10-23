@@ -6,6 +6,11 @@
 // Emscripten demodularize
 var MUnicorn = new MUnicorn();
 
+// Number conversion modes
+ELF_INT_NUMBER  = 1
+ELF_INT_STRING  = 2
+ELF_INT_OBJECT  = 3
+
 var uc = {
     // Static
     version: function() {

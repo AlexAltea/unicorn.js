@@ -324,31 +324,31 @@ var uc = {
         }
 
         // Helpers
-            this.__integer = function (value, width) {
-        if (typeof value === "number") {
-            value = [value];
-        }
-        switch (this.get_integer_type()) {
-        case ELF_INT_NUMBER:
-            return value[0];
-        case ELF_INT_STRING:
-            return value
-                .map(x => x.toString(16).toUpperCase())
-                .map(x => '0'.repeat(width/4 - x.length) + x)
-                .reverse().join('');
-        case ELF_INT_OBJECT:
-            switch (width) {
-            case 8:  return new ElfUInt8(value);
-            case 16: return new ElfUInt16(value);
-            case 32: return new ElfUInt32(value);
-            case 64: return new ElfUInt64(value);
-            default: throw 'Unexpected width';
+        this.__integer = function (value, width) {
+            if (typeof value === "number") {
+                value = [value];
             }
-        default:
-            var error = 'Unimplemented integer type';
-            throw error;
+            switch (this.get_integer_type()) {
+            case ELF_INT_NUMBER:
+                return value[0];
+            case ELF_INT_STRING:
+                return value
+                    .map(x => x.toString(16).toUpperCase())
+                    .map(x => '0'.repeat(width/4 - x.length) + x)
+                    .reverse().join('');
+            case ELF_INT_OBJECT:
+                switch (width) {
+                case 8:  return new ElfUInt8(value);
+                case 16: return new ElfUInt16(value);
+                case 32: return new ElfUInt32(value);
+                case 64: return new ElfUInt64(value);
+                default: throw 'Unexpected width';
+                }
+            default:
+                var error = 'Unimplemented integer type';
+                throw error;
+            }
         }
-    }
         this._sizeof = function (type) {
             switch (type) {
                 case 'i8':     return 1;
@@ -364,7 +364,11 @@ var uc = {
             // Allocate space for the output value
             var value_size = this._sizeof(type);
             var value_ptr = MUnicorn._malloc(value_size);
-            MUnicorn.setValue(value_ptr, value, type);
+            // Convert integer types
+            var value_obj = new (ElfUInt(value_size))(value);
+            for (var i = 0; i < value_size/2; i++) {
+                MUnicorn.setValue(value_ptr + i*2, value_obj.chunks[i], 'i16');
+            }
             // Register write
             var handle = MUnicorn.getValue(this.handle_ptr, '*');
             var ret = MUnicorn.ccall('uc_reg_write', 'number',
@@ -399,6 +403,10 @@ var uc = {
             );
             // Get register value, free memory and handle return code
             var value = MUnicorn.getValue(value_ptr, type);
+            // Convert integer types
+            if (type.includes('i')) {
+                value = this.__integer(value, value_size);
+            }
             MUnicorn._free(value_ptr);
             if (ret != uc.ERR_OK) {
                 var error = 'Unicorn.js: Function uc_reg_read failed with code ' + ret + ':\n' + uc.strerror(ret);
@@ -426,6 +434,10 @@ var uc = {
             );
             // Get result value, free memory and handle return code
             var result = MUnicorn.getValue(result_ptr, result_type);
+            // Convert integer types
+            if (type.includes('i')) {
+                result = this.__integer(result, result_size);
+            }
             MUnicorn._free(result_ptr);
             if (ret != uc.ERR_OK) {
                 var error = 'Unicorn.js: Function uc_query failed with code ' + ret + ':\n' + uc.strerror(ret);
@@ -439,7 +451,19 @@ var uc = {
         this.query_i64     = function (type) { return this.query_type(type, 'i64'); }
         this.query_float   = function (type) { return this.query_type(type, 'float'); }
         this.query_double  = function (type) { return this.query_type(type, 'double'); }
+        
+        // Configuration
+        this.get_integer_type = function () {
+            if (this.integer_type == null) {
+                // Using ELF_INT_NUMBER as default for back compatibility
+                return ELF_INT_NUMBER;
+            }
+            return this.integer_type;
+        }
 
+        this.set_integer_type = function (type) {
+            this.integer_type = type;
+        }
 
         // Constructor
         var ret = MUnicorn.ccall('uc_open', 'number',

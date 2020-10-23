@@ -324,6 +324,31 @@ var uc = {
         }
 
         // Helpers
+            this.__integer = function (value, width) {
+        if (typeof value === "number") {
+            value = [value];
+        }
+        switch (this.get_integer_type()) {
+        case ELF_INT_NUMBER:
+            return value[0];
+        case ELF_INT_STRING:
+            return value
+                .map(x => x.toString(16).toUpperCase())
+                .map(x => '0'.repeat(width/4 - x.length) + x)
+                .reverse().join('');
+        case ELF_INT_OBJECT:
+            switch (width) {
+            case 8:  return new ElfUInt8(value);
+            case 16: return new ElfUInt16(value);
+            case 32: return new ElfUInt32(value);
+            case 64: return new ElfUInt64(value);
+            default: throw 'Unexpected width';
+            }
+        default:
+            var error = 'Unimplemented integer type';
+            throw error;
+        }
+    }
         this._sizeof = function (type) {
             switch (type) {
                 case 'i8':     return 1;

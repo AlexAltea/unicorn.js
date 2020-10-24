@@ -29,7 +29,7 @@ var ElfUInt = function (width) {
                         ' is beyond 53 bits integer precision, use other initialization formats for better precision'
                     );
                 }
-                if (value > Math.pow(2, this.width)-1 || value < -Math.pow(2, this.width)) {
+                if (value > Math.pow(2, this.width)-1 || value < -Math.pow(2, this.width-1)) {
                     console.warn(
                         'Libelf.js: number ' + value +
                         ' overflows ' + this.width + ' bits width, use larger width to keep higher bits'
@@ -143,6 +143,12 @@ var ElfUInt = function (width) {
             var number = 0;
             for (var i = this.chunks.length - 1; i >= 0; i--)
                 number = (number * 0x10000) + this.chunks[i];
+            if (!Number.isSafeInteger(number)) {
+                console.warn(
+                    'Libelf.js: number ' + number +
+                    ' is beyond 53 bits integer precision, use other conversion formats for better precision'
+                );
+            }
             return number;
         }
 

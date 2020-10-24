@@ -23,9 +23,26 @@ var ElfUInt = function (width) {
         } else {
             // Initialize from Number
             if (typeof value === 'number') {
+                if (!Number.isSafeInteger(value)) {
+                    console.warn(
+                        'Libelf.js: number ' + value +
+                        ' is beyond 53 bits integer precision, use other initialization formats for better precision'
+                    );
+                }
+                if (value > Math.pow(2, this.width)-1 || value < -Math.pow(2, this.width)) {
+                    console.warn(
+                        'Libelf.js: number ' + value +
+                        ' overflows ' + this.width + ' bits width, use larger width to keep higher bits'
+                    );
+                }
                 for (var i = 0; i < this.chunks.length; i++) {
-                    this.chunks[i] = value & 0xFFFF;
-                    value >>>= 16;
+                    // Apply mask on the last chunk to cast to correct width
+                    this.chunks[i] = value & (i === this.chunks.length - 1 ? this.mask : 0xFFFF);
+                    if (value < 0) {
+                        // Fix round off of bits in negative values
+                        value -= 65535
+                    }
+                    value /= 65536;
                 }
             }
             // Initialize from String
@@ -33,7 +50,8 @@ var ElfUInt = function (width) {
                 if (value.toLowerCase().startsWith("0x"))
                     value = value.slice(2);
                 for (var i = 0; i < this.chunks.length; i++) {
-                    this.chunks[i] = parseInt(value.slice(-4), 16);
+                    // Force NaN value to be 0
+                    this.chunks[i] = parseInt(value.slice(-4), 16) || 0;
                     value.slice(0, -4);
                 }
             }

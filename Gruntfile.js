@@ -24,6 +24,7 @@ module.exports = function (grunt) {
             dist: {
                 src: [
                     'src/libunicorn<%= lib.suffix %>.out.js',
+                    'src/libelf-integers.js',
                     'src/unicorn-wrapper.js',
                     'src/unicorn-constants.js',
                 ],

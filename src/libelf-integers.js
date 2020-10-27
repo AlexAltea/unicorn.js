@@ -40,9 +40,9 @@ var ElfUInt = function (width) {
                     this.chunks[i] = value & (i === this.chunks.length - 1 ? this.mask : 0xFFFF);
                     if (value < 0) {
                         // Fix round off of bits in negative values
-                        value -= 65535
+                        value -= 0xFFFF;
                     }
-                    value /= 65536;
+                    value /= 0x10000;
                 }
             }
             // Initialize from String
@@ -51,7 +51,7 @@ var ElfUInt = function (width) {
                     value = value.slice(2);
                 for (var i = 0; i < this.chunks.length; i++) {
                     // Force NaN value to be 0
-                    this.chunks[i] = parseInt(value.slice(-4), 16) || 0;
+                    this.chunks[i] = parseInt(value.slice(-4), 16) | 0;
                     value.slice(0, -4);
                 }
             }

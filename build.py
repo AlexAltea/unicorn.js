@@ -395,7 +395,7 @@ def patchUnicornJS():
         "$(MAKE) -C qemu $(SMP_MFLAGS)":
         "$(MAKE) -C qemu $(SMP_MFLAGS)\r\n\t@python " + name,
         '	./configure --cc="${CC}" --extra-cflags="$(UNICORN_CFLAGS)" --target-list="$(UNICORN_TARGETS)" ${UNICORN_QEMU_FLAGS}':
-        '	./configure --cc="${CC}" --extra-cflags="$(UNICORN_CFLAGS)" --target-list="$(UNICORN_TARGETS)" ${UNICORN_QEMU_FLAGS} --cpu=i386',
+        '	./configure --cc="${CC}" --extra-cflags="$(UNICORN_CFLAGS)" --target-list="$(UNICORN_TARGETS)" ${UNICORN_QEMU_FLAGS} --disable-stack-protector --cpu=i386',
     })
     # Replace sigsetjmp/siglongjump with setjmp/longjmp
     replace(os.path.join(UNICORN_QEMU_DIR, "cpu-exec.c"), {

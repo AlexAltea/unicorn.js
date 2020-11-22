@@ -43,6 +43,12 @@ module.exports = function (grunt) {
                 }
             }
         },
+        copy: {
+            main: {
+                src: 'src/libunicorn<%= lib.suffix %>.out.wasm',
+                dest: 'dist/unicorn<%= lib.suffix %>.out.wasm'
+            }
+        },
         watch: {
             livereload: {
                 files: [
@@ -66,12 +72,12 @@ module.exports = function (grunt) {
         if (typeof arch === 'undefined') {
             grunt.config.set('lib.suffix', '');
             grunt.task.run('exec:emscripten');
-            grunt.task.run('concat');
         } else {
             grunt.config.set('lib.suffix', '-'+arch);
             grunt.task.run('exec:emscripten:'+arch);
-            grunt.task.run('concat');
         }
+        grunt.task.run('concat');
+        grunt.task.run('copy');
     });
     grunt.registerTask('release', [
         'build',

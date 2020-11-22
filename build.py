@@ -571,7 +571,7 @@ def compileUnicorn(targets):
     os.chdir('..')
 
     # Compile static library to JavaScript
-    methods = ['ccall', 'getValue', 'setValue', 'addFunction', 'removeFunction', 'writeArrayToMemory']
+    methods = ['_malloc', 'ccall', 'getValue', 'setValue', 'addFunction', 'removeFunction', 'writeArrayToMemory']
     cmd = 'emcc'
     cmd += ' -Os --memory-init-file 0'
     cmd += ' unicorn/libunicorn.a'
@@ -580,7 +580,7 @@ def compileUnicorn(targets):
     cmd += ' -s RESERVED_FUNCTION_POINTERS=256'
     cmd += ' -s ALLOW_MEMORY_GROWTH=1'
     cmd += ' -s MODULARIZE=1'
-    cmd += ' -s WASM=0'
+    cmd += ' -s WASM=1'
     cmd += ' -s EXPORT_NAME="\'MUnicorn\'"'
     if targets:
         cmd += ' -o src/libunicorn-%s.out.js' % ('-'.join(targets))

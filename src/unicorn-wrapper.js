@@ -212,6 +212,7 @@ var uc = {
                             user_callback(handle, user_data);
                         }
                     })(this, user_data);
+                    var callback_ptr = MUnicorn.addFunction(callback, 'vii');
                     break;
                 // uc_cb_hookintr_t
                 case uc.HOOK_INTR:
@@ -220,6 +221,7 @@ var uc = {
                             user_callback(handle, intno, user_data);
                         }
                     })(this, user_data);
+                    var callback_ptr = MUnicorn.addFunction(callback, 'viii');
                     break;
                 // uc_cb_hookcode_t
                 case uc.HOOK_CODE:
@@ -229,6 +231,7 @@ var uc = {
                             user_callback(handle, addr_lo, addr_hi, size, user_data);
                         }
                     })(this, user_data);
+                    var callback_ptr = MUnicorn.addFunction(callback, 'viiii');
                     break;
                 default:
                     // uc_cb_hookmem_t
@@ -241,6 +244,7 @@ var uc = {
                                 user_callback(handle, type, addr_lo, addr_hi, size, value_lo, value_hi, user_data);
                             }
                         })(this, user_data);
+                        var callback_ptr = MUnicorn.addFunction(callback, 'viiiiiiii');
                     }
                     // uc_cb_eventmem_t
                     if ((type & uc.HOOK_MEM_READ_UNMAPPED) ||
@@ -254,13 +258,13 @@ var uc = {
                                 return user_callback(handle, type, addr_lo, addr_hi, size, value_lo, value_hi, user_data);
                             }
                         })(this, user_data);
+                        var callback_ptr = MUnicorn.addFunction(callback, 'iiiiiiiii');
                     }
             }
             if (typeof callback === 'undefined') {
                 throw 'Unicorn.js: Unimplemented hook type'
             }
             // Set hook
-            var callback_ptr = MUnicorn.addFunction(callback);
             var hook_ptr = MUnicorn._malloc(4);
             var ret = MUnicorn.ccall('uc_hook_add', 'number',
                 ['pointer', 'pointer', 'number', 'pointer', 'pointer',

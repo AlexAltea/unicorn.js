@@ -46,7 +46,7 @@ module.exports = function (grunt) {
         copy: {
             main: {
                 src: 'src/libunicorn<%= lib.suffix %>.out.wasm',
-                dest: 'dist/unicorn<%= lib.suffix %>.out.wasm'
+                dest: 'dist/libunicorn<%= lib.suffix %>.out.wasm'
             }
         },
         watch: {

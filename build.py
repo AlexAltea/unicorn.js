@@ -566,7 +566,7 @@ def compileUnicorn(targets):
         cmd = ''
         if targets:
             cmd += 'UNICORN_ARCHS="%s" ' % (' '.join(targets))
-        cmd += 'emmake make'
+        cmd += 'emmake make unicorn'
         os.system(cmd)
     os.chdir('..')
 
@@ -590,10 +590,10 @@ def compileUnicorn(targets):
 
 
 def exit_usage():
-    print "Usage: %s <action> [<targets>...]\n" % (sys.argv[0])
-    print "List of actions:"
-    print " - patch: Patch Unicorn only"
-    print " - build: Patch Unicorn and build Unicorn.js"
+    print("Usage: %s <action> [<targets>...]\n" % (sys.argv[0]))
+    print("List of actions:")
+    print(" - patch: Patch Unicorn only")
+    print(" - build: Patch Unicorn and build Unicorn.js")
     exit(1)
 
 if __name__ == "__main__":
@@ -615,7 +615,7 @@ if __name__ == "__main__":
             generateConstants()
             compileUnicorn(targets)
         else:
-            print "Your operating system is not supported by this script:"
-            print "Please, use Emscripten to compile Unicorn manually to src/libunicorn.out.js"
+            print("Your operating system is not supported by this script:")
+            print("Please, use Emscripten to compile Unicorn manually to src/libunicorn.out.js")
     else:
         exit_usage()

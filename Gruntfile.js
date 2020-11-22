@@ -13,9 +13,9 @@ module.exports = function (grunt) {
             emscripten: {
                 cmd: function (arch) {
                     if (typeof arch === 'undefined') {
-                        return 'python build.py build'
+                        return 'python3 build.py build'
                     } else {
-                        return 'python build.py build ' + arch;
+                        return 'python3 build.py build ' + arch;
                     }
                 }
             }

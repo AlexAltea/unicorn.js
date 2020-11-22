@@ -189,7 +189,7 @@ var uc = {
             }
         }
 
-        this.hook_add = function (type, user_callback, user_data, begin, end) {
+        this.hook_add = function (type, user_callback, user_data, begin, end, extra) {
             var handle = MUnicorn.getValue(this.handle_ptr, '*');
             // Default arguments
             if (typeof user_data === 'undefined') {
@@ -201,8 +201,12 @@ var uc = {
                 end = 0;
             }
             // Wrap callback
+            var extra_types = ['number'];
+            var extra_values = [extra];
             switch (type) {
                 case uc.HOOK_INSN:
+                    extra_types = ['number'];
+                    extra_values = [extra];
                     var callback = (function (handle, user_data) {
                         return function (_, _) {
                             user_callback(handle, user_data);
@@ -258,11 +262,12 @@ var uc = {
             // Set hook
             var callback_ptr = MUnicorn.Runtime.addFunction(callback);
             var hook_ptr = MUnicorn._malloc(4);
+            console.log([extra_types, extra_values])
             var ret = MUnicorn.ccall('uc_hook_add', 'number',
                 ['pointer', 'pointer', 'number', 'pointer', 'pointer',
-                    'number', 'number', 'number', 'number'],
+                    'number', 'number', 'number', 'number', 'number'],
                 [handle, hook_ptr, type, callback_ptr, 0,
-                    begin, 0, end, 0]
+                    begin, 0, end, 0, extra]
             );
             if (ret != uc.ERR_OK) {
                 MUnicorn.Runtime.removeFunction(callback_ptr);

@@ -260,9 +260,8 @@ var uc = {
                 throw 'Unicorn.js: Unimplemented hook type'
             }
             // Set hook
-            var callback_ptr = MUnicorn.Runtime.addFunction(callback);
+            var callback_ptr = MUnicorn.addFunction(callback);
             var hook_ptr = MUnicorn._malloc(4);
-            console.log([extra_types, extra_values])
             var ret = MUnicorn.ccall('uc_hook_add', 'number',
                 ['pointer', 'pointer', 'number', 'pointer', 'pointer',
                     'number', 'number', 'number', 'number', 'number'],
@@ -270,7 +269,7 @@ var uc = {
                     begin, 0, end, 0, extra]
             );
             if (ret != uc.ERR_OK) {
-                MUnicorn.Runtime.removeFunction(callback_ptr);
+                MUnicorn.removeFunction(callback_ptr);
                 MUnicorn._free(hook_ptr);
                 var error = 'Unicorn.js: Function uc_mem_unmap failed with code ' + ret + ':\n' + uc.strerror(ret);
                 throw error;
@@ -293,7 +292,7 @@ var uc = {
                 var error = 'Unicorn.js: Function uc_mem_unmap failed with code ' + ret + ':\n' + uc.strerror(ret);
                 throw error;
             }
-            MUnicorn.Runtime.removeFunction(hook.callback);
+            MUnicorn.removeFunction(hook.callback);
         }
 
         this.emu_start = function (begin, until, timeout, count) {

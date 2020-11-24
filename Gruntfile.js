@@ -13,9 +13,9 @@ module.exports = function (grunt) {
             emscripten: {
                 cmd: function (arch) {
                     if (typeof arch === 'undefined') {
-                        return 'python build.py build'
+                        return 'python3 build.py build'
                     } else {
-                        return 'python build.py build ' + arch;
+                        return 'python3 build.py build ' + arch;
                     }
                 }
             }
@@ -43,6 +43,12 @@ module.exports = function (grunt) {
                 }
             }
         },
+        copy: {
+            main: {
+                src: 'src/libunicorn<%= lib.suffix %>.out.wasm',
+                dest: 'dist/libunicorn<%= lib.suffix %>.out.wasm'
+            }
+        },
         watch: {
             livereload: {
                 files: [
@@ -66,12 +72,12 @@ module.exports = function (grunt) {
         if (typeof arch === 'undefined') {
             grunt.config.set('lib.suffix', '');
             grunt.task.run('exec:emscripten');
-            grunt.task.run('concat');
         } else {
             grunt.config.set('lib.suffix', '-'+arch);
             grunt.task.run('exec:emscripten:'+arch);
-            grunt.task.run('concat');
         }
+        grunt.task.run('concat');
+        grunt.task.run('copy');
     });
     grunt.registerTask('release', [
         'build',

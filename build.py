@@ -344,7 +344,9 @@ def patchUnicornTCI():
     """
     # Enable TCI
     replace(os.path.join(UNICORN_QEMU_DIR, "configure"), {
-        "tcg_interpreter=\"no\"": "tcg_interpreter=\"yes\""
+        "strip_opt=\"yes\"": "strip_opt=\"yes\"\ntcg_interpreter=\"yes\"",
+        "# XXX: suppress that": "if test \"$tcg_interpreter\" = \"yes\" ; then\n  echo \"CONFIG_TCG_INTERPRETER=y\" >> $config_host_mak\nfi\n# XXX: suppress that",
+        "if test \"$ARCH\" = \"sparc64\" ; then": "if test \"$tcg_interpreter\" = \"yes\"; then\n  QEMU_INCLUDES=\"-I\$(SRC_PATH)/tcg/tci $QEMU_INCLUDES\"\nelif test \"$ARCH\" = \"sparc64\" ; then"
     })
     # Add executable permissions for the new configure file
     path = os.path.join(UNICORN_QEMU_DIR, "configure")
@@ -390,7 +392,7 @@ def patchUnicornJS():
     # Ensure QEMU's object files have different base names
     name = "rename_objects.py"
     with open(os.path.join(UNICORN_DIR, name), "wt") as f:
-        f.write(REPLACE_OBJECTS)
+        f.write("")
     replace(os.path.join(UNICORN_DIR, "Makefile"), {
         "$(MAKE) -C qemu $(SMP_MFLAGS)":
         "$(MAKE) -C qemu $(SMP_MFLAGS)\r\n\t@python " + name,
@@ -556,8 +558,8 @@ def patchUnicornJS():
         "        void *user_data, uint64_t begin, uint64_t end, uint32_t extra);",
     })
     replace(os.path.join(UNICORN_DIR, "uc.c"), {
-        "        uc_err err = uc_hook_add(uc, &uc->count_hook, UC_HOOK_CODE, hook_count_cb, NULL, 1, 0);":
-        "        uc_err err = uc_hook_add(uc, &uc->count_hook, UC_HOOK_CODE, hook_count_cb, NULL, 1, 0, 0);",
+        "        err = uc_hook_add(uc, &uc->count_hook, UC_HOOK_CODE, hook_count_cb, NULL, 1, 0);":
+        "        err = uc_hook_add(uc, &uc->count_hook, UC_HOOK_CODE, hook_count_cb, NULL, 1, 0, 0);",
         "        void *user_data, uint64_t begin, uint64_t end, ...)":
         "        void *user_data, uint64_t begin, uint64_t end, uint32_t extra)",
         "        va_list valist;":

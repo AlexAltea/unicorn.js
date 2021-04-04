@@ -208,7 +208,7 @@ var uc = {
                     extra_types = ['number'];
                     extra_values = [extra];
                     var callback = (function (handle, user_data) {
-                        return function (_, _) {
+                        return function (_, _2) {
                             user_callback(handle, user_data);
                         }
                     })(this, user_data);
@@ -217,7 +217,7 @@ var uc = {
                 // uc_cb_hookintr_t
                 case uc.HOOK_INTR:
                     var callback = (function (handle, user_data) {
-                        return function (_, intno, _) {
+                        return function (_, intno, _2) {
                             user_callback(handle, intno, user_data);
                         }
                     })(this, user_data);
@@ -227,7 +227,7 @@ var uc = {
                 case uc.HOOK_CODE:
                 case uc.HOOK_BLOCK:
                     var callback = (function (handle, user_data) {
-                        return function (_, addr_lo, addr_hi, size, _) {
+                        return function (_, addr_lo, addr_hi, size, _2) {
                             user_callback(handle, addr_lo, addr_hi, size, user_data);
                         }
                     })(this, user_data);
@@ -240,7 +240,7 @@ var uc = {
                         (type & uc.HOOK_MEM_FETCH) ||
                         (type & uc.HOOK_MEM_READ_AFTER)) {
                         var callback = (function (handle, user_data) {
-                            return function (_, type, addr_lo, addr_hi, size, value_lo, value_hi, _) {
+                            return function (_, type, addr_lo, addr_hi, size, value_lo, value_hi, _2) {
                                 user_callback(handle, type, addr_lo, addr_hi, size, value_lo, value_hi, user_data);
                             }
                         })(this, user_data);
@@ -254,7 +254,7 @@ var uc = {
                         (type & uc.HOOK_MEM_WRITE_PROT) ||
                         (type & uc.HOOK_MEM_FETCH_PROT)) {
                         var callback = (function (handle, user_data) {
-                            return function (_, type, addr_lo, addr_hi, size, value_lo, value_hi, _) {
+                            return function (_, type, addr_lo, addr_hi, size, value_lo, value_hi, _2) {
                                 return user_callback(handle, type, addr_lo, addr_hi, size, value_lo, value_hi, user_data);
                             }
                         })(this, user_data);

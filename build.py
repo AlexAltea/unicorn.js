@@ -603,7 +603,8 @@ def compileUnicorn(targets):
     cmd += ' -s RESERVED_FUNCTION_POINTERS=256'
     cmd += ' -s ALLOW_MEMORY_GROWTH=1'
     cmd += ' -s MODULARIZE=1'
-    cmd += ' -s WASM=0'
+    cmd += ' -s WASM_ASYNC_COMPILATION=0'
+    cmd += ' -s WASM=1'
     cmd += ' -s ENVIRONMENT="web"'
     cmd += ' -s EXPORT_NAME="\'MUnicorn\'"'
     if targets:

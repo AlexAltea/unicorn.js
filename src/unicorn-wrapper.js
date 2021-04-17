@@ -4,7 +4,7 @@
  */
 
 // Emscripten demodularize
-MUnicorn().then(function(instance){MUnicorn = instance});
+var MUnicorn = new MUnicorn();
 
 // Number conversion modes
 ELF_INT_NUMBER  = 1

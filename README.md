@@ -48,12 +48,12 @@ To build the Unicorn.js library, clone the *master* branch of this repository on
 
 1. Initialize the original Unicorn submodule: `git submodule update --init`.
 
-2. Install the latest [Python 2.x (64-bit)](https://www.python.org/downloads/) and [Emscripten SDK 1.37.x](http://kripken.github.io/emscripten-site/docs/getting_started/downloads.html). Follow the respective instructions and make sure all environment variables are configured correctly.
-    - Note that older versions of the Emscripten SDK, specifically 1.39.15 and earlier, will not run successfully (see issue [#19](https://github.com/AlexAltea/unicorn.js/issues/19#issuecomment-731707398)). You can install a supported version with the command:
-      ```bash
-      ./emsdk install 2.0.7
-      ```
+2. Install latest [Emscripten SDK 2.0.21+](https://emscripten.org/docs/getting_started/downloads.html). Follow the respective instructions and make sure all environment variables are configured correctly.
 
-3. Install the development dependencies with: `npm install`.
+3. Install the latest [Python 3.8+](https://www.python.org/downloads/). Make sure both `python3` and `python` are callable. You can either setup alias or `apt install python-is-python3`
 
-4. Finally, build the source with: `grunt build`.
+3. Install the development dependencies with: `npm install --also=dev`.
+
+4. Install grunt with: `npm install -g grunt`
+
+5. Finally, build the source with: `grunt build`.

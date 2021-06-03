@@ -89,6 +89,7 @@ function Register(name, type, id) {
             case 'i8':  this.dataHex = utilIntToHex(value, 2); break;
             case 'i16': this.dataHex = utilIntToHex(value, 4); break;
             case 'i32': this.dataHex = utilIntToHex(value, 8); break;
+            case 'i64': this.dataHex = utilIntToHex(value, 16); break;
         }
     }
     this._update_float = function () {
@@ -104,6 +105,7 @@ function Register(name, type, id) {
             case 'i8':
             case 'i16':
             case 'i32':
+            case 'i64':
                 this._update_int();
                 break;
             case 'f32':

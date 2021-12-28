@@ -32,9 +32,9 @@ Creates a hook object. (TODO: Add more detail)
 #### hook_del(hook)
 Removes the inputted hook object (`hook`) from the Unicorn object.
 #### emu_start(begin, until, timeout, count)
-TODO
+Start the emulator, running the code in memory from the starting address (`begin`) to the final address (`until`). (TODO: Explain what `timeout` and `count` do)
 #### emu_stop(begin, until, timeout, count)
-TODO
+TODO (Also, the code for this function doesn't use any of these arguments, so thye seem to be unessecary)
 #### context_alloc()
 TODO
 #### context_free()

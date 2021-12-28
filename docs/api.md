@@ -51,3 +51,8 @@ TODO
 TODO (Also, I'm not entirely sure that these should be documented, seeing as they're helpers meant to be used internally)
 ## Constants
 TODO
+
+## Credits
+Developers of Unicorn: Nguyen Anh Quynh, Dang Hoang Vu, Ziqiao Kong, and contributors  
+Developers of Unicorn.js: Alexandro Sanchez Bach and contributors  
+Contributors to the documentation: supremestdoggo

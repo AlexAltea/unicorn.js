@@ -46,7 +46,6 @@ EXPORTED_CONSTANTS = [
     'bindings/python/unicorn/sparc_const.py',
     'bindings/python/unicorn/x86_const.py',
     'bindings/python/unicorn/unicorn_const.py',
-    'bindings/python/unicorn/arm64_const.py',
 ]
 
 # Directories

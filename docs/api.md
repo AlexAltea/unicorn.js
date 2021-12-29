@@ -47,8 +47,6 @@ TODO
 TODO
 #### close()
 TODO
-### Helpers
-TODO (Also, I'm not entirely sure that these should be documented, seeing as they're helpers meant to be used internally)
 ## Constants
 TODO
 

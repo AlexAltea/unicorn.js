@@ -65,8 +65,6 @@ Formatted as `SPARC_REG_[register name]`.
 Formatted as `X86_REG_[register name]`.
 ### X86 Instructions
 You should use these when referencing X86 instructions (should you ever do so rather than using Capstone.js or Keystone.js). Under the hood, they all reference numbers that actually get passed to the Unicorn engine. Formatted as `X86_INS_[instruction name]`. See the X86 documentation for more information on its instructions.
-### Unicorn Constants
-TODO (I'm almost sure this will be like **Helpers**, where it shouldn't be documented.)
 
 ## Credits
 Developers of Unicorn: Nguyen Anh Quynh, Dang Hoang Vu, Ziqiao Kong, and contributors  

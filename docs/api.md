@@ -34,7 +34,7 @@ Removes the inputted hook object (`hook`) from the Unicorn object.
 #### emu_start(begin, until, timeout, count)
 Start the emulator, running the code in memory from the starting address (`begin`) to the final address (`until`). (TODO: Explain what `timeout` and `count` do)
 #### emu_stop(begin, until, timeout, count)
-TODO (Also, the code for this function doesn't use any of these arguments, so thye seem to be unessecary)
+TODO (Also, the code for this function doesn't use any of these arguments, so they seem to be unessecary)
 #### context_alloc()
 TODO
 #### context_free()
@@ -53,4 +53,4 @@ TODO
 ## Credits
 Developers of Unicorn: Nguyen Anh Quynh, Dang Hoang Vu, Ziqiao Kong, and contributors  
 Developers of Unicorn.js: Alexandro Sanchez Bach and contributors  
-Contributors to the documentation: supremestdoggo
+Contributors to the documentation: supremestdoggo (wrote most of it), Alexandro Sanchez Bach (revised before merging)

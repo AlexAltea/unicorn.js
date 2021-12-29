@@ -12,7 +12,7 @@ Given an error code, return the code in a human-readable format.
 An emulator object. `arch` is the name of the architecture the emulator will emulate, and `mode` is the mode it will be in.
 ### Methods
 #### reg_write(regid, bytes)
-Writes the inputted bytes to the inputted register (which is represented by `regid`). Please note that you should use one of the constants for `regid`, as otherwise you would need to dig through [unicorn-constants.js](https://github.com/AlexAltea/unicorn.js/blob/master/src/unicorn-constants.js) (or the Constants section of this documentation, when that's finally written).
+Writes the inputted bytes to the inputted register (which is represented by `regid`). Please note that you should use one of the constants for `regid`, as otherwise you would need to dig through [unicorn-constants.js](https://github.com/AlexAltea/unicorn.js/blob/master/src/unicorn-constants.js) (or the **Constants** section of this documentation).
 #### reg_read(regid, size)
 TODO
 #### mem_write(address, bytes)
@@ -47,6 +47,7 @@ TODO
 TODO
 #### close()
 TODO
+
 ## Constants
 ### Registers
 You should use these when referencing registers. Under the hood, they all reference numbers that actually get passed to the Unicorn engine. See each architecture's respective documentation for more information on their registers.
@@ -65,7 +66,7 @@ Formatted as `X86_REG_[register name]`.
 ### X86 Instructions
 You should use these when referencing X86 instructions (should you ever do so rather than using Capstone.js or Keystone.js). Under the hood, they all reference numbers that actually get passed to the Unicorn engine. Formatted as `X86_INS_[instruction name]`. See the X86 documentation for more information on its instructions.
 ### Unicorn Constants
-TODO
+TODO (I'm almost sure this will be like **Helpers**, where it shouldn't be documented.)
 
 ## Credits
 Developers of Unicorn: Nguyen Anh Quynh, Dang Hoang Vu, Ziqiao Kong, and contributors  

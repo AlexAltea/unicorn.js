@@ -48,6 +48,22 @@ TODO
 #### close()
 TODO
 ## Constants
+### Registers
+#### ARM64
+TODO
+#### ARM
+TODO
+#### M68K
+TODO
+#### MIPS
+TODO
+#### SPARC
+TODO
+#### X86
+TODO
+### X86 Insturctions
+TODO
+### Unicorn Constants
 TODO
 
 ## Credits

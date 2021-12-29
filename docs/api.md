@@ -62,7 +62,7 @@ Formatted as `MIPS_REG_[register name]`.
 Formatted as `SPARC_REG_[register name]`.
 #### X86
 Formatted as `X86_REG_[register name]`.
-### X86 Insturctions
+### X86 Instructions
 You should use these when referencing X86 instructions (should you ever do so rather than using Capstone.js or Keystone.js). Under the hood, they all reference numbers that actually get passed to the Unicorn engine. Formatted as `X86_INS_[instruction name]`. See the X86 documentation for more information on its instructions.
 ### Unicorn Constants
 TODO

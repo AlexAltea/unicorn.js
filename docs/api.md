@@ -49,20 +49,21 @@ TODO
 TODO
 ## Constants
 ### Registers
+You should use these when referencing registers. Under the hood, they all reference numbers that actually get passed to the Unicorn engine. See each architecture's respective documentation for more information on their registers.
 #### ARM64
-TODO
+Formatted as `ARM64_REG_[register name]`.
 #### ARM
-TODO
+Formatted as `ARM_REG_[register name]`.
 #### M68K
-TODO
+Formatted as `M68K_REG_[register name]`.
 #### MIPS
-TODO
+Formatted as `MIPS_REG_[register name]`.
 #### SPARC
-TODO
+Formatted as `SPARC_REG_[register name]`.
 #### X86
-TODO
+Formatted as `X86_REG_[register name]`.
 ### X86 Insturctions
-TODO
+You should use these when referencing X86 instructions (should you ever do so rather than using Capstone.js or Keystone.js). Under the hood, they all reference numbers that actually get passed to the Unicorn engine. Formatted as `X86_INS_[instruction name]`. See the X86 documentation for more information on its instructions.
 ### Unicorn Constants
 TODO
 

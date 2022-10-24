@@ -14,19 +14,19 @@ An emulator object. `arch` is the name of the architecture the emulator will emu
 #### reg_write(regid, bytes)
 Writes the inputted bytes to the inputted register (which is represented by `regid`). Please note that you should use one of the constants for `regid`, as otherwise you would need to dig through [unicorn-constants.js](https://github.com/AlexAltea/unicorn.js/blob/master/src/unicorn-constants.js) (or the **Constants** section of this documentation).
 #### reg_read(regid, size)
-Read `size` bytes from the register at `regid`.
+Read `size` bytes from the register `regid`.
 #### mem_write(address, bytes)
 Write the inputted bytes (`bytes`) to the inputted memory address (`address`).
 #### mem_read(address, size)
 Read `size` bytes from the memory address `address`.
 #### mem_map(address, size, perms)
-Map a region of memory of size `size` at `address` with `perms`.
+Map a region of memory of `size` bytes at `address` with `perms`.
 #### mem_protect(address, size, perms)
 TODO
 #### mem_regions()
 TODO
 #### mem_unmap(address, size)
-Unmap the region of memory of size `size` at `address`.
+Unmap the region of memory of `size` bytes at `address`.
 #### hook_add(type, user_callback, user_data, begin, end, extra)
 Creates a hook object. (TODO: Add more detail)
 #### hook_del(hook)

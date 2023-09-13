@@ -429,7 +429,12 @@ var uc = {
             // Allocate space for the output value
             var value_size = this._sizeof(type);
             var value_ptr = MUnicorn._malloc(value_size);
-            MUnicorn.setValue(value_ptr, 0, type);
+            if (type === 'i64') {
+                MUnicorn.setValue(value_ptr, 0, 'i32');
+                MUnicorn.setValue(value_ptr + 4, 0, 'i32');
+            } else {
+                MUnicorn.setValue(value_ptr, 0, type);
+            }
 
             // Register read
             var handle = MUnicorn.getValue(this.handle_ptr, '*');
@@ -438,9 +443,14 @@ var uc = {
                 [handle, regid, value_ptr]
             );
             // Get register value, free memory and handle return code
-            var value = MUnicorn.getValue(value_ptr, type);
+            var value;
             if (type === 'i64') {
-                    value = [value, MUnicorn.getValue(value_ptr+4, 'i32')]
+                value = [
+                    MUnicorn.getValue(value_ptr, 'i32'),
+                    MUnicorn.getValue(value_ptr + 4, 'i32')
+                ];
+            } else {
+                value = MUnicorn.getValue(value_ptr, type);
             }
             // Convert integer types
             if (type.includes('i')) {

@@ -36,6 +36,8 @@ EXPORTED_FUNCTIONS = [
     '_uc_free',
     '_uc_context_save',
     '_uc_context_restore',
+    '_malloc',
+    '_free',
 ]
 
 EXPORTED_CONSTANTS = [
@@ -593,13 +595,14 @@ def compileUnicorn(targets):
     os.chdir('..')
 
     # Compile static library to JavaScript
-    methods = ['_malloc', 'ccall', 'getValue', 'setValue', 'addFunction', 'removeFunction', 'writeArrayToMemory']
+    methods = ['ccall', 'getValue', 'setValue', 'addFunction', 'removeFunction', 'writeArrayToMemory']
     cmd = 'emcc'
     cmd += ' -Os --memory-init-file 0'
     cmd += ' unicorn/libunicorn.a'
     cmd += ' -s EXPORTED_FUNCTIONS=\"[\''+ '\', \''.join(EXPORTED_FUNCTIONS) +'\']\"'
     cmd += ' -s EXPORTED_RUNTIME_METHODS=\"[\''+ '\', \''.join(methods) +'\']\"'
     cmd += ' -s RESERVED_FUNCTION_POINTERS=256'
+    cmd += ' -s ALLOW_TABLE_GROWTH=1'
     cmd += ' -s ALLOW_MEMORY_GROWTH=1'
     cmd += ' -s MODULARIZE=1'
     cmd += ' -s WASM_ASYNC_COMPILATION=0'

@@ -315,7 +315,7 @@ var uc = {
             }
         }
 
-        this.emu_stop = function (begin, until, timeout, count) {
+        this.emu_stop = function () {
             var handle = MUnicorn.getValue(this.handle_ptr, '*');
             var ret = MUnicorn.ccall('uc_emu_stop', 'number', ['pointer'], [handle]);
             if (ret != uc.ERR_OK) {

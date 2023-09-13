@@ -483,8 +483,8 @@ def patchUnicornJS():
         """,
     })
     replace(os.path.join(UNICORN_QEMU_DIR, "include/exec/helper-tcg.h"), {
-        "func = HELPER(NAME)":
-        "func = glue(adapter_helper_, NAME)"
+        "HELPER(NAME)":
+        "glue(adapter_helper_, NAME)"
     })
     # Add arch-suffixes to adapters
     header_gen_patched = False
@@ -515,8 +515,9 @@ def patchUnicornJS():
          for (i = 0; i < nargs; i++) {
              int is_64bit = sizemask & (1 << (i+1)*2);
              if (!is_64bit) {
-                 TCGArg ext_arg = tcg_temp_new_i64(s);
-                 tcg_gen_ext32u_i64(s, ext_arg, args[i]);
+                 TCGv_i64 ext_arg = tcg_temp_new_i64(s);
+                 TCGv_i64 orig = MAKE_TCGV_I64(args[i]);
+                 tcg_gen_ext32u_i64(s, ext_arg, orig);
                  args[i] = GET_TCGV_I64(ext_arg);
              }
          }

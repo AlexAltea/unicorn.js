@@ -52,7 +52,7 @@ var ElfUInt = function (width) {
                 for (var i = 0; i < this.chunks.length; i++) {
                     // Force NaN value to be 0
                     this.chunks[i] = parseInt(value.slice(-4), 16) | 0;
-                    value.slice(0, -4);
+                    value = value.slice(0, -4);
                 }
             }
             // Initialize from Array (32-bit entries)
@@ -74,6 +74,7 @@ var ElfUInt = function (width) {
 
         // Methods
         this.clone = function () {
+            return new this.constructor(this);
         };
 
         this.neg = function () {
@@ -102,30 +103,56 @@ var ElfUInt = function (width) {
             var rhs = new this.constructor(rhs);
             return this.add(rhs.neg());
         };
-        this.mul = function (rhs) {
+        this.or = function (rhs) {
             var lhs = new this.constructor(this);
             var rhs = new this.constructor(rhs);
+            for (var i = 0; i < this.chunks.length; i++) {
+                var chunk_lhs = lhs.chunks[i];
+                var chunk_rhs = rhs.chunks[i];
+                lhs.chunks[i] = chunk_lhs | chunk_rhs;
+            }
             return lhs;
         };
-        this.div = function (rhs) {
+        this.and = function (rhs) {
             var lhs = new this.constructor(this);
             var rhs = new this.constructor(rhs);
+            for (var i = 0; i < this.chunks.length; i++) {
+                var chunk_lhs = lhs.chunks[i];
+                var chunk_rhs = rhs.chunks[i];
+                lhs.chunks[i] = chunk_lhs & chunk_rhs;
+            }
+            return lhs;
+        };
+        this.xor = function (rhs) {
+            var lhs = new this.constructor(this);
+            var rhs = new this.constructor(rhs);
+            for (var i = 0; i < this.chunks.length; i++) {
+                var chunk_lhs = lhs.chunks[i];
+                var chunk_rhs = rhs.chunks[i];
+                lhs.chunks[i] = chunk_lhs ^ chunk_rhs;
+            }
             return lhs;
         };
         this.shl = function (amount) {
-            var value = new this.constructor(this);
+            var bits = amount & 15;
+            var chunks = amount >> 4;
+            var value = new this.constructor(0);
+            var carry = 0;
+            for (var i = chunks; i < this.chunks.length; i++) {
+                value.chunks[i] = ((this.chunks[i - chunks] << bits) & 0xffff) | carry;
+                carry = this.chunks[i - chunks] >> (16 - bits);
+            }
             return value;
         };
         this.shr = function (amount) {
-            var value = new this.constructor(this);
-            return value;
-        };
-        this.ror = function (amount) {
-            var value = new this.constructor(this);
-            return value;
-        };
-        this.rol = function (amount) {
-            var value = new this.constructor(this);
+            var bits = amount & 15;
+            var chunks = amount >> 4;
+            var value = new this.constructor(0);
+            var carry = 0;
+            for (var i = this.chunks.length - 1; i >= chunks; i--) {
+                value.chunks[i - chunks] = (this.chunks[i] >> bits) | carry;
+                carry = (this.chunks[i] << (16 - bits)) & 0xffff;
+            }
             return value;
         };
 

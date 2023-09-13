@@ -300,10 +300,14 @@ var uc = {
         }
 
         this.emu_start = function (begin, until, timeout, count) {
+            var [begin_lo, begin_hi] = this.__address(begin);
+            var [until_lo, until_hi] = this.__address(until);
+
             var handle = MUnicorn.getValue(this.handle_ptr, '*');
             var ret = MUnicorn.ccall('uc_emu_start', 'number',
                 ['pointer', 'number', 'number', 'number', 'number', 'number', 'number', 'number'],
-                [handle, begin, 0, until, 0, timeout, 0, count]
+                [handle, begin_lo, begin_hi, until_lo, until_hi,
+                 timeout, 0, count]
             );
             if (ret != uc.ERR_OK) {
                 var error = 'Unicorn.js: Function uc_emu_start failed with code ' + ret + ':\n' + uc.strerror(ret);

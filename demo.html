@@ -42,6 +42,7 @@
         <p>
           Make sure you check out the other demos: <br>
           <a role="button" href="demo.html?arch=arm">ARM</a>,
+          <a role="button" href="demo.html?arch=arm64">ARM64</a>,
           <a role="button" href="demo.html?arch=mips">MIPS</a>,
           <a role="button" href="demo.html?arch=sparc">SPARC</a>,
           <a role="button" href="demo.html?arch=x86">X86</a>.
@@ -165,6 +166,10 @@
                 'dist/unicorn-arm.min',
                 'demos/externals/keystone-arm.min',
                 'demos/externals/capstone-arm.min'],
+              'demos/demo-arm64': [
+                'dist/unicorn-aarch64.min',
+                'demos/externals/keystone-aarch64.min',
+                'demos/externals/capstone-arm64.min'],
               'demos/demo-mips': [
                 'dist/unicorn-mips.min',
                 'demos/externals/keystone-mips.min',
@@ -193,6 +198,7 @@
       var scripts = []
       switch (gup('arch')) {
       case 'arm':   requirejs(['demos/demo-arm']);   break;
+      case 'arm64': requirejs(['demos/demo-arm64']);   break;
       case 'mips':  requirejs(['demos/demo-mips']);  break;
       case 'sparc': requirejs(['demos/demo-sparc']); break;
       case 'x86':   requirejs(['demos/demo-x86']);   break;

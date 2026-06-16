@@ -1,5 +1,6 @@
-# Dependencies NodeJS
-node_modules/
+# Unicorn.js arch-specific variants
+/dist/unicorn_*.js
+/dist/unicorn_*.wasm
 
-# Emscripten builds
-*.out.js
+# Unicorn.js packages
+*.zip

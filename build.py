@@ -7,6 +7,7 @@ import os
 import glob
 import shutil
 import stat
+import subprocess
 import sys
 
 EXPORTED_FUNCTIONS = [
@@ -61,7 +62,7 @@ def generateConstants():
         path = os.path.join(UNICORN_DIR, path)
         with open(path, 'r') as f:
             code = f.read()
-            code = code.replace('\nUC_', '\nuc.')
+            code = code.replace('\nUC_', '\nModule.')
             code = code.replace('#', '//')
         out.write(code)
     out.close()
@@ -595,26 +596,39 @@ def compileUnicorn(targets):
         os.system(cmd)
     os.chdir('..')
 
-    # Compile static library to JavaScript
-    methods = ['ccall', 'getValue', 'setValue', 'addFunction', 'removeFunction', 'writeArrayToMemory']
-    cmd = 'emcc'
-    cmd += ' -Os --memory-init-file 0'
-    cmd += ' unicorn/libunicorn.a'
-    cmd += ' -s EXPORTED_FUNCTIONS=\"[\''+ '\', \''.join(EXPORTED_FUNCTIONS) +'\']\"'
-    cmd += ' -s EXPORTED_RUNTIME_METHODS=\"[\''+ '\', \''.join(methods) +'\']\"'
-    cmd += ' -s RESERVED_FUNCTION_POINTERS=256'
-    cmd += ' -s ALLOW_TABLE_GROWTH=1'
-    cmd += ' -s ALLOW_MEMORY_GROWTH=1'
-    cmd += ' -s MODULARIZE=1'
-    cmd += ' -s WASM_ASYNC_COMPILATION=0'
-    cmd += ' -s WASM=0'
-    cmd += ' -s ENVIRONMENT="web"'
-    cmd += ' -s EXPORT_NAME="\'MUnicorn\'"'
-    if targets:
-        cmd += ' -o src/libunicorn-%s.out.js' % ('-'.join(targets))
-    else:
-        cmd += ' -o src/libunicorn.out.js'
-    os.system(cmd)
+    # Port the static library to JavaScript/WASM (mirrors capstone.js build).
+    # The high-level API and constants are bundled directly into the module via
+    # `--post-js`, so the output is a standalone `dist/unicorn{suffix}.js` plus
+    # its `.wasm`, consumed as `const uc = await MUnicorn()`.
+    suffix = ('_' + '+'.join(targets)) if targets else ''
+    methods = [
+        'ccall', 'getValue', 'setValue',
+        'addFunction', 'removeFunction', 'writeArrayToMemory',
+    ]
+    cmd = [
+        'emcc',
+        '-Os',
+        'unicorn/libunicorn.a',
+        '-s', f"EXPORTED_FUNCTIONS={EXPORTED_FUNCTIONS}",
+        '-s', f"EXPORTED_RUNTIME_METHODS={methods}",
+        '-s', 'RESERVED_FUNCTION_POINTERS=256',
+        '-s', 'ALLOW_TABLE_GROWTH=1',
+        '-s', 'ALLOW_MEMORY_GROWTH=1',
+        '-s', 'MODULARIZE=1',
+        '-s', 'WASM=1',
+        # 64-bit (uint64_t/int64_t) values cross the JS<->WASM boundary as
+        # BigInt. This is required for hook callbacks: unicorn invokes them
+        # internally with a native i64 address argument, which an addFunction
+        # trampoline can only match via a BigInt ('j') signature.
+        '-s', 'WASM_BIGINT=1',
+        '-s', "EXPORT_NAME='MUnicorn'",
+        '--post-js', 'src/libelf-integers.js',
+        '--post-js', 'src/unicorn-constants.js',
+        '--post-js', 'src/unicorn-wrapper.js',
+        '-o', f'dist/unicorn{suffix}.js',
+    ]
+    os.makedirs('dist', exist_ok=True)
+    subprocess.run(cmd, check=True)
 
 
 def exit_usage():
@@ -644,6 +658,6 @@ if __name__ == "__main__":
             compileUnicorn(targets)
         else:
             print("Your operating system is not supported by this script:")
-            print("Please, use Emscripten to compile Unicorn manually to src/libunicorn.out.js")
+            print("Please, use Emscripten to compile Unicorn manually to dist/unicorn.js")
     else:
         exit_usage()

@@ -3,20 +3,29 @@
   "version": "1.0.0",
   "description": "Unicorn CPU emulator framework port for JavaScript",
   "author": "Alexandro Sanchez Bach <alexaltea123@gmail.com>",
+  "license": "GPL-2.0",
+  "homepage": "https://alexaltea.github.io/unicorn.js/",
+  "keywords": [
+    "unicorn",
+    "emulator",
+    "emulation",
+    "cpu",
+    "wasm",
+    "webassembly",
+    "reverse-engineering"
+  ],
   "repository": {
     "type": "git",
     "url": "https://github.com/AlexAltea/unicorn.js.git"
   },
-  "dependencies": {},
-  "devDependencies": {
-    "grunt": "^1.5.3",
-    "grunt-contrib-concat": "^1.0.1",
-    "grunt-contrib-connect": "^3.0.0",
-    "grunt-contrib-copy": "^1.0.0",
-    "grunt-contrib-watch": "^1.1.0",
-    "grunt-exec": "~0.4.6",
-    "load-grunt-tasks": "^5.1.0",
-    "time-grunt": "^1.0.0"
+  "main": "./dist/unicorn.js",
+  "files": [
+    "dist/unicorn.js",
+    "dist/unicorn.wasm"
+  ],
+  "scripts": {
+    "build": "python3 build.py build",
+    "serve": "python3 -m http.server"
   },
   "bugs": {
     "url": "https://github.com/AlexAltea/unicorn.js/issues"

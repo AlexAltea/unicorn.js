@@ -670,20 +670,16 @@ def compileUnicorn(targets):
     patchUnicornJS()
 
     # Emscripten: Make
-    os.chdir('unicorn')
+    os.chdir(UNICORN_DIR)
     os.system('make clean')
-    if os.name == 'posix':
-        cmd = ''
-        if targets:
-            cmd += 'UNICORN_ARCHS="%s" ' % (' '.join(targets))
-        cmd += 'emmake make unicorn'
-        os.system(cmd)
     os.chdir('..')
 
-    # Port the static library to JavaScript/WASM (mirrors capstone.js build).
-    # The high-level API and constants are bundled directly into the module via
-    # `--post-js`, so the output is a standalone `dist/unicorn{suffix}.js` plus
-    # its `.wasm`, consumed as `const uc = await MUnicorn()`.
+    # Build the static library
+    jobs = os.cpu_count() or 1
+    cmd = ['emmake', 'make', 'unicorn', f'-j{jobs}']
+    subprocess.run(cmd, check=True, cwd=UNICORN_DIR)
+
+    # Port the static library to JavaScript/WASM
     suffix = ('_' + '+'.join(targets)) if targets else ''
     methods = [
         'ccall', 'getValue', 'setValue',
@@ -737,11 +733,7 @@ if __name__ == "__main__":
         patchUnicornTCI()
         patchUnicornJS()
         targets = sorted(sys.argv[2:])
-        if os.name in ['posix']:
-            generateConstants()
-            compileUnicorn(targets)
-        else:
-            print("Your operating system is not supported by this script:")
-            print("Please, use Emscripten to compile Unicorn manually to dist/unicorn.js")
+        generateConstants()
+        compileUnicorn(targets)
     else:
         exit_usage()

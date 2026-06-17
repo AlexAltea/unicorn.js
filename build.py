@@ -1,7 +1,4 @@
-#!/usr/bin/python
-
-# INFORMATION:
-# This scripts compiles the original Unicorn framework to JavaScript
+#!/usr/bin/env python3
 
 import os
 import glob
@@ -12,34 +9,34 @@ import subprocess
 import sys
 
 EXPORTED_FUNCTIONS = [
-    '_uc_version',
+    '_free',
+    '_malloc',
     '_uc_arch_supported',
-    '_uc_open',
     '_uc_close',
-    '_uc_query',
-    '_uc_errno',
-    '_uc_strerror',
-    '_uc_reg_write',
-    '_uc_reg_read',
-    '_uc_reg_write_batch',
-    '_uc_reg_read_batch',
-    '_uc_mem_write',
-    '_uc_mem_read',
+    '_uc_context_alloc',
+    '_uc_context_restore',
+    '_uc_context_save',
     '_uc_emu_start',
     '_uc_emu_stop',
+    '_uc_errno',
+    '_uc_free',
     '_uc_hook_add',
     '_uc_hook_del',
-    '_uc_mem_map',
     '_uc_mem_map_ptr',
-    '_uc_mem_unmap',
+    '_uc_mem_map',
     '_uc_mem_protect',
+    '_uc_mem_read',
     '_uc_mem_regions',
-    '_uc_context_alloc',
-    '_uc_free',
-    '_uc_context_save',
-    '_uc_context_restore',
-    '_malloc',
-    '_free',
+    '_uc_mem_unmap',
+    '_uc_mem_write',
+    '_uc_open',
+    '_uc_query',
+    '_uc_reg_read_batch',
+    '_uc_reg_read',
+    '_uc_reg_write_batch',
+    '_uc_reg_write',
+    '_uc_strerror',
+    '_uc_version',
 ]
 
 # Unicorn per-architecture public headers and the C macro prefix to export from
@@ -579,7 +576,10 @@ def compileUnicorn(targets):
     # Build the static library
     jobs = os.cpu_count() or 1
     cmd = ['emmake', 'make', 'unicorn', f'-j{jobs}']
-    subprocess.run(cmd, check=True, cwd=UNICORN_DIR)
+    env = os.environ.copy()
+    if targets:
+        env['UNICORN_ARCHS'] = ' '.join(targets)
+    subprocess.run(cmd, check=True, cwd=UNICORN_DIR, env=env)
 
     # Port the static library to JavaScript/WASM
     suffix = ('_' + '+'.join(targets)) if targets else ''

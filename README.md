@@ -9,10 +9,16 @@ Port of the [Unicorn](https://github.com/unicorn-engine/unicorn) CPU emulator fr
 
 ## Installation
 
-To add Unicorn.js to your web application, include it with:
+To use Unicorn.js in your web application, download and include it with:
 
 ```html
 <script src="unicorn.js"></script>
+```
+
+or install it with the NPM command:
+
+```bash
+npm install @alexaltea/unicorn-js
 ```
 
 ## Usage

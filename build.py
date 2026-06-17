@@ -222,16 +222,6 @@ def copytree(src, dst, symlinks=False, ignore=None):
 # Patching #
 ############
 
-REPLACE_OBJECTS = """
-import re, glob, shutil
-path = 'qemu/*softmmu/**/*.o'
-for d in xrange(5):
-    for f in glob.glob(path.replace('/**', '/*' * d)):
-        f = f.replace('\\\\', '/')
-        m = re.match(r'qemu\/([0-9A-Za-z_]+)\-softmmu.*', f)
-        shutil.move(f, f[:-2] + '-' + m.group(1) + '.o')
-"""
-
 PATCH_HELPER_ADAPTER_PROTO = """
 #define GEN_ADAPTER_ARGS \\
   uint32_t a1, uint32_t a2, uint32_t a3, uint32_t a4, uint32_t a5, \\
@@ -410,34 +400,21 @@ def patchUnicornTCI():
             "    'tcg_qemu_tb_exec',",
         ]
     )
-    # Update platform headers with new symbols
-    cmd = "bash -c \"cd " + UNICORN_QEMU_DIR + " && ./gen_all_header.sh\""
-    os.system(cmd)
+    # Replace python with current sys.executable, e.g. python3
+    replace(os.path.join(UNICORN_QEMU_DIR, "gen_all_header.sh"), {
+        "python header_gen.py": sys.executable + " header_gen.py",
+    })
+    subprocess.run(["sh", "gen_all_header.sh"], check=True, cwd=UNICORN_QEMU_DIR)
 
 
 def patchUnicornJS():
     """
     Patches Unicorn files to target JavaScript
     """
-    # Disable unnecessary options
-    replace(os.path.join(UNICORN_DIR, "config.mk"), {
-        "UNICORN_DEBUG ?= yes": "UNICORN_DEBUG ?= no",
-        "UNICORN_SHARED ?= yes": "UNICORN_SHARED ?= no",
-    })
-    # Ensure QEMU's object files have different base names
-    name = "rename_objects.py"
-    with open(os.path.join(UNICORN_DIR, name), "wt") as f:
-        f.write("")
     replace(os.path.join(UNICORN_DIR, "Makefile"), {
-        "$(MAKE) -C qemu $(SMP_MFLAGS)":
-        "$(MAKE) -C qemu $(SMP_MFLAGS)\r\n\t@python " + name,
         '	./configure --cc="${CC}" --extra-cflags="$(UNICORN_CFLAGS)" --target-list="$(UNICORN_TARGETS)" ${UNICORN_QEMU_FLAGS}':
         '	./configure --cc="${CC}" --extra-cflags="$(UNICORN_CFLAGS)" --target-list="$(UNICORN_TARGETS)" ${UNICORN_QEMU_FLAGS} --disable-stack-protector --cpu=i386',
-    })
-    # Replace sigsetjmp/siglongjump with setjmp/longjmp
-    replace(os.path.join(UNICORN_QEMU_DIR, "cpu-exec.c"), {
-        "sigsetjmp(cpu->jmp_env, 0)": "setjmp(cpu->jmp_env)",
-        "siglongjmp(cpu->jmp_env, 1)": "longjmp(cpu->jmp_env, 1)",
+        'python qemu/header_gen.py': sys.executable + ' qemu/header_gen.py',
     })
     # Fix Glib function pointer issues
     replace(os.path.join(UNICORN_QEMU_DIR, "glib_compat.c"), {
@@ -577,6 +554,8 @@ def compileUnicorn(targets):
     jobs = os.cpu_count() or 1
     cmd = ['emmake', 'make', 'unicorn', f'-j{jobs}']
     env = os.environ.copy()
+    env['UNICORN_DEBUG'] = 'no'
+    env['UNICORN_SHARED'] = 'no'
     if targets:
         env['UNICORN_ARCHS'] = ' '.join(targets)
     subprocess.run(cmd, check=True, cwd=UNICORN_DIR, env=env)
@@ -598,10 +577,6 @@ def compileUnicorn(targets):
         '-s', 'ALLOW_MEMORY_GROWTH=1',
         '-s', 'MODULARIZE=1',
         '-s', 'WASM=1',
-        # 64-bit (uint64_t/int64_t) values cross the JS<->WASM boundary as
-        # BigInt. This is required for hook callbacks: unicorn invokes them
-        # internally with a native i64 address argument, which an addFunction
-        # trampoline can only match via a BigInt ('j') signature.
         '-s', 'WASM_BIGINT=1',
         '-s', "EXPORT_NAME='MUnicorn'",
     ]

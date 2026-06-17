@@ -1,12 +1,7 @@
 /**
- * (c) 2016-2017 Unicorn.JS
+ * (c) 2016-2026 Unicorn.JS
  * Wrapper made by Alexandro Sanchez Bach.
  */
-
-// Number conversion modes
-const ELF_INT_NUMBER = 1;
-const ELF_INT_STRING = 2;
-const ELF_INT_OBJECT = 3;
 
 Object.assign(Module, {
     // uc_arch
@@ -213,7 +208,7 @@ Object.assign(Module, {
             var handle = Module.getValue(this.handle_ptr, '*');
             var ret = Module.ccall('uc_mem_write', 'number',
                 ['pointer', 'number', 'pointer', 'number'],
-                [handle, this.__address(address), buffer_ptr, buffer_len]
+                [handle, BigInt(address || 0), buffer_ptr, buffer_len]
             );
             // Free memory and handle return code
             Module._free(buffer_ptr);
@@ -234,7 +229,7 @@ Object.assign(Module, {
             var handle = Module.getValue(this.handle_ptr, '*');
             var ret = Module.ccall('uc_mem_read', 'number',
                 ['pointer', 'number', 'pointer', 'number'],
-                [handle, this.__address(address), buffer_ptr, size]
+                [handle, BigInt(address || 0), buffer_ptr, size]
             );
             // Get register value, free memory and handle return code
             var buffer = new Uint8Array(size);
@@ -253,7 +248,7 @@ Object.assign(Module, {
             var handle = Module.getValue(this.handle_ptr, '*');
             var ret = Module.ccall('uc_mem_map', 'number',
                 ['pointer', 'number', 'number', 'number'],
-                [handle, this.__address(address), size, perms]
+                [handle, BigInt(address || 0), size, perms]
             );
             if (ret != Module.ERR_OK) {
                 var error = 'Unicorn.js: Function uc_mem_map failed with code ' + ret + ':\n' + Module.strerror(ret);
@@ -265,7 +260,7 @@ Object.assign(Module, {
             var handle = Module.getValue(this.handle_ptr, '*');
             var ret = Module.ccall('uc_mem_protect', 'number',
                 ['pointer', 'number', 'number', 'number'],
-                [handle, this.__address(address), size, perms]
+                [handle, BigInt(address || 0), size, perms]
             );
             if (ret != Module.ERR_OK) {
                 var error = 'Unicorn.js: Function uc_mem_protect failed with code ' + ret + ':\n' + Module.strerror(ret);
@@ -281,7 +276,7 @@ Object.assign(Module, {
             var handle = Module.getValue(this.handle_ptr, '*');
             var ret = Module.ccall('uc_mem_unmap', 'number',
                 ['pointer', 'number', 'number'],
-                [handle, this.__address(address), size]
+                [handle, BigInt(address || 0), size]
             );
             if (ret != Module.ERR_OK) {
                 var error = 'Unicorn.js: Function uc_mem_unmap failed with code ' + ret + ':\n' + Module.strerror(ret);
@@ -374,7 +369,7 @@ Object.assign(Module, {
                 ['pointer', 'pointer', 'number', 'pointer', 'pointer',
                     'number', 'number', 'number'],
                 [handle, hook_ptr, type, callback_ptr, 0,
-                    this.__address(begin), this.__address(end), extra || 0]
+                    BigInt(begin || 0), BigInt(end || 0), extra || 0]
             );
             if (ret != Module.ERR_OK) {
                 Module.removeFunction(callback_ptr);
@@ -408,7 +403,7 @@ Object.assign(Module, {
             var handle = Module.getValue(this.handle_ptr, '*');
             var ret = Module.ccall('uc_emu_start', 'number',
                 ['pointer', 'number', 'number', 'number', 'number'],
-                [handle, this.__address(begin), this.__address(until),
+                [handle, BigInt(begin || 0), BigInt(until || 0),
                  BigInt(timeout || 0), count]
             );
             if (ret != Module.ERR_OK) {
@@ -458,49 +453,6 @@ Object.assign(Module, {
         }
 
         // Helpers
-        this.__integer = function (value, width) {
-            if (typeof value === "number") {
-                value = [value];
-            }
-            switch (this.get_integer_type()) {
-            case ELF_INT_NUMBER:
-                return value[0];
-            case ELF_INT_STRING:
-                return value
-                    .map(x => x.toString(16).toUpperCase())
-                    .map(x => '0'.repeat(width/4 - x.length) + x)
-                    .reverse().join('');
-            case ELF_INT_OBJECT:
-                switch (width) {
-                case 8:  return new ElfUInt8(value);
-                case 16: return new ElfUInt16(value);
-                case 32: return new ElfUInt32(value);
-                case 64: return new ElfUInt64(value);
-                default: throw 'Unexpected width';
-                }
-            default:
-                var error = 'Unimplemented integer type';
-                throw error;
-            }
-        }
-        this.__address = function (address) {
-            // Normalize any supported address representation into the BigInt
-            // expected at the 64-bit (uint64_t) FFI boundary.
-            if (typeof address === 'bigint') {
-                return address;
-            }
-            if (typeof address === 'number' || typeof address === 'string') {
-                return BigInt(address);
-            }
-            if (address && address.chunks) { // ElfUInt
-                var value = 0n;
-                for (var i = address.chunks.length - 1; i >= 0; i--) {
-                    value = (value << 16n) | BigInt(address.chunks[i]);
-                }
-                return value;
-            }
-            return BigInt(address);
-        }
         this._sizeof = function (type) {
             switch (type) {
                 case 'i8':     return 1;
@@ -516,10 +468,12 @@ Object.assign(Module, {
             // Allocate space for the output value
             var value_size = this._sizeof(type);
             var value_ptr = Module._malloc(value_size);
-            // Convert integer types
-            var value_obj = new (ElfUInt(value_size*8))(value);
-            for (var i = 0; i < value_size/2; i++) {
-                Module.setValue(value_ptr + i*2, value_obj.chunks[i], 'i16');
+            // Serialize the value: 64-bit integers cross as BigInt (WASM_BIGINT),
+            // narrower integer types and floats as Number.
+            if (type === 'i64') {
+                Module.setValue(value_ptr, BigInt(value || 0), 'i64');
+            } else {
+                Module.setValue(value_ptr, value, type);
             }
             // Register write
             var handle = Module.getValue(this.handle_ptr, '*');
@@ -546,8 +500,7 @@ Object.assign(Module, {
             var value_size = this._sizeof(type);
             var value_ptr = Module._malloc(value_size);
             if (type === 'i64') {
-                Module.setValue(value_ptr, 0, 'i32');
-                Module.setValue(value_ptr + 4, 0, 'i32');
+                Module.setValue(value_ptr, 0n, 'i64');
             } else {
                 Module.setValue(value_ptr, 0, type);
             }
@@ -558,20 +511,9 @@ Object.assign(Module, {
                 ['pointer', 'number', 'pointer'],
                 [handle, regid, value_ptr]
             );
-            // Get register value, free memory and handle return code
-            var value;
-            if (type === 'i64') {
-                value = [
-                    Module.getValue(value_ptr, 'i32'),
-                    Module.getValue(value_ptr + 4, 'i32')
-                ];
-            } else {
-                value = Module.getValue(value_ptr, type);
-            }
-            // Convert integer types
-            if (type.includes('i')) {
-                value = this.__integer(value, value_size*8);
-            }
+            // Read back the value: 64-bit integers come back as BigInt
+            // (WASM_BIGINT), narrower integer types and floats as Number.
+            var value = Module.getValue(value_ptr, type);
             Module._free(value_ptr);
             if (ret != Module.ERR_OK) {
                 var error = 'Unicorn.js: Function uc_reg_read failed with code ' + ret + ':\n' + Module.strerror(ret);
@@ -590,22 +532,19 @@ Object.assign(Module, {
             // Allocate space for the output value
             var result_size = this._sizeof(result_type);
             var result_ptr = Module._malloc(result_size);
-            Module.setValue(value_ptr, 0, result_type);
+            if (result_type === 'i64') {
+                Module.setValue(result_ptr, 0n, 'i64');
+            } else {
+                Module.setValue(result_ptr, 0, result_type);
+            }
             // Make query
             var handle = Module.getValue(this.handle_ptr, '*');
             var ret = Module.ccall('uc_query', 'number',
                 ['pointer', 'number', 'pointer'],
                 [handle, query_type, result_ptr]
             );
-            // Get result value, free memory and handle return code
+            // Read back the result (64-bit as BigInt under WASM_BIGINT), then free.
             var result = Module.getValue(result_ptr, result_type);
-            if (type === 'i64') {
-                result = [result, Module.getValue(result_ptr+4, 'i32')]
-            }
-            // Convert integer types
-            if (type.includes('i')) {
-                result = this.__integer(result, result_size*8);
-            }
             Module._free(result_ptr);
             if (ret != Module.ERR_OK) {
                 var error = 'Unicorn.js: Function uc_query failed with code ' + ret + ':\n' + Module.strerror(ret);
@@ -619,20 +558,6 @@ Object.assign(Module, {
         this.query_i64     = function (type) { return this.query_type(type, 'i64'); }
         this.query_float   = function (type) { return this.query_type(type, 'float'); }
         this.query_double  = function (type) { return this.query_type(type, 'double'); }
-        
-        // Configuration
-        this.get_integer_type = function () {
-            // Using ELF_INT_NUMBER as default for 32 bit backward compatibility
-            if (this.integer_type == null) {
-                return ELF_INT_NUMBER;
-            }
-            return this.integer_type;
-        }
-
-        this.set_integer_type = function (type) {
-            // Please Use ELF_INT_STRING/ELF_INT_OBJECT for 64 bit support
-            this.integer_type = type;
-        }
 
         // Constructor
         var ret = Module.ccall('uc_open', 'number',

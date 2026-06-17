@@ -706,7 +706,6 @@ def compileUnicorn(targets):
         # trampoline can only match via a BigInt ('j') signature.
         '-s', 'WASM_BIGINT=1',
         '-s', "EXPORT_NAME='MUnicorn'",
-        '--post-js', 'src/libelf-integers.js',
     ]
     for path in constant_files(targets):
         cmd += ['--post-js', path]

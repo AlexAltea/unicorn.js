@@ -365,16 +365,17 @@ Object.assign(Module, {
             }
             // Set hook
             var hook_ptr = Module._malloc(4);
+            var valist_ptr = Module._malloc(8);
+            Module.setValue(valist_ptr, extra || 0, 'i32');
             var ret = Module.ccall('uc_hook_add', 'number',
-                ['pointer', 'pointer', 'number', 'pointer', 'pointer',
-                    'number', 'number', 'number'],
-                [handle, hook_ptr, type, callback_ptr, 0,
-                    BigInt(begin || 0), BigInt(end || 0), extra || 0]
+                ['pointer', 'pointer', 'number', 'pointer', 'pointer', 'number', 'number', 'pointer'],
+                [handle, hook_ptr, type, callback_ptr, 0, BigInt(begin || 0), BigInt(end || 0), valist_ptr]
             );
+            Module._free(valist_ptr);
             if (ret != Module.ERR_OK) {
                 Module.removeFunction(callback_ptr);
                 Module._free(hook_ptr);
-                var error = 'Unicorn.js: Function uc_mem_unmap failed with code ' + ret + ':\n' + Module.strerror(ret);
+                var error = 'Unicorn.js: Function uc_hook_add failed with code ' + ret + ':\n' + Module.strerror(ret);
                 throw error;
             }
             var hook = {

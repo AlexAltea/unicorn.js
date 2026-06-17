@@ -560,25 +560,6 @@ def patchUnicornJS():
          }
         """
     })
-    # Fix unsupported varargs in uc_hook_add function signature
-    replace(os.path.join(UNICORN_DIR, "include/unicorn/unicorn.h"), {
-        "        void *user_data, uint64_t begin, uint64_t end, ...);":
-        "        void *user_data, uint64_t begin, uint64_t end, uint32_t extra);",
-    })
-    replace(os.path.join(UNICORN_DIR, "uc.c"), {
-        "        err = uc_hook_add(uc, &uc->count_hook, UC_HOOK_CODE, hook_count_cb, NULL, 1, 0);":
-        "        err = uc_hook_add(uc, &uc->count_hook, UC_HOOK_CODE, hook_count_cb, NULL, 1, 0, 0);",
-        "        void *user_data, uint64_t begin, uint64_t end, ...)":
-        "        void *user_data, uint64_t begin, uint64_t end, uint32_t extra)",
-        "        va_list valist;":
-        "        //va_list valist;",
-        "        va_start(valist, end);":
-        "        //va_start(valist, end);",
-        "        hook->insn = va_arg(valist, int);":
-        "        hook->insn = extra;",
-        "        va_end(valist);":
-        "        //va_end(valist);",
-    })
 
 
 ############

@@ -2,11 +2,13 @@
 
 import os
 import glob
+import json
 import re
 import shutil
 import stat
 import subprocess
 import sys
+import zipfile
 
 EXPORTED_FUNCTIONS = [
     '_free',
@@ -62,6 +64,15 @@ CONST_HEADERS = [
 TARGET_ALIASES = {
     'aarch64': 'arm64',
 }
+
+# Unicorn build-target architecture names (the values UNICORN_ARCHS accepts, see
+# the unicorn submodule's Makefile). Used by --release to emit one single-arch
+# bundle per architecture. Kept as build-target names (e.g. `aarch64`, resolved
+# to the `arm64` constants via TARGET_ALIASES), so `--release` mirrors what a
+# user would get from `build.py <arch>`.
+AVAILABLE_ARCHITECTURES = [
+    'arm', 'aarch64', 'm68k', 'mips', 'sparc', 'x86',
+]
 
 # Directories
 UNICORN_DIR = os.path.abspath("unicorn")
@@ -131,7 +142,7 @@ def generateConstants():
         out.close()
 
 
-def constant_files(targets):
+def constant_files(archs):
     """Per-architecture constants files (constants_<arch>.js) to bundle.
 
     The cross-architecture constants are kept in src/unicorn-wrapper.js (always
@@ -139,8 +150,8 @@ def constant_files(targets):
     build, or just the selected architectures' for a targeted build.
     """
     wanted = None
-    if targets:
-        wanted = {TARGET_ALIASES.get(t.lower(), t.lower()) for t in targets}
+    if archs:
+        wanted = {TARGET_ALIASES.get(a.lower(), a.lower()) for a in archs}
     files = []
     for header, name, prefix in CONST_HEADERS:
         if wanted is not None and name not in wanted:
@@ -540,15 +551,18 @@ def patchUnicornJS():
 # Building #
 ############
 
-def compileUnicorn(targets):
-    # Patching Unicorn's QEMU fork
-    patchUnicornTCI()
-    patchUnicornJS()
+def package_build(suffix):
+    """Zip the .js/.wasm pair into dist/unicorn{suffix}_{version}.zip."""
+    version = json.load(open('package.json'))['version']
+    zip_path = f'dist/unicorn{suffix}_{version}.zip'
+    with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zf:
+        for path in (f'dist/unicorn{suffix}.js', f'dist/unicorn{suffix}.wasm'):
+            zf.write(path, os.path.basename(path))
 
-    # Emscripten: Make
-    os.chdir(UNICORN_DIR)
-    os.system('make clean')
-    os.chdir('..')
+
+def compileUnicorn(archs=[], package=False):
+    # Clean static library objects
+    subprocess.run(['make', 'clean'], cwd=UNICORN_DIR)
 
     # Build the static library
     jobs = os.cpu_count() or 1
@@ -556,12 +570,12 @@ def compileUnicorn(targets):
     env = os.environ.copy()
     env['UNICORN_DEBUG'] = 'no'
     env['UNICORN_SHARED'] = 'no'
-    if targets:
-        env['UNICORN_ARCHS'] = ' '.join(targets)
+    if archs:
+        env['UNICORN_ARCHS'] = ' '.join(archs)
     subprocess.run(cmd, check=True, cwd=UNICORN_DIR, env=env)
 
     # Port the static library to JavaScript/WASM
-    suffix = ('_' + '+'.join(targets)) if targets else ''
+    suffix = ('_' + '+'.join(archs)) if archs else ''
     methods = [
         'ccall', 'getValue', 'setValue',
         'addFunction', 'removeFunction', 'writeArrayToMemory',
@@ -580,37 +594,33 @@ def compileUnicorn(targets):
         '-s', 'WASM_BIGINT=1',
         '-s', "EXPORT_NAME='MUnicorn'",
     ]
-    for path in constant_files(targets):
+    for path in constant_files(archs):
         cmd += ['--post-js', path]
     cmd += ['--post-js', 'src/unicorn-wrapper.js']
     cmd += ['-o', f'dist/unicorn{suffix}.js']
     os.makedirs('dist', exist_ok=True)
     subprocess.run(cmd, check=True)
+    if package:
+        package_build(suffix)
 
-
-def exit_usage():
-    print("Usage: %s <action> [<targets>...]\n" % (sys.argv[0]))
-    print("List of actions:")
-    print(" - patch: Patch Unicorn only")
-    print(" - build: Patch Unicorn and build Unicorn.js")
-    exit(1)
 
 if __name__ == "__main__":
     # Initialize Unicorn submodule if necessary
     if not os.listdir(UNICORN_DIR):
         os.system("git submodule update --init")
-    # Compile Unicorn
-    if len(sys.argv) < 2:
-        exit_usage()
-    action = sys.argv[1]
-    if action == 'patch':
-        patchUnicornTCI()
-        patchUnicornJS()
-    elif action == 'build':
-        patchUnicornTCI()
-        patchUnicornJS()
-        targets = sorted(sys.argv[2:])
-        generateConstants()
-        compileUnicorn(targets)
+
+    # Patch Unicorn submodule
+    patchUnicornTCI()
+    patchUnicornJS()
+
+    args = sys.argv[1:]
+    package = '--package' in args
+    release = '--release' in args
+    generateConstants()
+    if release:
+        compileUnicorn([], package) # Build all
+        for arch in AVAILABLE_ARCHITECTURES:
+            compileUnicorn([arch], package)
     else:
-        exit_usage()
+        archs = sorted(a for a in args if not a.startswith('--'))
+        compileUnicorn(archs, package)

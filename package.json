@@ -1,5 +1,5 @@
 {
-  "name": "unicornjs",
+  "name": "@alexaltea/unicorn-js",
   "version": "1.0.0",
   "description": "Unicorn CPU emulator framework port for JavaScript",
   "author": "Alexandro Sanchez Bach <alexaltea123@gmail.com>",
@@ -24,12 +24,11 @@
     "dist/unicorn.wasm"
   ],
   "scripts": {
-    "build": "python3 build.py build",
+    "build": "python3 build.py",
     "serve": "python3 -m http.server",
     "test": "node tests/main.js"
   },
   "bugs": {
     "url": "https://github.com/AlexAltea/unicorn.js/issues"
-  },
-  "private": true
+  }
 }

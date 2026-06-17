@@ -60,10 +60,10 @@ To build the Unicorn.js library:
 
 3. Run the build script:
     ```bash
-    python3 build.py build
+    python3 build.py
     ```
 
 Build artifacts will be saved to [`dist`](./dist/).
 
 > [!TIP]
-> Pass an architecture name to produce a smaller, single-architecture bundle (e.g. `python3 build.py build x86`).
+> Pass architecture names to produce a smaller, single-architecture bundle (e.g. `python3 build.py x86`), or `python3 build.py --release` to build every variant.

@@ -16,7 +16,7 @@ const dist = process.argv[2]
 
 if (!fs.existsSync(dist)) {
   console.error(`dist not found: ${dist}`);
-  console.error('Build it first:  python3 build.py build   (or: npm run build)');
+  console.error('Build it first:  python3 build.py   (or: npm run build)');
   process.exit(2);
 }
 

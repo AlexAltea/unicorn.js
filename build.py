@@ -5,6 +5,7 @@
 
 import os
 import glob
+import re
 import shutil
 import stat
 import subprocess
@@ -41,31 +42,114 @@ EXPORTED_FUNCTIONS = [
     '_free',
 ]
 
-EXPORTED_CONSTANTS = [
-    'bindings/python/unicorn/arm64_const.py',
-    'bindings/python/unicorn/arm_const.py',
-    'bindings/python/unicorn/m68k_const.py',
-    'bindings/python/unicorn/mips_const.py',
-    'bindings/python/unicorn/sparc_const.py',
-    'bindings/python/unicorn/x86_const.py',
-    'bindings/python/unicorn/unicorn_const.py',
+# Unicorn per-architecture public headers and the C macro prefix to export from
+# each. Adapted from capstone.js (which adapted it from Unicorn's
+# bindings/const_generator.py): each header is parsed into src/constants_<name>.js,
+# with every value resolved to a plain integer. The leading `UC_` is dropped on
+# output, so e.g. UC_ARM_REG_R0 -> ARM_REG_R0, matching the names the public API
+# uses (uc.ARM_REG_R0).
+#
+# The cross-architecture constants (UC_ARCH/MODE/ERR/MEM/HOOK/QUERY/PROT, ...) are
+# small and stable, so — as in capstone.js's capstone-wrapper.js — they are kept
+# by hand directly in src/unicorn-wrapper.js rather than generated here.
+CONST_HEADERS = [
+    ('arm.h',     'arm',    'UC_ARM_'),
+    ('arm64.h',   'arm64',  'UC_ARM64_'),
+    ('m68k.h',    'm68k',   'UC_M68K_'),
+    ('mips.h',    'mips',   'UC_MIPS_'),
+    ('sparc.h',   'sparc',  'UC_SPARC_'),
+    ('x86.h',     'x86',    'UC_X86_'),
 ]
+
+# Unicorn build-target names whose constants file is named differently.
+TARGET_ALIASES = {
+    'aarch64': 'arm64',
+}
 
 # Directories
 UNICORN_DIR = os.path.abspath("unicorn")
+UNICORN_INCLUDE_DIR = os.path.join(UNICORN_DIR, "include", "unicorn")
 UNICORN_QEMU_DIR = os.path.join(UNICORN_DIR, "qemu")
 ORIGINAL_QEMU_DIR = os.path.abspath("externals/qemu-2.2.1")
 
+
 def generateConstants():
-    out = open('src/unicorn-constants.js', 'w')
-    for path in EXPORTED_CONSTANTS:
-        path = os.path.join(UNICORN_DIR, path)
-        with open(path, 'r') as f:
-            code = f.read()
-            code = code.replace('\nUC_', '\nModule.')
-            code = code.replace('#', '//')
-        out.write(code)
-    out.close()
+    """Generate src/constants_<name>.js from Unicorn's C headers (one per header).
+
+    Each file is loaded into the module via Emscripten `--post-js` (see
+    compileUnicorn) so it runs with `Module` in scope and merges its constants
+    straight onto the module, which becomes the public `uc` object.
+
+    Each header's `typedef enum` / `#define` constants are parsed and every value
+    resolved to an integer, so enum aliases (e.g. `UC_ARM_REG_R13 = UC_ARM_REG_SP`)
+    and expressions (e.g. `1 << 30`) collapse to plain integer literals. This is
+    immune to the textual quirks of Unicorn's pre-generated Python bindings.
+    """
+    for header, name, prefix in CONST_HEADERS:
+        content = open(os.path.join(UNICORN_INCLUDE_DIR, header)).read()
+        # Strip C comments up front so values never collide with `//`/`/* */`.
+        content = re.sub(r'/\*.*?\*/', ' ', content, flags=re.DOTALL)
+
+        out = open('src/constants_%s.js' % name, 'w')
+        out.write('// AUTO-GENERATED, DO NOT EDIT [%s]\n' % header)
+        out.write('Object.assign(Module, {\n')
+        values = {}    # running namespace for value resolution (full UC_ names)
+        count = 0
+        for line in content.splitlines():
+            line = line.split('//', 1)[0].strip()
+            if line == '':
+                continue
+            if line.startswith('#define '):
+                fields = re.split(r'\s+', line[len('#define '):], 1)
+                if len(fields) != 2 or '(' in fields[0] or ')' in fields[0]:
+                    continue  # skip multi-token / function-like macros
+                line = fields[0] + ' = ' + fields[1]
+            if not line.startswith(prefix):
+                continue
+
+            for token in line.split(','):
+                token = token.strip()
+                if not token:
+                    continue
+                fields = re.split(r'\s+', token)
+                if not fields[0].startswith(prefix):
+                    continue
+                if len(fields) > 1 and fields[1] != '=':
+                    continue  # not a `NAME` or `NAME = value` enumerator
+                if len(fields) > 1 and fields[1] == '=':
+                    rhs = ''.join(fields[2:])      # explicit value/alias/expression
+                else:
+                    rhs = str(count)               # implicit running enum value
+                    count += 1
+                try:
+                    count = int(rhs) + 1
+                except ValueError:
+                    pass
+                name_c = fields[0].strip()
+                value = eval(rhs, None, values)    # resolve to integer
+                exec('%s = %d' % (name_c, value), None, values)
+                key = name_c[3:] if name_c.startswith('UC_') else name_c
+                out.write('  %s: %d,\n' % (key, value))
+        out.write('});\n')
+        out.close()
+
+
+def constant_files(targets):
+    """Per-architecture constants files (constants_<arch>.js) to bundle.
+
+    The cross-architecture constants are kept in src/unicorn-wrapper.js (always
+    bundled), so this returns only per-architecture files: all of them for a full
+    build, or just the selected architectures' for a targeted build.
+    """
+    wanted = None
+    if targets:
+        wanted = {TARGET_ALIASES.get(t.lower(), t.lower()) for t in targets}
+    files = []
+    for header, name, prefix in CONST_HEADERS:
+        if wanted is not None and name not in wanted:
+            continue
+        files.append('src/constants_%s.js' % name)
+    return files
 
 #############
 # Utilities #
@@ -623,10 +707,11 @@ def compileUnicorn(targets):
         '-s', 'WASM_BIGINT=1',
         '-s', "EXPORT_NAME='MUnicorn'",
         '--post-js', 'src/libelf-integers.js',
-        '--post-js', 'src/unicorn-constants.js',
-        '--post-js', 'src/unicorn-wrapper.js',
-        '-o', f'dist/unicorn{suffix}.js',
     ]
+    for path in constant_files(targets):
+        cmd += ['--post-js', path]
+    cmd += ['--post-js', 'src/unicorn-wrapper.js']
+    cmd += ['-o', f'dist/unicorn{suffix}.js']
     os.makedirs('dist', exist_ok=True)
     subprocess.run(cmd, check=True)
 

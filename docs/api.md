@@ -12,7 +12,7 @@ Given an error code, return the code in a human-readable format.
 An emulator object. `arch` is the name of the architecture the emulator will emulate, and `mode` is the mode it will be in.
 ### Methods
 #### reg_write(regid, bytes)
-Writes the inputted bytes to the inputted register (which is represented by `regid`). Please note that you should use one of the constants for `regid`, as otherwise you would need to dig through [unicorn-constants.js](https://github.com/AlexAltea/unicorn.js/blob/master/src/unicorn-constants.js) (or the **Constants** section of this documentation).
+Writes the inputted bytes to the inputted register (which is represented by `regid`). Please note that you should use one of the constants for `regid`, as otherwise you would need to dig through the per-architecture [constants files](https://github.com/AlexAltea/unicorn.js/tree/master/src) (e.g. `constants_arm.js`, `constants_x86.js`), or the **Constants** section of this documentation.
 #### reg_read(regid, size)
 Read `size` bytes from the register `regid`.
 #### mem_write(address, bytes)

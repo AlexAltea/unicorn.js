@@ -382,7 +382,7 @@ def patchUnicornTCI():
     replace(os.path.join(UNICORN_QEMU_DIR, "configure"), {
         "strip_opt=\"yes\"": "strip_opt=\"yes\"\ntcg_interpreter=\"yes\"",
         "# XXX: suppress that": "if test \"$tcg_interpreter\" = \"yes\" ; then\n  echo \"CONFIG_TCG_INTERPRETER=y\" >> $config_host_mak\nfi\n# XXX: suppress that",
-        "if test \"$ARCH\" = \"sparc64\" ; then": "if test \"$tcg_interpreter\" = \"yes\"; then\n  QEMU_INCLUDES=\"-I\$(SRC_PATH)/tcg/tci $QEMU_INCLUDES\"\nelif test \"$ARCH\" = \"sparc64\" ; then"
+        "if test \"$ARCH\" = \"sparc64\" ; then": "if test \"$tcg_interpreter\" = \"yes\"; then\n  QEMU_INCLUDES=\"-I\\$(SRC_PATH)/tcg/tci $QEMU_INCLUDES\"\nelif test \"$ARCH\" = \"sparc64\" ; then"
     })
     # Add executable permissions for the new configure file
     path = os.path.join(UNICORN_QEMU_DIR, "configure")
@@ -415,7 +415,6 @@ def patchUnicornTCI():
     replace(os.path.join(UNICORN_QEMU_DIR, "gen_all_header.sh"), {
         "python header_gen.py": sys.executable + " header_gen.py",
     })
-    subprocess.run(["sh", "gen_all_header.sh"], check=True, cwd=UNICORN_QEMU_DIR)
 
 
 def patchUnicornJS():
@@ -561,8 +560,9 @@ def package_build(suffix):
 
 
 def compileUnicorn(archs=[], package=False):
-    # Clean static library objects
+    # Clean static library objects and re-generate headers
     subprocess.run(['make', 'clean'], cwd=UNICORN_DIR)
+    subprocess.run(["sh", "gen_all_header.sh"], check=True, cwd=UNICORN_QEMU_DIR)
 
     # Build the static library
     jobs = os.cpu_count() or 1

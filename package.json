@@ -25,7 +25,8 @@
   ],
   "scripts": {
     "build": "python3 build.py build",
-    "serve": "python3 -m http.server"
+    "serve": "python3 -m http.server",
+    "test": "node tests/main.js"
   },
   "bugs": {
     "url": "https://github.com/AlexAltea/unicorn.js/issues"

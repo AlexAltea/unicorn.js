@@ -1,3 +1,6 @@
+// Engine modules and instances
+var uc, ks, cs, e, a, d;
+
 // Utils
 function utilIntToHex(n, pad) {
     pad = (typeof pad !== 'undefined') ? pad : 1;
@@ -187,7 +190,7 @@ function Instruction() {
     }
     this.setAsm = function (asm) {
         this.dataAsm = asm.trim();
-        var bytes = Array.from(a.asm(this.dataAsm));
+        var bytes = Array.from(a.asm(this.dataAsm).mc);
         this.setHex(bytes);
         this.restore();
     }
@@ -242,7 +245,7 @@ var paneAssembler = {
         paneRegisters.update();
     },
     appendAsm: function (asm) {
-        asm = asm.split(/[\n\r;]+/);
+        asm = (asm || '').split(/[\n\r;]+/);
         for (var i = 0; i < asm.length; i++) {
             var instAsm = asm[i].trim();
             if (instAsm.length == 0) {

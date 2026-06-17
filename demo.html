@@ -2,15 +2,16 @@
 <html lang="en">
   <head>
     <meta charset="utf-8"/>
-
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
     <title>Unicorn.js</title>
 
     <!-- External fonts -->
-    <link href='//fonts.googleapis.com/css?family=Open+Sans:400italic,600italic,400,600' rel='stylesheet' type='text/css'>
-    <link href='//fonts.googleapis.com/css?family=Inconsolata:400,700' rel='stylesheet' type='text/css'>
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400italic,600italic,400,600' rel='stylesheet' type='text/css'>
+    <link href='https://fonts.googleapis.com/css?family=Inconsolata:400,700' rel='stylesheet' type='text/css'>
 
     <!-- External icons -->
-    <link href="//cdn.materialdesignicons.com/1.8.36/css/materialdesignicons.min.css" rel="stylesheet">
+    <link href="https://cdn.materialdesignicons.com/1.8.36/css/materialdesignicons.min.css" rel="stylesheet"
+          integrity="sha384-DMPxSCjH/Vuhh3xBEeQOhpMcFp7bIArg37LOvIHv4G1ucZyKTmQlhOXz+ZilR16j" crossorigin="anonymous">
 
     <!-- Style -->
     <link href='demos/demo.css' rel='stylesheet' type='text/css'>
@@ -151,53 +152,55 @@
 
     <!-- External scripts -->
     <script src="demos/externals/clipboard.min.js"></script>
-    <script src="//code.jquery.com/jquery-3.1.1.min.js"></script>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/require.js/2.3.2/require.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.1.1.min.js"
+            integrity="sha384-3ceskX3iaEnIogmQchP8opvBy3Mi7Ce34nWjpBIwVTHfGYWQS9jwHDVRnpKKHJg7" crossorigin="anonymous"></script>
     <script src="demos/externals/split.min.js"></script>
 
     <!-- Unicorn.js demo -->
     <script src="demos/demo.js"></script>
     <script>
-      // Require.JS
-      requirejs.config({
-          shim: {
-              'demos/demo-arm': [
-                'dist/unicorn-arm.min',
-                'demos/externals/keystone-arm.min',
-                'demos/externals/capstone-arm.min'],
-              'demos/demo-mips': [
-                'dist/unicorn-mips.min',
-                'demos/externals/keystone-mips.min',
-                'demos/externals/capstone-mips.min'],
-              'demos/demo-sparc': [
-                'dist/unicorn-sparc.min',
-                'demos/externals/keystone-sparc.min',
-                'demos/externals/capstone-sparc.min'],
-              'demos/demo-x86': [
-                'dist/unicorn-x86.min',
-                'demos/externals/keystone-x86.min',
-                'demos/externals/capstone-x86.min'],
-          }
-      });
       // Get URL parameters
       function gup(name) {
-          url = location.href;
-          name = name.replace(/[\[]/,"\\\[").replace(/[\]]/,"\\\]");
-          var regexS = "[\\?&]"+name+"=([^&#]*)";
-          var regex = new RegExp(regexS);
-          var results = regex.exec(url);
+          var regex = new RegExp("[\\?&]" + name.replace(/[\[\]]/g, "\\$&") + "=([^&#]*)");
+          var results = regex.exec(location.href);
           return results == null ? null : results[1];
       }
 
-      // Get needed scripts from URL anchor-based parameters
-      var scripts = []
-      switch (gup('arch')) {
-      case 'arm':   requirejs(['demos/demo-arm']);   break;
-      case 'mips':  requirejs(['demos/demo-mips']);  break;
-      case 'sparc': requirejs(['demos/demo-sparc']); break;
-      case 'x86':   requirejs(['demos/demo-x86']);   break;
-      default:
-        window.location = './index.html';
+      // Load scripts sequentially to preserve dependency order
+      function loadScripts(urls, done) {
+          (function next(i) {
+              if (i >= urls.length) { done(); return; }
+              var s = document.createElement('script');
+              s.src = urls[i];
+              s.onload = function () { next(i + 1); };
+              s.onerror = function () { console.error('Failed to load ' + urls[i]); };
+              document.head.appendChild(s);
+          })(0);
+      }
+
+      // unicorn.js / keystone.js / capstone.js each expose an async factory
+      // (MUnicorn / MKeystone / MCapstone) returning a Promise; demo-<arch> defines demoInit.
+      // keystone.js and capstone.js are the all-architecture WASM builds served from
+      // GitHub Pages (the URL is unversioned): keystone.js v0.9.2, capstone.js v5.0.9.
+      var arch = gup('arch');
+      if (['arm', 'mips', 'sparc', 'x86'].indexOf(arch) < 0) {
+          window.location = './index.html';
+      } else {
+          loadScripts([
+              'https://alexaltea.github.io/keystone.js/dist/keystone.js',
+              'https://alexaltea.github.io/capstone.js/dist/capstone.js',
+              'dist/unicorn.js',
+              'demos/demo-' + arch + '.js',
+          ], function () {
+              $(function () {
+                  Promise.all([MUnicorn(), MKeystone(), MCapstone()]).then(function (mods) {
+                      uc = mods[0];
+                      ks = mods[1];
+                      cs = mods[2];
+                      demoInit();
+                  });
+              });
+          });
       }
     </script>
   </body>

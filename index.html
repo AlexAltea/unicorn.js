@@ -2,17 +2,20 @@
 <html lang="en">
     <head>
         <meta charset="utf-8"/>
-
+        <meta name="viewport" content="width=device-width, initial-scale=1"/>
         <title>Unicorn.js</title>
 
         <!-- External stylesheets -->
-        <link href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css" rel="stylesheet">
-        <link href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/8.4/styles/github.min.css" rel="stylesheet">
-        <link href="//cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.10.0/css/bootstrap-select.min.css" rel="stylesheet">
+        <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css" rel="stylesheet"
+              integrity="sha384-8+rznmq/k0KZkJlZhnuPEVkbRD7tA0wcFEjY48dajGWn3Xc1MasJwS8/tJ7OEsKW" crossorigin="anonymous">
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.4/styles/github.min.css" rel="stylesheet"
+              integrity="sha384-fNd8YWakt/tPdUmtC3TuP7+sYc2xegAshr3FFUYklBBDwiP/DpoBvW2HvQNr6w0h" crossorigin="anonymous">
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.10.0/css/bootstrap-select.min.css" rel="stylesheet"
+              integrity="sha384-feuj7rKXjU3ab4TXdk66vl9bpF8MgQADmGa8JxkC1T8WOlIrTAexWZtb2kLc/q1f" crossorigin="anonymous">
 
         <!-- External fonts -->
-        <link href='//fonts.googleapis.com/css?family=Open+Sans:400italic,600italic,400,600' rel='stylesheet' type='text/css'>
-        <link href='//fonts.googleapis.com/css?family=Inconsolata:400,700' rel='stylesheet' type='text/css'>
+        <link href='https://fonts.googleapis.com/css?family=Open+Sans:400italic,600italic,400,600' rel='stylesheet' type='text/css'>
+        <link href='https://fonts.googleapis.com/css?family=Inconsolata:400,700' rel='stylesheet' type='text/css'>
 
         <!-- Style -->
         <style>
@@ -118,7 +121,9 @@ MUnicorn().then((uc) => {
     e.mem_write(addr, code);
 
     // Start emulator
-    e.emu_start(addr, addr + code.length, 0, 0);
+    var begin = addr;
+    var until = addr + code.length;
+    e.emu_start(begin, until, 0, 0);
 
     // Read registers
     var r0 = e.reg_read_i32(uc.ARM_REG_R0);  // 0x37
@@ -142,8 +147,10 @@ MUnicorn().then((uc) => {
         </div>
 
         <!-- External scripts -->
-        <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/8.4/highlight.min.js"></script>
-        <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/8.4/languages/javascript.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.4/highlight.min.js"
+                integrity="sha384-kaknrs+4mAUK7Cfvb68OavtvOQ2AuNxHHeBSG7IbcRVoVwPO73Q/oPB3qop8tNRk" crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.4/languages/javascript.min.js"
+                integrity="sha384-/DX38n5i8baBf5uZU3Um7iyMnFhTwH5WUK3kY2x8gEwnbOiHrq1lYYNVhswLpk//" crossorigin="anonymous"></script>
 
         <script>
             // Highlight.JS

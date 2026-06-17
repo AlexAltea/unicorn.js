@@ -235,54 +235,6 @@ for d in xrange(5):
         shutil.move(f, f[:-2] + '-' + m.group(1) + '.o')
 """
 
-PATCH_UNALIGNED_MEMACCESS = """
-#define UNALIGNED_READ16_LE(addr) ( \\
-    ((uint16_t)(*((uint8_t*)(addr) + 0)) <<  0) |  \\
-    ((uint16_t)(*((uint8_t*)(addr) + 1)) <<  8)    \\
-)
-
-#define UNALIGNED_READ32_LE(addr) ( \\
-    ((uint32_t)(*((uint8_t*)(addr) + 0)) <<  0) |  \\
-    ((uint32_t)(*((uint8_t*)(addr) + 1)) <<  8) |  \\
-    ((uint32_t)(*((uint8_t*)(addr) + 2)) << 16) |  \\
-    ((uint32_t)(*((uint8_t*)(addr) + 3)) << 24)    \\
-)
-
-#define UNALIGNED_READ64_LE(addr) ( \\
-    ((uint64_t)(*((uint8_t*)(addr) + 0)) <<  0) |  \\
-    ((uint64_t)(*((uint8_t*)(addr) + 1)) <<  8) |  \\
-    ((uint64_t)(*((uint8_t*)(addr) + 2)) << 16) |  \\
-    ((uint64_t)(*((uint8_t*)(addr) + 3)) << 24) |  \\
-    ((uint64_t)(*((uint8_t*)(addr) + 4)) << 32) |  \\
-    ((uint64_t)(*((uint8_t*)(addr) + 5)) << 40) |  \\
-    ((uint64_t)(*((uint8_t*)(addr) + 6)) << 48) |  \\
-    ((uint64_t)(*((uint8_t*)(addr) + 7)) << 56)    \\
-)
-
-#define UNALIGNED_WRITE16_LE(addr, value) { \\
-    *((uint8_t*)(addr) + 0) = ((value) >>  0) & 0xFF; \\
-    *((uint8_t*)(addr) + 1) = ((value) >>  8) & 0xFF; \\
-}
-
-#define UNALIGNED_WRITE32_LE(addr, value) { \\
-    *((uint8_t*)(addr) + 0) = ((value) >>  0) & 0xFF; \\
-    *((uint8_t*)(addr) + 1) = ((value) >>  8) & 0xFF; \\
-    *((uint8_t*)(addr) + 2) = ((value) >> 16) & 0xFF; \\
-    *((uint8_t*)(addr) + 3) = ((value) >> 24) & 0xFF; \\
-}
-
-#define UNALIGNED_WRITE64_LE(addr, value) { \\
-    *((uint8_t*)(addr) + 0) = ((value) >>  0) & 0xFF; \\
-    *((uint8_t*)(addr) + 1) = ((value) >>  8) & 0xFF; \\
-    *((uint8_t*)(addr) + 2) = ((value) >> 16) & 0xFF; \\
-    *((uint8_t*)(addr) + 3) = ((value) >> 24) & 0xFF; \\
-    *((uint8_t*)(addr) + 4) = ((value) >> 32) & 0xFF; \\
-    *((uint8_t*)(addr) + 5) = ((value) >> 40) & 0xFF; \\
-    *((uint8_t*)(addr) + 6) = ((value) >> 48) & 0xFF; \\
-    *((uint8_t*)(addr) + 7) = ((value) >> 56) & 0xFF; \\
-}
-"""
-
 PATCH_HELPER_ADAPTER_PROTO = """
 #define GEN_ADAPTER_ARGS \\
   uint32_t a1, uint32_t a2, uint32_t a3, uint32_t a4, uint32_t a5, \\
@@ -607,37 +559,6 @@ def patchUnicornJS():
              }
          }
         """
-    })
-    # Fix unaligned reads
-    append(os.path.join(UNICORN_QEMU_DIR, "include/qemu-common.h"),
-        PATCH_UNALIGNED_MEMACCESS)
-    replace(os.path.join(UNICORN_QEMU_DIR, "include/exec/exec-all.h"), {
-        "    *(uint32_t *)jmp_addr = addr - (jmp_addr + 4);":
-        "    UNALIGNED_WRITE32_LE(jmp_addr, addr - (jmp_addr + 4));"
-    })
-    replace(os.path.join(UNICORN_QEMU_DIR, "tci.c"), {
-        "*(tcg_target_ulong *)(*tb_ptr)":
-        "UNALIGNED_READ32_LE(*tb_ptr)",
-        "*(uint32_t *)(*tb_ptr)":
-        "UNALIGNED_READ32_LE(*tb_ptr)",
-        "*(int32_t *)(*tb_ptr)":
-        "UNALIGNED_READ32_LE(*tb_ptr)",
-        "*(uint64_t *)tb_ptr":
-        "UNALIGNED_READ64_LE(tb_ptr)",
-        # Stores
-        "*(uint16_t *)(t1 + t2) = t0":
-        "UNALIGNED_WRITE16_LE(t1 + t2, t0)",
-        "*(uint32_t *)(t1 + t2) = t0":
-        "UNALIGNED_WRITE32_LE(t1 + t2, t0)",
-        "*(uint64_t *)(t1 + t2) = t0":
-        "UNALIGNED_WRITE64_LE(t1 + t2, t0)",
-        # Loads
-        "*(uint32_t *)(t1 + t2)":
-        "UNALIGNED_READ32_LE(t1 + t2)",
-        "*(uint64_t *)(t1 + t2)":
-        "UNALIGNED_READ64_LE(t1 + t2)",
-        "*(int32_t *)(t1 + t2)":
-        "(int32_t)UNALIGNED_READ32_LE(t1 + t2)",
     })
     # Fix unsupported varargs in uc_hook_add function signature
     replace(os.path.join(UNICORN_DIR, "include/unicorn/unicorn.h"), {

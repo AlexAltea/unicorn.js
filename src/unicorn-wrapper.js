@@ -12,7 +12,10 @@ Object.assign(Module, {
     ARCH_PPC: 5,
     ARCH_SPARC: 6,
     ARCH_M68K: 7,
-    ARCH_MAX: 8,
+    ARCH_RISCV: 8,
+    ARCH_S390X: 9,
+    ARCH_TRICORE: 10,
+    ARCH_MAX: 11,
 
     // uc_mode
     MODE_LITTLE_ENDIAN: 0,
@@ -39,6 +42,8 @@ Object.assign(Module, {
     MODE_SPARC32: 1 << 2,
     MODE_SPARC64: 1 << 3,
     MODE_V9: 1 << 4,
+    MODE_RISCV32: 1 << 2,
+    MODE_RISCV64: 1 << 3,
 
     // uc_err
     ERR_OK: 0,
@@ -63,6 +68,7 @@ Object.assign(Module, {
     ERR_HOOK_EXIST: 19,
     ERR_RESOURCE: 20,
     ERR_EXCEPTION: 21,
+    ERR_OVERFLOW: 22,
 
     // uc_mem_type
     MEM_READ: 16,
@@ -92,6 +98,9 @@ Object.assign(Module, {
     HOOK_MEM_FETCH: 1 << 12,
     HOOK_MEM_READ_AFTER: 1 << 13,
     HOOK_INSN_INVALID: 1 << 14,
+    HOOK_EDGE_GENERATED: 1 << 15,
+    HOOK_TCG_OPCODE: 1 << 16,
+    HOOK_TLB_FILL: 1 << 17,
     HOOK_MEM_UNMAPPED: (1 << 4) + (1 << 5) + (1 << 6),
     HOOK_MEM_PROT: (1 << 7) + (1 << 8) + (1 << 9),
     HOOK_MEM_READ_INVALID: (1 << 7) + (1 << 4),
@@ -114,11 +123,14 @@ Object.assign(Module, {
     PROT_ALL: 7,
 
     // Version and time-scale macros
-    API_MAJOR: 1,
-    API_MINOR: 0,
-    VERSION_MAJOR: 1,
-    VERSION_MINOR: 0,
-    VERSION_EXTRA: 3,
+    API_MAJOR: 2,
+    API_MINOR: 1,
+    API_PATCH: 4,
+    API_EXTRA: 255,
+    VERSION_MAJOR: 2,
+    VERSION_MINOR: 1,
+    VERSION_PATCH: 4,
+    VERSION_EXTRA: 255,
     SECOND_SCALE: 1000000,
     MILISECOND_SCALE: 1000,
 
@@ -204,11 +216,10 @@ Object.assign(Module, {
             var buffer_ptr = Module._malloc(buffer_len);
             Module.writeArrayToMemory(bytes, buffer_ptr);
 
-            // Write to memory (address is a uint64_t -> BigInt)
             var handle = Module.getValue(this.handle_ptr, '*');
             var ret = Module.ccall('uc_mem_write', 'number',
                 ['pointer', 'number', 'pointer', 'number'],
-                [handle, BigInt(address || 0), buffer_ptr, buffer_len]
+                [handle, BigInt(address || 0), buffer_ptr, BigInt(buffer_len || 0)]
             );
             // Free memory and handle return code
             Module._free(buffer_ptr);
@@ -225,11 +236,10 @@ Object.assign(Module, {
                 Module.setValue(buffer_ptr + i, 0, 'i8');
             }
 
-            // Read from memory (address is a uint64_t -> BigInt)
             var handle = Module.getValue(this.handle_ptr, '*');
             var ret = Module.ccall('uc_mem_read', 'number',
                 ['pointer', 'number', 'pointer', 'number'],
-                [handle, BigInt(address || 0), buffer_ptr, size]
+                [handle, BigInt(address || 0), buffer_ptr, BigInt(size || 0)]
             );
             // Get register value, free memory and handle return code
             var buffer = new Uint8Array(size);
@@ -248,7 +258,7 @@ Object.assign(Module, {
             var handle = Module.getValue(this.handle_ptr, '*');
             var ret = Module.ccall('uc_mem_map', 'number',
                 ['pointer', 'number', 'number', 'number'],
-                [handle, BigInt(address || 0), size, perms]
+                [handle, BigInt(address || 0), BigInt(size || 0), perms]
             );
             if (ret != Module.ERR_OK) {
                 var error = 'Unicorn.js: Function uc_mem_map failed with code ' + ret + ':\n' + Module.strerror(ret);
@@ -260,7 +270,7 @@ Object.assign(Module, {
             var handle = Module.getValue(this.handle_ptr, '*');
             var ret = Module.ccall('uc_mem_protect', 'number',
                 ['pointer', 'number', 'number', 'number'],
-                [handle, BigInt(address || 0), size, perms]
+                [handle, BigInt(address || 0), BigInt(size || 0), perms]
             );
             if (ret != Module.ERR_OK) {
                 var error = 'Unicorn.js: Function uc_mem_protect failed with code ' + ret + ':\n' + Module.strerror(ret);
@@ -276,7 +286,7 @@ Object.assign(Module, {
             var handle = Module.getValue(this.handle_ptr, '*');
             var ret = Module.ccall('uc_mem_unmap', 'number',
                 ['pointer', 'number', 'number'],
-                [handle, BigInt(address || 0), size]
+                [handle, BigInt(address || 0), BigInt(size || 0)]
             );
             if (ret != Module.ERR_OK) {
                 var error = 'Unicorn.js: Function uc_mem_unmap failed with code ' + ret + ':\n' + Module.strerror(ret);

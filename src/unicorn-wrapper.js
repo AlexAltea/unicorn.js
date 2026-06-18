@@ -279,7 +279,36 @@ Object.assign(Module, {
         }
 
         this.mem_regions = function () {
-            console.error("Unicorn.js: Method mem_regions unimplemented");
+            var handle = Module.getValue(this.handle_ptr, '*');
+            var regions_ptr_ptr = Module._malloc(4); // uc_mem_region**
+            var count_ptr = Module._malloc(4); // uint32_t*
+            Module.setValue(regions_ptr_ptr, 0, '*');
+            Module.setValue(count_ptr, 0, 'i32');
+            var ret = Module.ccall('uc_mem_regions', 'number',
+                ['pointer', 'pointer', 'pointer'],
+                [handle, regions_ptr_ptr, count_ptr]
+            );
+            var count = Module.getValue(count_ptr, 'i32');
+            var regions_ptr = Module.getValue(regions_ptr_ptr, '*');
+            Module._free(regions_ptr_ptr);
+            Module._free(count_ptr);
+            if (ret != Module.ERR_OK) {
+                var error = 'Unicorn.js: Function uc_mem_regions failed with code ' + ret + ':\n' + Module.strerror(ret);
+                throw error;
+            }
+            var regions = [];
+            for (var i = 0; i < count; i++) {
+                var base = regions_ptr + i * 24; // sizeof(uc_mem_region)
+                regions.push({
+                    begin: Module.getValue(base, 'i64'),
+                    end:   Module.getValue(base + 8, 'i64'),
+                    perms: Module.getValue(base + 16, 'i32'),
+                });
+            }
+            if (regions_ptr) {
+                Module.ccall('uc_free', 'number', ['pointer'], [regions_ptr]);
+            }
+            return regions;
         }
 
         this.mem_unmap = function (address, size) {
@@ -432,20 +461,51 @@ Object.assign(Module, {
             }
         }
 
+        // Snapshot/restore of CPU context. context_alloc() returns an opaque
+        // uc_context* handle to pass to context_save/restore and, when done,
+        // context_free (uc_context_alloc sizes it for this engine internally).
         this.context_alloc = function () {
-            console.error('Unicorn.js: Contexts not implemented');
+            var handle = Module.getValue(this.handle_ptr, '*');
+            var context_ptr_ptr = Module._malloc(4); // uc_context**
+            Module.setValue(context_ptr_ptr, 0, '*');
+            var ret = Module.ccall('uc_context_alloc', 'number',
+                ['pointer', 'pointer'], [handle, context_ptr_ptr]);
+            var context = Module.getValue(context_ptr_ptr, '*');
+            Module._free(context_ptr_ptr);
+            if (ret != Module.ERR_OK) {
+                var error = 'Unicorn.js: Function uc_context_alloc failed with code ' + ret + ':\n' + Module.strerror(ret);
+                throw error;
+            }
+            return context;
         }
 
-        this.context_free = function () {
-            console.error('Unicorn.js: Contexts not implemented');
+        this.context_free = function (context) {
+            var ret = Module.ccall('uc_context_free', 'number',
+                ['pointer'], [context]);
+            if (ret != Module.ERR_OK) {
+                var error = 'Unicorn.js: Function uc_context_free failed with code ' + ret + ':\n' + Module.strerror(ret);
+                throw error;
+            }
         }
 
-        this.context_save = function () {
-            console.error('Unicorn.js: Contexts not implemented');
+        this.context_save = function (context) {
+            var handle = Module.getValue(this.handle_ptr, '*');
+            var ret = Module.ccall('uc_context_save', 'number',
+                ['pointer', 'pointer'], [handle, context]);
+            if (ret != Module.ERR_OK) {
+                var error = 'Unicorn.js: Function uc_context_save failed with code ' + ret + ':\n' + Module.strerror(ret);
+                throw error;
+            }
         }
 
-        this.context_restore = function () {
-            console.error('Unicorn.js: Contexts not implemented');
+        this.context_restore = function (context) {
+            var handle = Module.getValue(this.handle_ptr, '*');
+            var ret = Module.ccall('uc_context_restore', 'number',
+                ['pointer', 'pointer'], [handle, context]);
+            if (ret != Module.ERR_OK) {
+                var error = 'Unicorn.js: Function uc_context_restore failed with code ' + ret + ':\n' + Module.strerror(ret);
+                throw error;
+            }
         }
 
         this.errno = function() {

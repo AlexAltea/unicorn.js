@@ -1,6 +1,2 @@
-# Unicorn.js arch-specific variants
-/dist/unicorn_*.js
-/dist/unicorn_*.wasm
-
-# Unicorn.js packages
-*.zip
+# Unicorn.js build artifacts
+/dist

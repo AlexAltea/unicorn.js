@@ -152,9 +152,9 @@
 
     <!-- External scripts -->
     <script src="demos/externals/clipboard.min.js"></script>
+    <script src="demos/externals/split.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.1.1.min.js"
             integrity="sha384-3ceskX3iaEnIogmQchP8opvBy3Mi7Ce34nWjpBIwVTHfGYWQS9jwHDVRnpKKHJg7" crossorigin="anonymous"></script>
-    <script src="demos/externals/split.min.js"></script>
 
     <!-- CapstoneJS and KeystoneJS engines -->
      <script src="https://cdn.jsdelivr.net/npm/@alexaltea/capstone-js@5.0.9/dist/capstone.js"
@@ -164,7 +164,32 @@
             integrity="sha384-RBtIAWmcBWC5zdAUN8RBUgxNK9ttz6nAqGqtt1GS1afGooNe3RA5fiifSkhE5ft3"
             crossorigin="anonymous"></script>
 
-    <script src="dist/unicorn.js"></script>
+    <!-- UnicornJS: try local build first, otherwise fallback to latest npm release -->
+    <script>
+      function loadScript(src, integrity) {
+        return new Promise((resolve, reject) => {
+          const script = document.createElement('script');
+          script.src = src;
+          if (integrity) {
+            script.integrity = integrity;
+            script.crossOrigin = 'anonymous';
+          }
+          script.onload = resolve;
+          script.onerror = reject;
+          document.head.appendChild(script);
+        });
+      }
+
+      function loadUnicorn() {
+        const local = 'dist/unicorn.js';
+        const cdn = 'https://cdn.jsdelivr.net/npm/@alexaltea/unicorn-js@1.0.3/dist/unicorn.js';
+        const sri = 'sha384-NajHcYamBPe3EGa0Cj4JfJbEwB3YPr7WyRXBlmGAITHpzmy2qroG9qUpL5aUK4gk';
+        return fetch(local, { method: 'HEAD' })
+          .then((res) => (res.ok ? loadScript(local) : Promise.reject()))
+          .catch(() => loadScript(cdn, sri))
+          .then(() => MUnicorn());
+      }
+    </script>
 
     <!-- Unicorn.js demo -->
     <script src="demos/demo.js"></script>
@@ -185,10 +210,10 @@
           s.src = 'demos/demo-' + arch + '.js';
           s.onload = function () {
               $(function () {
-                  Promise.all([MUnicorn(), MKeystone(), MCapstone()]).then(function (mods) {
-                      uc = mods[0];
+                  Promise.all([MCapstone(), MKeystone(), loadUnicorn()]).then(function (mods) {
+                      cs = mods[0];
                       ks = mods[1];
-                      cs = mods[2];
+                      uc = mods[2];
                       demoInit();
                   });
               });

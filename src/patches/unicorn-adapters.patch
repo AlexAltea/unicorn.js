@@ -1,0 +1,434 @@
+diff --git a/glib_compat/glib_compat.c b/glib_compat/glib_compat.c
+index 2bb71828..88f68608 100644
+--- a/glib_compat/glib_compat.c
++++ b/glib_compat/glib_compat.c
+@@ -200,7 +200,7 @@ static GList *g_list_sort_merge(GList *l1,
+ 
+     while (l1 && l2)
+     {
+-        cmp = ((GCompareDataFunc) compare_func) (l1->data, l2->data, user_data);
++        cmp = ((GCompareFunc) compare_func) (l1->data, l2->data);
+ 
+         if (cmp <= 0)
+         {
+@@ -337,7 +337,7 @@ static GSList *g_slist_sort_merge (GSList *l1,
+ 
+     while (l1 && l2)
+     {
+-        cmp = ((GCompareDataFunc) compare_func) (l1->data, l2->data, user_data);
++        cmp = ((GCompareFunc) compare_func) (l1->data, l2->data);
+ 
+         if (cmp <= 0)
+         {
+diff --git a/qemu/include/exec/helper-gen.h b/qemu/include/exec/helper-gen.h
+index c77990f5..af25cb5a 100644
+--- a/qemu/include/exec/helper-gen.h
++++ b/qemu/include/exec/helper-gen.h
+@@ -5,65 +5,73 @@
+ #define HELPER_GEN_H
+ 
+ #include "exec/helper-head.h"
++#include "exec/helper-adapter.h"  /* Unicorn.js: TCI/WASM helper adapters */
+ 
+ #define DEF_HELPER_FLAGS_0(name, flags, ret)                            \
++GEN_ADAPTER_0(name, ret) \
+ static inline void glue(gen_helper_, name)(TCGContext *tcg_ctx, dh_retvar_decl0(ret))        \
+ {                                                                       \
+-  tcg_gen_callN(tcg_ctx, HELPER(name), dh_retvar(ret), 0, NULL);                 \
++  tcg_gen_callN(tcg_ctx, glue(adapter_helper_, name), dh_retvar(ret), 0, NULL);                 \
+ }
+ 
+ #define DEF_HELPER_FLAGS_1(name, flags, ret, t1)                        \
++GEN_ADAPTER_1(name, ret, t1) \
+ static inline void glue(gen_helper_, name)(TCGContext *tcg_ctx, dh_retvar_decl(ret)          \
+     dh_arg_decl(t1, 1))                                                 \
+ {                                                                       \
+   TCGTemp *args[1] = { dh_arg(t1, 1) };                                 \
+-  tcg_gen_callN(tcg_ctx, HELPER(name), dh_retvar(ret), 1, args);                 \
++  tcg_gen_callN(tcg_ctx, glue(adapter_helper_, name), dh_retvar(ret), 1, args);                 \
+ }
+ 
+ #define DEF_HELPER_FLAGS_2(name, flags, ret, t1, t2)                    \
++GEN_ADAPTER_2(name, ret, t1, t2) \
+ static inline void glue(gen_helper_, name)(TCGContext *tcg_ctx, dh_retvar_decl(ret)          \
+     dh_arg_decl(t1, 1), dh_arg_decl(t2, 2))                             \
+ {                                                                       \
+   TCGTemp *args[2] = { dh_arg(t1, 1), dh_arg(t2, 2) };                  \
+-  tcg_gen_callN(tcg_ctx, HELPER(name), dh_retvar(ret), 2, args);                 \
++  tcg_gen_callN(tcg_ctx, glue(adapter_helper_, name), dh_retvar(ret), 2, args);                 \
+ }
+ 
+ #define DEF_HELPER_FLAGS_3(name, flags, ret, t1, t2, t3)                \
++GEN_ADAPTER_3(name, ret, t1, t2, t3) \
+ static inline void glue(gen_helper_, name)(TCGContext *tcg_ctx, dh_retvar_decl(ret)          \
+     dh_arg_decl(t1, 1), dh_arg_decl(t2, 2), dh_arg_decl(t3, 3))         \
+ {                                                                       \
+   TCGTemp *args[3] = { dh_arg(t1, 1), dh_arg(t2, 2), dh_arg(t3, 3) };   \
+-  tcg_gen_callN(tcg_ctx, HELPER(name), dh_retvar(ret), 3, args);                 \
++  tcg_gen_callN(tcg_ctx, glue(adapter_helper_, name), dh_retvar(ret), 3, args);                 \
+ }
+ 
+ #define DEF_HELPER_FLAGS_4(name, flags, ret, t1, t2, t3, t4)            \
++GEN_ADAPTER_4(name, ret, t1, t2, t3, t4) \
+ static inline void glue(gen_helper_, name)(TCGContext *tcg_ctx, dh_retvar_decl(ret)          \
+     dh_arg_decl(t1, 1), dh_arg_decl(t2, 2),                             \
+     dh_arg_decl(t3, 3), dh_arg_decl(t4, 4))                             \
+ {                                                                       \
+   TCGTemp *args[4] = { dh_arg(t1, 1), dh_arg(t2, 2),                    \
+                      dh_arg(t3, 3), dh_arg(t4, 4) };                    \
+-  tcg_gen_callN(tcg_ctx, HELPER(name), dh_retvar(ret), 4, args);                 \
++  tcg_gen_callN(tcg_ctx, glue(adapter_helper_, name), dh_retvar(ret), 4, args);                 \
+ }
+ 
+ #define DEF_HELPER_FLAGS_5(name, flags, ret, t1, t2, t3, t4, t5)        \
++GEN_ADAPTER_5(name, ret, t1, t2, t3, t4, t5) \
+ static inline void glue(gen_helper_, name)(TCGContext *tcg_ctx, dh_retvar_decl(ret)          \
+     dh_arg_decl(t1, 1),  dh_arg_decl(t2, 2), dh_arg_decl(t3, 3),        \
+     dh_arg_decl(t4, 4), dh_arg_decl(t5, 5))                             \
+ {                                                                       \
+   TCGTemp *args[5] = { dh_arg(t1, 1), dh_arg(t2, 2), dh_arg(t3, 3),     \
+                      dh_arg(t4, 4), dh_arg(t5, 5) };                    \
+-  tcg_gen_callN(tcg_ctx, HELPER(name), dh_retvar(ret), 5, args);                 \
++  tcg_gen_callN(tcg_ctx, glue(adapter_helper_, name), dh_retvar(ret), 5, args);                 \
+ }
+ 
+ #define DEF_HELPER_FLAGS_6(name, flags, ret, t1, t2, t3, t4, t5, t6)    \
++GEN_ADAPTER_6(name, ret, t1, t2, t3, t4, t5, t6) \
+ static inline void glue(gen_helper_, name)(TCGContext *tcg_ctx, dh_retvar_decl(ret)          \
+     dh_arg_decl(t1, 1),  dh_arg_decl(t2, 2), dh_arg_decl(t3, 3),        \
+     dh_arg_decl(t4, 4), dh_arg_decl(t5, 5), dh_arg_decl(t6, 6))         \
+ {                                                                       \
+   TCGTemp *args[6] = { dh_arg(t1, 1), dh_arg(t2, 2), dh_arg(t3, 3),     \
+                      dh_arg(t4, 4), dh_arg(t5, 5), dh_arg(t6, 6) };     \
+-  tcg_gen_callN(tcg_ctx, HELPER(name), dh_retvar(ret), 6, args);                 \
++  tcg_gen_callN(tcg_ctx, glue(adapter_helper_, name), dh_retvar(ret), 6, args);                 \
+ }
+ 
+ #define DEF_HELPER_FLAGS_7(name, flags, ret, t1, t2, t3, t4, t5, t6, t7)\
+@@ -75,7 +83,7 @@ static inline void glue(gen_helper_, name)(TCGContext *tcg_ctx, dh_retvar_decl(r
+   TCGTemp *args[7] = { dh_arg(t1, 1), dh_arg(t2, 2), dh_arg(t3, 3),     \
+                      dh_arg(t4, 4), dh_arg(t5, 5), dh_arg(t6, 6),       \
+                      dh_arg(t7, 7) };                                   \
+-  tcg_gen_callN(tcg_ctx, HELPER(name), dh_retvar(ret), 7, args);                 \
++  tcg_gen_callN(tcg_ctx, glue(adapter_helper_, name), dh_retvar(ret), 7, args);                 \
+ }
+ 
+ #include "helper.h"
+diff --git a/qemu/include/exec/helper-proto.h b/qemu/include/exec/helper-proto.h
+index 217d670a..11d288a4 100644
+--- a/qemu/include/exec/helper-proto.h
++++ b/qemu/include/exec/helper-proto.h
+@@ -5,28 +5,36 @@
+ #define HELPER_PROTO_H
+ 
+ #include "exec/helper-head.h"
++#include "exec/helper-adapter.h"  /* Unicorn.js: TCI/WASM helper adapters */
+ 
+ #define DEF_HELPER_FLAGS_0(name, flags, ret) \
++GEN_ADAPTER_DECLARE(name) \
+ dh_ctype(ret) HELPER(name) (void);
+ 
+ #define DEF_HELPER_FLAGS_1(name, flags, ret, t1) \
++GEN_ADAPTER_DECLARE(name) \
+ dh_ctype(ret) HELPER(name) (dh_ctype(t1));
+ 
+ #define DEF_HELPER_FLAGS_2(name, flags, ret, t1, t2) \
++GEN_ADAPTER_DECLARE(name) \
+ dh_ctype(ret) HELPER(name) (dh_ctype(t1), dh_ctype(t2));
+ 
+ #define DEF_HELPER_FLAGS_3(name, flags, ret, t1, t2, t3) \
++GEN_ADAPTER_DECLARE(name) \
+ dh_ctype(ret) HELPER(name) (dh_ctype(t1), dh_ctype(t2), dh_ctype(t3));
+ 
+ #define DEF_HELPER_FLAGS_4(name, flags, ret, t1, t2, t3, t4) \
++GEN_ADAPTER_DECLARE(name) \
+ dh_ctype(ret) HELPER(name) (dh_ctype(t1), dh_ctype(t2), dh_ctype(t3), \
+                                    dh_ctype(t4));
+ 
+ #define DEF_HELPER_FLAGS_5(name, flags, ret, t1, t2, t3, t4, t5) \
++GEN_ADAPTER_DECLARE(name) \
+ dh_ctype(ret) HELPER(name) (dh_ctype(t1), dh_ctype(t2), dh_ctype(t3), \
+                             dh_ctype(t4), dh_ctype(t5));
+ 
+ #define DEF_HELPER_FLAGS_6(name, flags, ret, t1, t2, t3, t4, t5, t6) \
++GEN_ADAPTER_DECLARE(name) \
+ dh_ctype(ret) HELPER(name) (dh_ctype(t1), dh_ctype(t2), dh_ctype(t3), \
+                             dh_ctype(t4), dh_ctype(t5), dh_ctype(t6));
+ 
+diff --git a/qemu/include/exec/helper-tcg.h b/qemu/include/exec/helper-tcg.h
+index 42d145b8..7edb3901 100644
+--- a/qemu/include/exec/helper-tcg.h
++++ b/qemu/include/exec/helper-tcg.h
+@@ -5,55 +5,56 @@
+ #define HELPER_TCG_H
+ 
+ #include "exec/helper-head.h"
++#include "exec/helper-adapter.h"  /* Unicorn.js: TCI/WASM helper adapters */
+ 
+ /* Need one more level of indirection before stringification
+    to get all the macros expanded first.  */
+ #define str(s) #s
+ 
+ #define DEF_HELPER_FLAGS_0(NAME, FLAGS, ret) \
+-  { .func = HELPER(NAME), .name = str(NAME), \
++  { .func = glue(adapter_helper_, NAME), .name = str(NAME), \
+     .flags = FLAGS | dh_callflag(ret), \
+     .sizemask = dh_sizemask(ret, 0) },
+ 
+ #define DEF_HELPER_FLAGS_1(NAME, FLAGS, ret, t1) \
+-  { .func = HELPER(NAME), .name = str(NAME), \
++  { .func = glue(adapter_helper_, NAME), .name = str(NAME), \
+     .flags = FLAGS | dh_callflag(ret), \
+     .sizemask = dh_sizemask(ret, 0) | dh_sizemask(t1, 1) },
+ 
+ #define DEF_HELPER_FLAGS_2(NAME, FLAGS, ret, t1, t2) \
+-  { .func = HELPER(NAME), .name = str(NAME), \
++  { .func = glue(adapter_helper_, NAME), .name = str(NAME), \
+     .flags = FLAGS | dh_callflag(ret), \
+     .sizemask = dh_sizemask(ret, 0) | dh_sizemask(t1, 1) \
+     | dh_sizemask(t2, 2) },
+ 
+ #define DEF_HELPER_FLAGS_3(NAME, FLAGS, ret, t1, t2, t3) \
+-  { .func = HELPER(NAME), .name = str(NAME), \
++  { .func = glue(adapter_helper_, NAME), .name = str(NAME), \
+     .flags = FLAGS | dh_callflag(ret), \
+     .sizemask = dh_sizemask(ret, 0) | dh_sizemask(t1, 1) \
+     | dh_sizemask(t2, 2) | dh_sizemask(t3, 3) },
+ 
+ #define DEF_HELPER_FLAGS_4(NAME, FLAGS, ret, t1, t2, t3, t4) \
+-  { .func = HELPER(NAME), .name = str(NAME), \
++  { .func = glue(adapter_helper_, NAME), .name = str(NAME), \
+     .flags = FLAGS | dh_callflag(ret), \
+     .sizemask = dh_sizemask(ret, 0) | dh_sizemask(t1, 1) \
+     | dh_sizemask(t2, 2) | dh_sizemask(t3, 3) | dh_sizemask(t4, 4) },
+ 
+ #define DEF_HELPER_FLAGS_5(NAME, FLAGS, ret, t1, t2, t3, t4, t5) \
+-  { .func = HELPER(NAME), .name = str(NAME), \
++  { .func = glue(adapter_helper_, NAME), .name = str(NAME), \
+     .flags = FLAGS | dh_callflag(ret), \
+     .sizemask = dh_sizemask(ret, 0) | dh_sizemask(t1, 1) \
+     | dh_sizemask(t2, 2) | dh_sizemask(t3, 3) | dh_sizemask(t4, 4) \
+     | dh_sizemask(t5, 5) },
+ 
+ #define DEF_HELPER_FLAGS_6(NAME, FLAGS, ret, t1, t2, t3, t4, t5, t6) \
+-  { .func = HELPER(NAME), .name = str(NAME), \
++  { .func = glue(adapter_helper_, NAME), .name = str(NAME), \
+     .flags = FLAGS | dh_callflag(ret), \
+     .sizemask = dh_sizemask(ret, 0) | dh_sizemask(t1, 1) \
+     | dh_sizemask(t2, 2) | dh_sizemask(t3, 3) | dh_sizemask(t4, 4) \
+     | dh_sizemask(t5, 5) | dh_sizemask(t6, 6) },
+ 
+ #define DEF_HELPER_FLAGS_7(NAME, FLAGS, ret, t1, t2, t3, t4, t5, t6, t7) \
+-  { .func = HELPER(NAME), .name = str(NAME), .flags = FLAGS, \
++  { .func = glue(adapter_helper_, NAME), .name = str(NAME), .flags = FLAGS, \
+     .sizemask = dh_sizemask(ret, 0) | dh_sizemask(t1, 1) \
+     | dh_sizemask(t2, 2) | dh_sizemask(t3, 3) | dh_sizemask(t4, 4) \
+     | dh_sizemask(t5, 5) | dh_sizemask(t6, 6) | dh_sizemask(t7, 7) },
+diff --git a/qemu/include/tcg/tcg-op.h b/qemu/include/tcg/tcg-op.h
+index 93026d1d..1f853b9b 100644
+--- a/qemu/include/tcg/tcg-op.h
++++ b/qemu/include/tcg/tcg-op.h
+@@ -47,7 +47,7 @@ static inline void gen_uc_tracecode(TCGContext *tcg_ctx, int32_t size, int32_t t
+     };
+ 
+     const int hook_type = type & UC_HOOK_IDX_MASK;
+-    if (puc->hooks_count[hook_type] == 1 && !(type & UC_HOOK_FLAG_NO_STOP)) {
++    if (0 && puc->hooks_count[hook_type] == 1 && !(type & UC_HOOK_FLAG_NO_STOP)) {
+         cur = puc->hook[hook_type].head;
+         
+         while (cur) {
+diff --git a/qemu/target/arm/translate.c b/qemu/target/arm/translate.c
+index 744d8ff7..db38550c 100644
+--- a/qemu/target/arm/translate.c
++++ b/qemu/target/arm/translate.c
+@@ -1,3 +1,5 @@
++/* Unicorn.js: define TCI/WASM helper adapters in this translation unit. */
++#define GEN_ADAPTER_DEFINE
+ /*
+  *  ARM translation
+  *
+diff --git a/qemu/target/i386/translate.c b/qemu/target/i386/translate.c
+index 8278774a..a4ef5644 100644
+--- a/qemu/target/i386/translate.c
++++ b/qemu/target/i386/translate.c
+@@ -1,3 +1,5 @@
++/* Unicorn.js: define TCI/WASM helper adapters in this translation unit. */
++#define GEN_ADAPTER_DEFINE
+ /*
+  *  i386 translation
+  *
+diff --git a/qemu/target/m68k/translate.c b/qemu/target/m68k/translate.c
+index 5b9a74ce..a8303db4 100644
+--- a/qemu/target/m68k/translate.c
++++ b/qemu/target/m68k/translate.c
+@@ -1,3 +1,5 @@
++/* Unicorn.js: define TCI/WASM helper adapters in this translation unit. */
++#define GEN_ADAPTER_DEFINE
+ /*
+  *  m68k translation
+  *
+diff --git a/qemu/target/mips/translate.c b/qemu/target/mips/translate.c
+index 3fab57b2..f990c50b 100644
+--- a/qemu/target/mips/translate.c
++++ b/qemu/target/mips/translate.c
+@@ -1,3 +1,5 @@
++/* Unicorn.js: define TCI/WASM helper adapters in this translation unit. */
++#define GEN_ADAPTER_DEFINE
+ /*
+  *  MIPS emulation for QEMU - main translation routines
+  *
+diff --git a/qemu/target/ppc/translate.c b/qemu/target/ppc/translate.c
+index 0b3e5c8c..ea48a453 100644
+--- a/qemu/target/ppc/translate.c
++++ b/qemu/target/ppc/translate.c
+@@ -1,3 +1,5 @@
++/* Unicorn.js: define TCI/WASM helper adapters in this translation unit. */
++#define GEN_ADAPTER_DEFINE
+ /*
+  *  PowerPC emulation for qemu: main translation routines.
+  *
+diff --git a/qemu/target/riscv/translate.c b/qemu/target/riscv/translate.c
+index 792bc12f..2b5cadd3 100644
+--- a/qemu/target/riscv/translate.c
++++ b/qemu/target/riscv/translate.c
+@@ -1,3 +1,5 @@
++/* Unicorn.js: define TCI/WASM helper adapters in this translation unit. */
++#define GEN_ADAPTER_DEFINE
+ /*
+  * RISC-V emulation for qemu: main translation routines.
+  *
+diff --git a/qemu/target/s390x/translate.c b/qemu/target/s390x/translate.c
+index e41a3b73..e40fdb6d 100644
+--- a/qemu/target/s390x/translate.c
++++ b/qemu/target/s390x/translate.c
+@@ -1,3 +1,5 @@
++/* Unicorn.js: define TCI/WASM helper adapters in this translation unit. */
++#define GEN_ADAPTER_DEFINE
+ /*
+  *  S/390 translation
+  *
+diff --git a/qemu/target/sparc/translate.c b/qemu/target/sparc/translate.c
+index 95b24ab6..75d508f2 100644
+--- a/qemu/target/sparc/translate.c
++++ b/qemu/target/sparc/translate.c
+@@ -1,3 +1,5 @@
++/* Unicorn.js: define TCI/WASM helper adapters in this translation unit. */
++#define GEN_ADAPTER_DEFINE
+ /*
+    SPARC translation
+ 
+diff --git a/qemu/target/tricore/translate.c b/qemu/target/tricore/translate.c
+index 75188b8b..7985a003 100644
+--- a/qemu/target/tricore/translate.c
++++ b/qemu/target/tricore/translate.c
+@@ -1,3 +1,5 @@
++/* Unicorn.js: define TCI/WASM helper adapters in this translation unit. */
++#define GEN_ADAPTER_DEFINE
+ /*
+  *  TriCore emulation for qemu: main translation routines.
+  *
+diff --git a/qemu/tcg/tcg.c b/qemu/tcg/tcg.c
+index bc62051f..9d9f17c8 100644
+--- a/qemu/tcg/tcg.c
++++ b/qemu/tcg/tcg.c
+@@ -304,7 +304,7 @@ static int ptr_cmp_tb_tc(const void *ptr, const struct tb_tc *s)
+     return 0;
+ }
+ 
+-static gint tb_tc_cmp(gconstpointer ap, gconstpointer bp)
++static gint tb_tc_cmp(gconstpointer ap, gconstpointer bp, gpointer udata)
+ {
+     const struct tb_tc *a = ap;
+     const struct tb_tc *b = bp;
+@@ -537,7 +537,7 @@ void tcg_region_init(TCGContext *tcg_ctx)
+         (void)qemu_mprotect_none(end, page_size);
+     }
+ 
+-    tcg_ctx->tree = g_tree_new(tb_tc_cmp);
++    tcg_ctx->tree = g_tree_new((GCompareFunc)tb_tc_cmp);
+     // Unicorn: Though this code is taken from CONFIG_USER_ONLY, it is crucial or
+     //          tcg_ctx->region.current is 0 and we will miss a tb_flush when the
+     //          buffer gets full.
+@@ -1458,7 +1458,7 @@ void tcg_gen_callN(TCGContext *tcg_ctx, void *func, TCGTemp *ret, int nargs, TCG
+     reth = NULL;
+     if (sizemask != 0) {
+         for (i = real_args = 0; i < nargs; ++i) {
+-            int is_64bit = sizemask & (1 << (i+1)*2);
++            int is_64bit = 1; /* Unicorn.js: always pair-split args for TCI adapter ABI */
+             if (is_64bit) {
+                 TCGv_i64 orig = temp_tcgv_i64(args[i]);
+                 TCGv_i32 h = tcg_temp_new_i32();
+@@ -1476,7 +1476,7 @@ void tcg_gen_callN(TCGContext *tcg_ctx, void *func, TCGTemp *ret, int nargs, TCG
+     }
+ #elif defined(TCG_TARGET_EXTEND_ARGS) && TCG_TARGET_REG_BITS == 64
+     for (i = 0; i < nargs; ++i) {
+-        int is_64bit = sizemask & (1 << (i+1)*2);
++        int is_64bit = 1; /* Unicorn.js: always pair-split args for TCI adapter ABI */
+         int is_signed = sizemask & (2 << (i+1)*2);
+         if (!is_64bit) {
+             TCGv_i64 temp = tcg_temp_new_i64(tcg_ctx);
+@@ -1491,6 +1491,19 @@ void tcg_gen_callN(TCGContext *tcg_ctx, void *func, TCGTemp *ret, int nargs, TCG
+     }
+ #endif /* TCG_TARGET_EXTEND_ARGS */
+ 
++    /* Unicorn.js (TCI/WASM adapter ABI): every logical helper argument must
++     * occupy a full (lo,hi) 32-bit register pair so the adapters can
++     * reconstruct it (A1..A6 in helper-adapter.h). Zero-extend narrow args. */
++    for (i = 0; i < nargs; i++) {
++        int arg_is_64bit = sizemask & (1 << (i+1)*2);
++        if (!arg_is_64bit) {
++            TCGv_i64 ext_temp = tcg_temp_new_i64(tcg_ctx);
++            TCGv_i64 ext_orig = temp_tcgv_i64(tcg_ctx, args[i]);
++            tcg_gen_ext32u_i64(tcg_ctx, ext_temp, ext_orig);
++            args[i] = tcgv_i64_temp(tcg_ctx, ext_temp);
++        }
++    }
++
+     op = tcg_emit_op(tcg_ctx, INDEX_op_call);
+ 
+     pi = 0;
+@@ -1531,7 +1544,7 @@ void tcg_gen_callN(TCGContext *tcg_ctx, void *func, TCGTemp *ret, int nargs, TCG
+ 
+     real_args = 0;
+     for (i = 0; i < nargs; i++) {
+-        int is_64bit = sizemask & (1 << (i+1)*2);
++        int is_64bit = 1; /* Unicorn.js: always pair-split args for TCI adapter ABI */
+         if (TCG_TARGET_REG_BITS < 64 && is_64bit) {
+ #ifdef TCG_TARGET_CALL_ALIGN_ARGS
+             /* some targets want aligned 64 bit args */
+@@ -1593,7 +1606,7 @@ void tcg_gen_callN(TCGContext *tcg_ctx, void *func, TCGTemp *ret, int nargs, TCG
+     }
+ #elif defined(TCG_TARGET_EXTEND_ARGS) && TCG_TARGET_REG_BITS == 64
+     for (i = 0; i < nargs; ++i) {
+-        int is_64bit = sizemask & (1 << (i+1)*2);
++        int is_64bit = 1; /* Unicorn.js: always pair-split args for TCI adapter ABI */
+         if (!is_64bit) {
+             tcg_temp_free_internal(tcg_ctx, args[i]);
+         }
+--- a/symbols.sh
++++ b/symbols.sh
+@@ -1296,6 +1296,8 @@
+ tlb_reset_dirty_by_vaddr \
+ helper_stqcx_le_parallel \
+ helper_stqcx_be_parallel \
++adapter_helper_uc_tracecode \
++adapter_helper_uc_traceopcode \
+ "
+ 
+ x86_64_SYMBOLS="
+@@ -6568,6 +6570,7 @@
+ 
+ for loop in $COMMON_SYMBOLS; do
+     echo "#define $loop ${loop}_${arch}" >> $SOURCE_DIR/qemu/$arch.h
++    case "$loop" in helper_*) echo "#define adapter_$loop adapter_${loop}_${arch}" >> $SOURCE_DIR/qemu/$arch.h ;; esac
+ done
+ 
+ ARCH_SYMBOLS=$(eval echo '$'"${arch}_SYMBOLS")
+@@ -6576,6 +6579,7 @@
+ 
+ for loop in $ARCH_SYMBOLS; do
+     echo "#define $loop ${loop}_${arch}" >> $SOURCE_DIR/qemu/$arch.h
++    case "$loop" in helper_*) echo "#define adapter_$loop adapter_${loop}_${arch}" >> $SOURCE_DIR/qemu/$arch.h ;; esac
+ done
+ 
+ echo "#endif" >> $SOURCE_DIR/qemu/$arch.h

@@ -1,11 +1,9 @@
 #!/usr/bin/env python3
 
-import os
-import glob
 import json
+import os
 import re
 import shutil
-import stat
 import subprocess
 import sys
 import zipfile
@@ -16,6 +14,7 @@ EXPORTED_FUNCTIONS = [
     '_uc_arch_supported',
     '_uc_close',
     '_uc_context_alloc',
+    '_uc_context_free',
     '_uc_context_restore',
     '_uc_context_save',
     '_uc_emu_start',
@@ -41,23 +40,9 @@ EXPORTED_FUNCTIONS = [
     '_uc_version',
 ]
 
-# Unicorn per-architecture public headers and the C macro prefix to export from
-# each. Adapted from capstone.js (which adapted it from Unicorn's
-# bindings/const_generator.py): each header is parsed into src/constants_<name>.js,
-# with every value resolved to a plain integer. The leading `UC_` is dropped on
-# output, so e.g. UC_ARM_REG_R0 -> ARM_REG_R0, matching the names the public API
-# uses (uc.ARM_REG_R0).
-#
-# The cross-architecture constants (UC_ARCH/MODE/ERR/MEM/HOOK/QUERY/PROT, ...) are
-# small and stable, so — as in capstone.js's capstone-wrapper.js — they are kept
-# by hand directly in src/unicorn-wrapper.js rather than generated here.
-CONST_HEADERS = [
-    ('arm.h',     'arm',    'UC_ARM_'),
-    ('arm64.h',   'arm64',  'UC_ARM64_'),
-    ('m68k.h',    'm68k',   'UC_M68K_'),
-    ('mips.h',    'mips',   'UC_MIPS_'),
-    ('sparc.h',   'sparc',  'UC_SPARC_'),
-    ('x86.h',     'x86',    'UC_X86_'),
+AVAILABLE_ARCHITECTURES = [
+    'arm', 'aarch64', 'm68k', 'mips', 'ppc', 'riscv', 's390x', 'sparc',
+    'tricore', 'x86',
 ]
 
 # Unicorn build-target names whose constants file is named differently.
@@ -65,20 +50,19 @@ TARGET_ALIASES = {
     'aarch64': 'arm64',
 }
 
-# Unicorn build-target architecture names (the values UNICORN_ARCHS accepts, see
-# the unicorn submodule's Makefile). Used by --release to emit one single-arch
-# bundle per architecture. Kept as build-target names (e.g. `aarch64`, resolved
-# to the `arm64` constants via TARGET_ALIASES), so `--release` mirrors what a
-# user would get from `build.py <arch>`.
-AVAILABLE_ARCHITECTURES = [
-    'arm', 'aarch64', 'm68k', 'mips', 'sparc', 'x86',
-]
+# Map a build-target arch to the (header, name, UC_ prefix) for its constants
+def arch_constants(arch):
+    name = TARGET_ALIASES.get(arch.lower(), arch.lower())
+    return name + '.h', name, 'UC_%s_' % name.upper()
 
 # Directories
-UNICORN_DIR = os.path.abspath("unicorn")
+ROOT_DIR = os.path.abspath(os.path.dirname(__file__))
+UNICORN_DIR = os.path.join(ROOT_DIR, "unicorn")
 UNICORN_INCLUDE_DIR = os.path.join(UNICORN_DIR, "include", "unicorn")
 UNICORN_QEMU_DIR = os.path.join(UNICORN_DIR, "qemu")
-ORIGINAL_QEMU_DIR = os.path.abspath("externals/qemu-2.2.1")
+UNICORN_BUILD_DIR = os.path.join(UNICORN_DIR, "build")
+ORIGINAL_QEMU_DIR = os.path.join(ROOT_DIR, "externals/qemu-5.0.1")
+HELPER_ADAPTER_SRC = os.path.join(ROOT_DIR, "src/qemu/helper-adapter.h")
 
 
 def generateConstants():
@@ -90,10 +74,11 @@ def generateConstants():
 
     Each header's `typedef enum` / `#define` constants are parsed and every value
     resolved to an integer, so enum aliases (e.g. `UC_ARM_REG_R13 = UC_ARM_REG_SP`)
-    and expressions (e.g. `1 << 30`) collapse to plain integer literals. This is
-    immune to the textual quirks of Unicorn's pre-generated Python bindings.
+    and expressions (e.g. `1 << 30`, `UC_X86_REG_EIP + 2`) collapse to plain
+    integer literals.
     """
-    for header, name, prefix in CONST_HEADERS:
+    for arch in AVAILABLE_ARCHITECTURES:
+        header, name, prefix = arch_constants(arch)
         content = open(os.path.join(UNICORN_INCLUDE_DIR, header)).read()
         # Strip C comments up front so values never collide with `//`/`/* */`.
         content = re.sub(r'/\*.*?\*/', ' ', content, flags=re.DOTALL)
@@ -101,7 +86,7 @@ def generateConstants():
         out = open('src/constants_%s.js' % name, 'w')
         out.write('// AUTO-GENERATED, DO NOT EDIT [%s]\n' % header)
         out.write('Object.assign(Module, {\n')
-        values = {}    # running namespace for value resolution (full UC_ names)
+        values = {}  # running namespace for value resolution
         count = 0
         for line in content.splitlines():
             line = line.split('//', 1)[0].strip()
@@ -123,19 +108,15 @@ def generateConstants():
                 if not fields[0].startswith(prefix):
                     continue
                 if len(fields) > 1 and fields[1] != '=':
-                    continue  # not a `NAME` or `NAME = value` enumerator
+                    continue
                 if len(fields) > 1 and fields[1] == '=':
-                    rhs = ''.join(fields[2:])      # explicit value/alias/expression
+                    rhs = ''.join(fields[2:])
                 else:
-                    rhs = str(count)               # implicit running enum value
-                    count += 1
-                try:
-                    count = int(rhs) + 1
-                except ValueError:
-                    pass
+                    rhs = str(count)
                 name_c = fields[0].strip()
-                value = eval(rhs, None, values)    # resolve to integer
+                value = eval(rhs, None, values)
                 exec('%s = %d' % (name_c, value), None, values)
+                count = value + 1
                 key = name_c[3:] if name_c.startswith('UC_') else name_c
                 out.write('  %s: %d,\n' % (key, value))
         out.write('});\n')
@@ -143,80 +124,20 @@ def generateConstants():
 
 
 def constant_files(archs):
-    """Per-architecture constants files (constants_<arch>.js) to bundle.
-
-    The cross-architecture constants are kept in src/unicorn-wrapper.js (always
-    bundled), so this returns only per-architecture files: all of them for a full
-    build, or just the selected architectures' for a targeted build.
-    """
-    wanted = None
-    if archs:
-        wanted = {TARGET_ALIASES.get(a.lower(), a.lower()) for a in archs}
+    """Per-arch constants files from generateConstants(), loaded via --post-js."""
+    targets = archs if archs else AVAILABLE_ARCHITECTURES
     files = []
-    for header, name, prefix in CONST_HEADERS:
-        if wanted is not None and name not in wanted:
-            continue
-        files.append('src/constants_%s.js' % name)
+    for arch in targets:
+        path = 'src/constants_%s.js' % arch_constants(arch)[1]
+        if path not in files:
+            files.append(path)
     return files
 
-#############
-# Utilities #
-#############
+############
+# Patching #
+############
 
-# Replace strings in files
-def replace(path, replacements):
-    pathBak = path + ".bak"
-    if os.path.exists(pathBak):
-        return
-    shutil.move(path, pathBak)
-    fin = open(pathBak, "rt")
-    fout = open(path, "wt")
-    for line in fin:
-        for string in replacements:
-            line = line.replace(string, replacements[string])
-        fout.write(line)
-    fin.close()
-    fout.close()
-
-# Insert strings in files after a specific line
-def insert(path, match, strings):
-    pathBak = path + ".bak"
-    if os.path.exists(pathBak):
-        return
-    shutil.move(path, pathBak)
-    fin = open(pathBak, "rt")
-    fout = open(path, "wt")
-    for line in fin:
-        fout.write(line)
-        if match.strip() == line.strip():
-            for string in strings:
-                fout.write(string + "\n")
-    fin.close()
-    fout.close()
-
-# Append strings at the end of the file
-def append(path, code):
-    pathBak = path + ".bak"
-    if os.path.exists(pathBak):
-        return
-    shutil.copy(path, pathBak)
-    with open(path, 'a') as f:
-        f.write(code)
-
-# Prepend strings at the beginning of the file
-def prepend(path, code):
-    pathBak = path + ".bak"
-    if os.path.exists(pathBak):
-        return
-    shutil.move(path, pathBak)
-    fin = open(pathBak, 'r')
-    fout = open(path, 'w')
-    fout.write(code)
-    fout.write(fin.read())
-    fout.close()
-    fin.close()
-
-# Copy directory contents to another folder without overwriting files
+# Copy directory contents into another folder without overwriting existing files.
 def copytree(src, dst, symlinks=False, ignore=None):
     if not os.path.exists(dst):
         os.makedirs(dst)
@@ -229,321 +150,31 @@ def copytree(src, dst, symlinks=False, ignore=None):
             shutil.copy2(s, d)
 
 
-############
-# Patching #
-############
+# Apply patch to repository via git apply (idempotent)
+def apply_patch(repo, patch):
+    patch_path = os.path.join(ROOT_DIR, patch)
+    already = subprocess.run(
+        ["git", "apply", "--reverse", "--check", patch_path],
+        cwd=repo, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    if already.returncode == 0:
+        return
+    subprocess.run(["git", "apply", patch_path], cwd=repo, check=True)
 
-PATCH_HELPER_ADAPTER_PROTO = """
-#define GEN_ADAPTER_ARGS \\
-  uint32_t a1, uint32_t a2, uint32_t a3, uint32_t a4, uint32_t a5, \\
-  uint32_t a6, uint32_t a7, uint32_t a8, uint32_t a9, uint32_t a10
 
-#define GEN_ADAPTER_DECLARE(name) \\
-    uint64_t glue(adapter_helper_, name)(GEN_ADAPTER_ARGS);
-"""
-
-PATCH_HELPER_ADAPTER_GEN = """
-// Compile-time dispatch
-#define CAT(a, ...) PRIMITIVE_CAT(a, __VA_ARGS__)
-#define PRIMITIVE_CAT(a, ...) a ## __VA_ARGS__
-
-#define IIF(c) PRIMITIVE_CAT(IIF_, c)
-#define IIF_0(t, ...) __VA_ARGS__
-#define IIF_1(t, ...) t
-
-#define PROBE(x) x, 1
-#define CHECK(...) CHECK_N(__VA_ARGS__, 0)
-#define CHECK_N(x, n, ...) n
-
-// Void type detection
-#define VOID_TYPE_void ()
-#define VOID_TYPE_noreturn ()
-#define VOID_PROBE(type)            VOID_PROBE_PROXY(VOID_TYPE_##type)
-#define VOID_PROBE_PROXY(...)       VOID_PROBE_PRIMITIVE(__VA_ARGS__)
-#define VOID_PROBE_PRIMITIVE(x)     VOID_PROBE_COMBINE_ x
-#define VOID_PROBE_COMBINE_(...)    PROBE(~)
-#define IS_VOID(type)               CHECK(VOID_PROBE(type))
-
-// Global helper detection
-#define GLOB_NAME_uc_tracecode ()
-#define GLOB_NAME_div_i32 ()
-#define GLOB_NAME_rem_i32 ()
-#define GLOB_NAME_divu_i32 ()
-#define GLOB_NAME_remu_i32 ()
-#define GLOB_NAME_div_i64 ()
-#define GLOB_NAME_rem_i64 ()
-#define GLOB_NAME_divu_i64 ()
-#define GLOB_NAME_remu_i64 ()
-#define GLOB_NAME_shl_i64 ()
-#define GLOB_NAME_shr_i64 ()
-#define GLOB_NAME_sar_i64 ()
-#define GLOB_NAME_mulsh_i64 ()
-#define GLOB_NAME_muluh_i64 ()
-#define GLOB_PROBE(name)            GLOB_PROBE_PROXY(GLOB_NAME_##name)
-#define GLOB_PROBE_PROXY(...)       GLOB_PROBE_PRIMITIVE(__VA_ARGS__)
-#define GLOB_PROBE_PRIMITIVE(x)     GLOB_PROBE_COMBINE_ x
-#define GLOB_PROBE_COMBINE_(...)    PROBE(~)
-#define IS_GLOB(name)               CHECK(GLOB_PROBE(name))
-
-// Arguments
-#define A1 (a1 | ((uint64_t)a2  << 32))
-#define A2 (a3 | ((uint64_t)a4  << 32))
-#define A3 (a5 | ((uint64_t)a6  << 32))
-#define A4 (a7 | ((uint64_t)a8  << 32))
-#define A5 (a9 | ((uint64_t)a10 << 32))
-#define GEN_ADAPTER_ARGS \\
-  uint32_t a1, uint32_t a2, uint32_t a3, uint32_t a4, uint32_t a5, \\
-  uint32_t a6, uint32_t a7, uint32_t a8, uint32_t a9, uint32_t a10
-
-// Adapter definition
-#define GEN_ADAPTER_0_VOID(name) \\
-    HELPER(name)(); return 0;
-#define GEN_ADAPTER_0_NONVOID(name) \\
-    return HELPER(name)();
-#define GEN_ADAPTER_0_DEFINE(name, ret) \\
-uint64_t glue(adapter_helper_, name)(GEN_ADAPTER_ARGS) { \\
-    IIF(IS_VOID(ret)) (GEN_ADAPTER_0_VOID(name), GEN_ADAPTER_0_NONVOID(name)) \\
-}
-
-#define GEN_ADAPTER_1_VOID(name, t1) \\
-    HELPER(name)((dh_ctype(t1))A1); return 0;
-#define GEN_ADAPTER_1_NONVOID(name, t1) \\
-    return HELPER(name)((dh_ctype(t1))A1);
-#define GEN_ADAPTER_1_DEFINE(name, ret, t1) \\
-uint64_t glue(adapter_helper_, name)(GEN_ADAPTER_ARGS) { \\
-    IIF(IS_VOID(ret)) (GEN_ADAPTER_1_VOID(name, t1), GEN_ADAPTER_1_NONVOID(name, t1)) \\
-}
-
-#define GEN_ADAPTER_2_VOID(name, t1, t2) \\
-    HELPER(name)((dh_ctype(t1))A1, (dh_ctype(t2))A2); return 0;
-#define GEN_ADAPTER_2_NONVOID(name, t1, t2) \\
-    return HELPER(name)((dh_ctype(t1))A1, (dh_ctype(t2))A2);
-#define GEN_ADAPTER_2_DEFINE(name, ret, t1, t2) \\
-uint64_t glue(adapter_helper_, name)(GEN_ADAPTER_ARGS) { \\
-    IIF(IS_VOID(ret)) (GEN_ADAPTER_2_VOID(name, t1, t2), GEN_ADAPTER_2_NONVOID(name, t1, t2)) \\
-}
-
-#define GEN_ADAPTER_3_VOID(name, t1, t2, t3) \\
-    HELPER(name)((dh_ctype(t1))A1, (dh_ctype(t2))A2, (dh_ctype(t3))A3); return 0;
-#define GEN_ADAPTER_3_NONVOID(name, t1, t2, t3) \\
-    return HELPER(name)((dh_ctype(t1))A1, (dh_ctype(t2))A2, (dh_ctype(t3))A3);
-#define GEN_ADAPTER_3_DEFINE(name, ret, t1, t2, t3) \\
-uint64_t glue(adapter_helper_, name)(GEN_ADAPTER_ARGS) { \\
-    IIF(IS_VOID(ret)) (GEN_ADAPTER_3_VOID(name, t1, t2, t3), GEN_ADAPTER_3_NONVOID(name, t1, t2, t3)) \\
-}
-
-#define GEN_ADAPTER_4_VOID(name, t1, t2, t3, t4) \\
-    HELPER(name)((dh_ctype(t1))A1, (dh_ctype(t2))A2, (dh_ctype(t3))A3, (dh_ctype(t4))A4); return 0;
-#define GEN_ADAPTER_4_NONVOID(name, t1, t2, t3, t4) \\
-    return HELPER(name)((dh_ctype(t1))A1, (dh_ctype(t2))A2, (dh_ctype(t3))A3, (dh_ctype(t4))A4);
-#define GEN_ADAPTER_4_DEFINE(name, ret, t1, t2, t3, t4) \\
-uint64_t glue(adapter_helper_, name)(GEN_ADAPTER_ARGS) { \\
-    IIF(IS_VOID(ret)) (GEN_ADAPTER_4_VOID(name, t1, t2, t3, t4), GEN_ADAPTER_4_NONVOID(name, t1, t2, t3, t4)) \\
-}
-
-#define GEN_ADAPTER_5_VOID(name, t1, t2, t3, t4, t5) \\
-    HELPER(name)((dh_ctype(t1))A1, (dh_ctype(t2))A2, (dh_ctype(t3))A3, (dh_ctype(t4))A4, (dh_ctype(t5))A5); return 0;
-#define GEN_ADAPTER_5_NONVOID(name, t1, t2, t3, t4, t5) \\
-    return HELPER(name)((dh_ctype(t1))A1, (dh_ctype(t2))A2, (dh_ctype(t3))A3, (dh_ctype(t4))A4, (dh_ctype(t5))A5);
-#define GEN_ADAPTER_5_DEFINE(name, ret, t1, t2, t3, t4, t5) \\
-uint64_t glue(adapter_helper_, name)(GEN_ADAPTER_ARGS) { \\
-    IIF(IS_VOID(ret)) (GEN_ADAPTER_5_VOID(name, t1, t2, t3, t4, t5), GEN_ADAPTER_5_NONVOID(name, t1, t2, t3, t4, t5)) \\
-}
-
-#define GEN_ADAPTER_BLANK
-#ifdef GEN_ADAPTER_DEFINE
-#define GEN_ADAPTER_0(name, ret) \\
-    IIF(IS_GLOB(name)) (GEN_ADAPTER_BLANK, GEN_ADAPTER_0_DEFINE(name, ret))
-#define GEN_ADAPTER_1(name, ret, t1) \\
-    IIF(IS_GLOB(name)) (GEN_ADAPTER_BLANK, GEN_ADAPTER_1_DEFINE(name, ret, t1))
-#define GEN_ADAPTER_2(name, ret, t1, t2) \\
-    IIF(IS_GLOB(name)) (GEN_ADAPTER_BLANK, GEN_ADAPTER_2_DEFINE(name, ret, t1, t2))
-#define GEN_ADAPTER_3(name, ret, t1, t2, t3) \\
-    IIF(IS_GLOB(name)) (GEN_ADAPTER_BLANK, GEN_ADAPTER_3_DEFINE(name, ret, t1, t2, t3))
-#define GEN_ADAPTER_4(name, ret, t1, t2, t3, t4) \\
-    IIF(IS_GLOB(name)) (GEN_ADAPTER_BLANK, GEN_ADAPTER_4_DEFINE(name, ret, t1, t2, t3, t4))
-#define GEN_ADAPTER_5(name, ret, t1, t2, t3, t4, t5) \\
-    IIF(IS_GLOB(name)) (GEN_ADAPTER_BLANK, GEN_ADAPTER_5_DEFINE(name, ret, t1, t2, t3, t4, t5))
-#else
-#define GEN_ADAPTER_0(name, ret) GEN_ADAPTER_BLANK
-#define GEN_ADAPTER_1(name, ret, t1) GEN_ADAPTER_BLANK
-#define GEN_ADAPTER_2(name, ret, t1, t2) GEN_ADAPTER_BLANK
-#define GEN_ADAPTER_3(name, ret, t1, t2, t3) GEN_ADAPTER_BLANK
-#define GEN_ADAPTER_4(name, ret, t1, t2, t3, t4) GEN_ADAPTER_BLANK
-#define GEN_ADAPTER_5(name, ret, t1, t2, t3, t4, t5) GEN_ADAPTER_BLANK
-#endif
-"""
-
-def patchUnicornTCI():
-    """
-    Patches Unicorn's QEMU fork to add the TCG Interpreter backend
-    """
-    # Enable TCI
-    replace(os.path.join(UNICORN_QEMU_DIR, "configure"), {
-        "strip_opt=\"yes\"": "strip_opt=\"yes\"\ntcg_interpreter=\"yes\"",
-        "# XXX: suppress that": "if test \"$tcg_interpreter\" = \"yes\" ; then\n  echo \"CONFIG_TCG_INTERPRETER=y\" >> $config_host_mak\nfi\n# XXX: suppress that",
-        "if test \"$ARCH\" = \"sparc64\" ; then": "if test \"$tcg_interpreter\" = \"yes\"; then\n  QEMU_INCLUDES=\"-I\\$(SRC_PATH)/tcg/tci $QEMU_INCLUDES\"\nelif test \"$ARCH\" = \"sparc64\" ; then"
-    })
-    # Add executable permissions for the new configure file
-    path = os.path.join(UNICORN_QEMU_DIR, "configure")
-    st = os.stat(path)
-    os.chmod(path, st.st_mode | stat.S_IEXEC)
-    # Copy missing TCI source files and patch them with Unicorn updates
+def patchUnicorn():
+    # Re-add the TCG Interpreter (TCI) to Unicorn's QEMU 5.0.1 fork
     copytree(ORIGINAL_QEMU_DIR, UNICORN_QEMU_DIR)
-    replace(os.path.join(UNICORN_QEMU_DIR, "tcg/tci/tcg-target.c"), {
-        "tcg_target_available_regs": "s->tcg_target_available_regs",
-        "tcg_target_call_clobber_regs": "s->tcg_target_call_clobber_regs",
-        "tcg_add_target_add_op_defs(": "tcg_add_target_add_op_defs(s, ",
-    })
-    replace(os.path.join(UNICORN_QEMU_DIR, "tcg/tci/tcg-target.h"), {
-        "#define tcg_qemu_tb_exec": "//#define tcg_qemu_tb_exec",
-    })
-    # Add TCI to Makefile.targets
-    insert(os.path.join(UNICORN_QEMU_DIR, "Makefile.target"),
-        "obj-y += tcg/tcg.o tcg/optimize.o", [
-            "obj-$(CONFIG_TCG_INTERPRETER) += tci.o"
-        ]
-    )
-    # Add TCI symbols
-    insert(os.path.join(UNICORN_QEMU_DIR, "header_gen.py"),
-        "symbols = (", [
-            "    'tci_tb_ptr',",
-            "    'tcg_qemu_tb_exec',",
-        ]
-    )
-    # Replace python with current sys.executable, e.g. python3
-    replace(os.path.join(UNICORN_QEMU_DIR, "gen_all_header.sh"), {
-        "python header_gen.py": sys.executable + " header_gen.py",
-    })
+    apply_patch(UNICORN_DIR, "src/patches/unicorn-tci.patch")
 
+    # Wrap every TCG helper in an adapter a uniform call signature (no function casts in Emscripten)
+    dst = os.path.join(UNICORN_QEMU_DIR, "include/exec/helper-adapter.h")
+    if not os.path.exists(dst):
+        shutil.copy2(HELPER_ADAPTER_SRC, dst)
+    apply_patch(UNICORN_DIR, "src/patches/unicorn-adapters.patch")
 
-def patchUnicornJS():
-    """
-    Patches Unicorn files to target JavaScript
-    """
-    replace(os.path.join(UNICORN_DIR, "Makefile"), {
-        '	./configure --cc="${CC}" --extra-cflags="$(UNICORN_CFLAGS)" --target-list="$(UNICORN_TARGETS)" ${UNICORN_QEMU_FLAGS}':
-        '	./configure --cc="${CC}" --extra-cflags="$(UNICORN_CFLAGS)" --target-list="$(UNICORN_TARGETS)" ${UNICORN_QEMU_FLAGS} --disable-stack-protector --cpu=i386',
-        'python qemu/header_gen.py': sys.executable + ' qemu/header_gen.py',
-    })
-    # Fix Glib function pointer issues
-    replace(os.path.join(UNICORN_QEMU_DIR, "glib_compat.c"), {
-        "(GCompareDataFunc) compare_func) (l1->data, l2->data, user_data)":
-            "(GCompareFunc) compare_func) (l1->data, l2->data)",
-    })
-    # Fix QEMU function pointer issues
-    replace(os.path.join(UNICORN_QEMU_DIR, "include/exec/helper-proto.h"), {
-        # Adapter helpers
-        "#include <exec/helper-head.h>":
-        "#include <exec/helper-head.h>\n" + PATCH_HELPER_ADAPTER_PROTO,
-        # Declare adapters
-        "#define DEF_HELPER_FLAGS_0(name, flags, ret) \\":"""
-         #define DEF_HELPER_FLAGS_0(name, flags, ret) \\
-         GEN_ADAPTER_DECLARE(name) \\""",
-        "#define DEF_HELPER_FLAGS_1(name, flags, ret, t1) \\":"""
-         #define DEF_HELPER_FLAGS_1(name, flags, ret, t1) \\
-         GEN_ADAPTER_DECLARE(name) \\""",
-        "#define DEF_HELPER_FLAGS_2(name, flags, ret, t1, t2) \\":"""
-         #define DEF_HELPER_FLAGS_2(name, flags, ret, t1, t2) \\
-         GEN_ADAPTER_DECLARE(name) \\""",
-        "#define DEF_HELPER_FLAGS_3(name, flags, ret, t1, t2, t3) \\":"""
-         #define DEF_HELPER_FLAGS_3(name, flags, ret, t1, t2, t3) \\
-         GEN_ADAPTER_DECLARE(name) \\""",
-        "#define DEF_HELPER_FLAGS_4(name, flags, ret, t1, t2, t3, t4) \\":"""
-         #define DEF_HELPER_FLAGS_4(name, flags, ret, t1, t2, t3, t4) \\
-         GEN_ADAPTER_DECLARE(name) \\""",
-        "#define DEF_HELPER_FLAGS_5(name, flags, ret, t1, t2, t3, t4, t5) \\":"""
-         #define DEF_HELPER_FLAGS_5(name, flags, ret, t1, t2, t3, t4, t5) \\
-         GEN_ADAPTER_DECLARE(name) \\""",
-    })
-    replace(os.path.join(UNICORN_QEMU_DIR, "include/exec/helper-gen.h"), {
-        # Adapter helpers
-        "#include <exec/helper-head.h>":
-        "#include <exec/helper-head.h>\n" + PATCH_HELPER_ADAPTER_GEN,
-        # Generate calls to adapters instead
-        "tcg_gen_callN(tcg_ctx, HELPER(name)":
-        "tcg_gen_callN(tcg_ctx, glue(adapter_helper_, name)",
-        # Define adapters
-        "#define DEF_HELPER_FLAGS_0(name, flags, ret)                            \\":"""
-         #define DEF_HELPER_FLAGS_0(name, flags, ret)                            \\
-         GEN_ADAPTER_0(name, ret) \\""",
-        "#define DEF_HELPER_FLAGS_1(name, flags, ret, t1)                        \\":"""
-         #define DEF_HELPER_FLAGS_1(name, flags, ret, t1)                        \\
-         GEN_ADAPTER_1(name, ret, t1) \\""",
-        "#define DEF_HELPER_FLAGS_2(name, flags, ret, t1, t2)                    \\":"""
-         #define DEF_HELPER_FLAGS_2(name, flags, ret, t1, t2)                    \\
-         GEN_ADAPTER_2(name, ret, t1, t2) \\""",
-        "#define DEF_HELPER_FLAGS_3(name, flags, ret, t1, t2, t3)                \\":"""
-         #define DEF_HELPER_FLAGS_3(name, flags, ret, t1, t2, t3)                \\
-         GEN_ADAPTER_3(name, ret, t1, t2, t3) \\""",
-        "#define DEF_HELPER_FLAGS_4(name, flags, ret, t1, t2, t3, t4)            \\":"""
-         #define DEF_HELPER_FLAGS_4(name, flags, ret, t1, t2, t3, t4)            \\
-         GEN_ADAPTER_4(name, ret, t1, t2, t3, t4) \\""",
-        "#define DEF_HELPER_FLAGS_5(name, flags, ret, t1, t2, t3, t4, t5)        \\":"""
-         #define DEF_HELPER_FLAGS_5(name, flags, ret, t1, t2, t3, t4, t5)        \\
-         GEN_ADAPTER_5(name, ret, t1, t2, t3, t4, t5) \\""",
-    })
-    replace(os.path.join(UNICORN_QEMU_DIR, "tcg-runtime.c"), {
-        # Adapter helpers
-        '#include "exec/helper-head.h"':
-        '#include "exec/helper-head.h"\n' +
-        PATCH_HELPER_ADAPTER_GEN,
-        # Add uc_tracecode to globals
-        '#include "tcg-runtime.h"':"""
-        #undef DEF_HELPER_FLAGS_2
-        #define DEF_HELPER_FLAGS_2(name, flags, ret, t1, t2) \\
-            dh_ctype(ret) HELPER(name) (dh_ctype(t1), dh_ctype(t2)); \\
-            uint64_t glue(adapter_helper_, name)(GEN_ADAPTER_ARGS); \\
-            GEN_ADAPTER_2_DEFINE(name, ret, t1, t2)
-        #define DEF_HELPER_FLAGS_4(name, flags, ret, t1, t2, t3, t4) \\
-            dh_ctype(ret) HELPER(name) (dh_ctype(t1), dh_ctype(t2), dh_ctype(t3), dh_ctype(t4)); \\
-            uint64_t glue(adapter_helper_, name)(GEN_ADAPTER_ARGS); \\
-            GEN_ADAPTER_4_DEFINE(name, ret, t1, t2, t3, t4)
-        DEF_HELPER_4(uc_tracecode, void, i32, i32, ptr, i64)
-        #include "tcg-runtime.h"
-        """,
-    })
-    replace(os.path.join(UNICORN_QEMU_DIR, "include/exec/helper-tcg.h"), {
-        "HELPER(NAME)":
-        "glue(adapter_helper_, NAME)"
-    })
-    # Add arch-suffixes to adapters
-    header_gen_patched = False
-    with open(os.path.join(UNICORN_QEMU_DIR, "header_gen.py"), 'r') as f:
-        if 'adapter_' in f.read():
-            header_gen_patched = True
-    if header_gen_patched == False:
-        os.remove(os.path.join(UNICORN_QEMU_DIR, "header_gen.py.bak"))
-        replace(os.path.join(UNICORN_QEMU_DIR, "header_gen.py"), {
-            '      print("#define %s %s_%s" %(s, s, arch))':
-            '      print("#define %s %s_%s" %(s, s, arch))\n'
-            '      if s.startswith("helper_"):\n'
-            '          s = "adapter_" + s\n'
-            '          print("#define %s %s_%s" %(s, s, arch))',
-        })
-    # Define adapters
-    translate_pat = os.path.join(UNICORN_QEMU_DIR, "target-*/translate.c")
-    for fpath in glob.glob(translate_pat):
-        prepend(fpath, '#define GEN_ADAPTER_DEFINE\n')
-    # Fix register allocation for arguments
-    replace(os.path.join(UNICORN_QEMU_DIR, "tcg/tcg.c"), {
-        "int is_64bit = ":
-        "int is_64bit = 1;//",
-        # Explicit casts of non-64bit arguments in tcg_gen_callN
-        "sizemask = info->sizemask;":"""
-         sizemask = info->sizemask;
-
-         for (i = 0; i < nargs; i++) {
-             int is_64bit = sizemask & (1 << (i+1)*2);
-             if (!is_64bit) {
-                 TCGv_i64 ext_arg = tcg_temp_new_i64(s);
-                 TCGv_i64 orig = MAKE_TCGV_I64(args[i]);
-                 tcg_gen_ext32u_i64(s, ext_arg, orig);
-                 args[i] = GET_TCGV_I64(ext_arg);
-             }
-         }
-        """
-    })
+    # Add missing PPC symbols
+    apply_patch(UNICORN_DIR, "src/patches/unicorn-ppc-fix.patch")
+    subprocess.run(["bash", "symbols.sh"], check=True, cwd=UNICORN_DIR)
 
 
 ############
@@ -560,30 +191,37 @@ def package_build(suffix):
 
 
 def compileUnicorn(archs=[], package=False):
-    # Clean static library objects and re-generate headers
-    subprocess.run(['make', 'clean'], cwd=UNICORN_DIR)
-    subprocess.run(["sh", "gen_all_header.sh"], check=True, cwd=UNICORN_QEMU_DIR)
+    targets = archs if archs else AVAILABLE_ARCHITECTURES
+    shutil.rmtree(UNICORN_BUILD_DIR, ignore_errors=True)
+
+    # Configure with CMake
+    subprocess.run([
+        'emcmake', 'cmake',
+        '-B', UNICORN_BUILD_DIR,
+        '-S', UNICORN_DIR,
+        '-DCMAKE_BUILD_TYPE=Release',
+        '-DBUILD_SHARED_LIBS=OFF',
+        '-DUNICORN_ARCH=' + ';'.join(targets),
+        '-DUNICORN_BUILD_TESTS=OFF',
+        '-DUNICORN_INSTALL=OFF',
+        '-DUNICORN_FUZZ=OFF',
+        '-DUNICORN_LEGACY_STATIC_ARCHIVE=ON',
+    ], check=True)
 
     # Build the static library
     jobs = os.cpu_count() or 1
-    cmd = ['emmake', 'make', 'unicorn', f'-j{jobs}']
-    env = os.environ.copy()
-    env['UNICORN_DEBUG'] = 'no'
-    env['UNICORN_SHARED'] = 'no'
-    if archs:
-        env['UNICORN_ARCHS'] = ' '.join(archs)
-    subprocess.run(cmd, check=True, cwd=UNICORN_DIR, env=env)
+    cmd = ['emmake', 'cmake', '--build', UNICORN_BUILD_DIR, '--target', 'unicorn_archive', f'-j{jobs}']
+    subprocess.run(cmd, check=True)
 
     # Port the static library to JavaScript/WASM
     suffix = ('_' + '+'.join(archs)) if archs else ''
     methods = [
-        'ccall', 'getValue', 'setValue',
-        'addFunction', 'removeFunction', 'writeArrayToMemory',
+        'ccall', 'getValue', 'setValue', 'addFunction', 'removeFunction', 'writeArrayToMemory'
     ]
     cmd = [
         'emcc',
         '-Os',
-        'unicorn/libunicorn.a',
+        os.path.join(UNICORN_BUILD_DIR, 'libunicorn.a'),
         '-s', f"EXPORTED_FUNCTIONS={EXPORTED_FUNCTIONS}",
         '-s', f"EXPORTED_RUNTIME_METHODS={methods}",
         '-s', 'RESERVED_FUNCTION_POINTERS=256',
@@ -610,8 +248,7 @@ if __name__ == "__main__":
         os.system("git submodule update --init")
 
     # Patch Unicorn submodule
-    patchUnicornTCI()
-    patchUnicornJS()
+    patchUnicorn()
 
     args = sys.argv[1:]
     package = '--package' in args

@@ -1,6 +1,6 @@
 {
   "name": "@alexaltea/unicorn-js",
-  "version": "1.0.3",
+  "version": "2.1.4",
   "description": "Unicorn CPU emulator framework port for JavaScript",
   "author": "Alexandro Sanchez Bach <alexaltea123@gmail.com>",
   "license": "GPL-2.0",

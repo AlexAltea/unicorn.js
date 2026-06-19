@@ -4,10 +4,18 @@ var uc, ks, cs, e, a, d;
 // Utils
 function utilIntToHex(n, pad) {
     pad = (typeof pad !== 'undefined') ? pad : 1;
-    if (n < 0) {
-        n += Math.pow(2,32);
+    var s;
+    if (typeof n === 'bigint') {
+        // Mask to `pad` hex digits so negative (two's complement) 64-bit values
+        // render as their unsigned hexadecimal representation.
+        var mask = (1n << BigInt(pad * 4)) - 1n;
+        s = (n & mask).toString(16).toUpperCase();
+    } else {
+        if (n < 0) {
+            n += Math.pow(2,32);
+        }
+        s = Number(n).toString(16).toUpperCase();
     }
-    var s = Number(n).toString(16).toUpperCase();
     while (s.length < pad) {
         s = '0' + s;
     }
@@ -68,7 +76,13 @@ function Register(name, type, id) {
             reg.nodeHex.appendChild(input);
             $(input).on('keyup', function (e) {
                 if (e.keyCode == 13) {
-                    reg.set(parseInt(this.value, 16));
+                    // 64-bit registers are parsed as BigInt to avoid losing
+                    // precision beyond JavaScript's 2^53 safe-integer range.
+                    var raw = this.value.trim().replace(/^0x/i, '');
+                    var value = (reg.type === 'i64')
+                        ? BigInt('0x' + (raw || '0'))
+                        : parseInt(raw, 16);
+                    reg.set(value);
                     reg.update();
                 }
             });
@@ -78,7 +92,10 @@ function Register(name, type, id) {
 
     // Helpers
     this._update_int = function () {
-        var value = e.reg_read_i32(this.id);
+        // 64-bit registers come back as BigInt; everything else as a Number.
+        var value = (this.type === 'i64')
+            ? e.reg_read_i64(this.id)
+            : e.reg_read_i32(this.id);
         var valueStr = value.toString();
         // Set color
         if (this.dataValue != valueStr) {
@@ -92,6 +109,7 @@ function Register(name, type, id) {
             case 'i8':  this.dataHex = utilIntToHex(value, 2); break;
             case 'i16': this.dataHex = utilIntToHex(value, 4); break;
             case 'i32': this.dataHex = utilIntToHex(value, 8); break;
+            case 'i64': this.dataHex = utilIntToHex(value, 16); break;
         }
     }
     this._update_float = function () {
@@ -107,6 +125,7 @@ function Register(name, type, id) {
             case 'i8':
             case 'i16':
             case 'i32':
+            case 'i64':
                 this._update_int();
                 break;
             case 'f32':

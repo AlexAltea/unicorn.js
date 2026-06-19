@@ -67,14 +67,24 @@ MUnicorn().then((uc) => {
 [BigInt](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/BigInt)
 support (the WASM build relies on `WASM_BIGINT`).
 
-### Single-architecture builds
+### Available builds
 
 The default `dist/unicorn.js` bundles every supported architecture and is
-fairly large. The build script can also emit smaller, single-architecture
-bundles (e.g. `python3 build.py x86`), which are written as
-`dist/unicorn_<arch>.js` / `.wasm`. These expose the exact same `MUnicorn()`
-factory and API; they simply only contain the constants and emulation support
-for the architecture(s) they were built with.
+fairly large. Smaller per-architecture variants are published alongside it
+and can be selected via the `require` or `import` subpath. e.g.:
+
+```javascript
+const MUnicorn = require('@alexaltea/unicorn-js');       // all architectures
+const MUnicorn = require('@alexaltea/unicorn-js/x86');   // x86 only
+```
+
+Available subpaths: `arm`, `aarch64` (`arm64`), `m68k`, `mips`, `ppc`,
+`riscv`, `s390x`, `sparc`, `tricore`, `x86`.
+
+Each exposes the same _MUnicorn_ factory and API. Bundlers resolve the subpath
+to a single file, so only the variant you select is bundled; over a CDN, reference the
+file directly, e.g. `https://cdn.jsdelivr.net/npm/@alexaltea/unicorn-js/dist/unicorn_arm.js`.
+
 
 ## BigInt usage
 

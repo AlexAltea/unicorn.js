@@ -21,6 +21,19 @@ or install it with the NPM command:
 npm install @alexaltea/unicorn-js
 ```
 
+### Lightweight single-architecture variants
+
+The default build supports all architectures. If you only need one, smaller per-architecture variants are published alongside it and can be selected via the `require` or `import` subpath:
+
+```javascript
+const MUnicorn = require('@alexaltea/unicorn-js');       // all architectures
+const MUnicorn = require('@alexaltea/unicorn-js/x86');   // x86 only
+```
+
+Available variants: `arm`, `aarch64` (`arm64`), `m68k`, `mips`, `ppc`, `riscv`, `s390x`, `sparc`, `tricore`, `x86`.
+
+Each exposes the same _MUnicorn_ factory and API. Bundlers resolve the subpath to a single file, so only the variant you select is bundled; over a CDN, reference the file directly, e.g. `https://cdn.jsdelivr.net/npm/@alexaltea/unicorn-js/dist/unicorn_arm.js`.
+
 ## Usage
 
 ```javascript

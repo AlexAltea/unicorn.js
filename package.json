@@ -19,13 +19,28 @@
     "url": "https://github.com/AlexAltea/unicorn.js.git"
   },
   "main": "./dist/unicorn.js",
+  "exports": {
+    ".": "./dist/unicorn.js",
+    "./arm": "./dist/unicorn_arm.js",
+    "./aarch64": "./dist/unicorn_aarch64.js",
+    "./arm64": "./dist/unicorn_aarch64.js",
+    "./m68k": "./dist/unicorn_m68k.js",
+    "./mips": "./dist/unicorn_mips.js",
+    "./ppc": "./dist/unicorn_ppc.js",
+    "./riscv": "./dist/unicorn_riscv.js",
+    "./s390x": "./dist/unicorn_s390x.js",
+    "./sparc": "./dist/unicorn_sparc.js",
+    "./tricore": "./dist/unicorn_tricore.js",
+    "./x86": "./dist/unicorn_x86.js",
+    "./package.json": "./package.json"
+  },
   "files": [
-    "dist/unicorn.js",
-    "dist/unicorn.wasm"
+    "dist/"
   ],
   "scripts": {
     "build": "python3 build.py",
-    "prepack": "npm run build",
+    "build:release": "python3 build.py --release",
+    "prepack": "npm run build:release",
     "serve": "python3 -m http.server",
     "test": "node tests/main.js"
   },

@@ -181,16 +181,7 @@ def patchUnicorn():
 # Building #
 ############
 
-def package_build(suffix):
-    """Zip the .js/.wasm pair into dist/unicorn{suffix}_{version}.zip."""
-    version = json.load(open('package.json'))['version']
-    zip_path = f'dist/unicorn{suffix}_{version}.zip'
-    with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zf:
-        for path in (f'dist/unicorn{suffix}.js', f'dist/unicorn{suffix}.wasm'):
-            zf.write(path, os.path.basename(path))
-
-
-def compileUnicorn(archs=[], package=False):
+def compileUnicorn(archs=[]):
     targets = archs if archs else AVAILABLE_ARCHITECTURES
     shutil.rmtree(UNICORN_BUILD_DIR, ignore_errors=True)
 
@@ -228,6 +219,7 @@ def compileUnicorn(archs=[], package=False):
         '-s', 'ALLOW_TABLE_GROWTH=1',
         '-s', 'ALLOW_MEMORY_GROWTH=1',
         '-s', 'MODULARIZE=1',
+        '-s', 'SINGLE_FILE=1',
         '-s', 'WASM=1',
         '-s', 'WASM_BIGINT=1',
         '-s', "EXPORT_NAME='MUnicorn'",
@@ -238,8 +230,6 @@ def compileUnicorn(archs=[], package=False):
     cmd += ['-o', f'dist/unicorn{suffix}.js']
     os.makedirs('dist', exist_ok=True)
     subprocess.run(cmd, check=True)
-    if package:
-        package_build(suffix)
 
 
 if __name__ == "__main__":
@@ -251,13 +241,12 @@ if __name__ == "__main__":
     patchUnicorn()
 
     args = sys.argv[1:]
-    package = '--package' in args
     release = '--release' in args
     generateConstants()
     if release:
-        compileUnicorn([], package) # Build all
+        compileUnicorn([]) # Build all
         for arch in AVAILABLE_ARCHITECTURES:
-            compileUnicorn([arch], package)
+            compileUnicorn([arch])
     else:
         archs = sorted(a for a in args if not a.startswith('--'))
-        compileUnicorn(archs, package)
+        compileUnicorn(archs)

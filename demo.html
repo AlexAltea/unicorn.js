@@ -182,8 +182,8 @@
 
       function loadUnicorn() {
         const local = 'dist/unicorn.js';
-        const cdn = 'https://cdn.jsdelivr.net/npm/@alexaltea/unicorn-js@1.0.3/dist/unicorn.js';
-        const sri = 'sha384-NajHcYamBPe3EGa0Cj4JfJbEwB3YPr7WyRXBlmGAITHpzmy2qroG9qUpL5aUK4gk';
+        const cdn = 'https://cdn.jsdelivr.net/npm/@alexaltea/unicorn-js@2.1.4/dist/unicorn.js';
+        const sri = 'sha384-fS1FjoYg59dodJD+Agqw9LWwxaYJ8KHE/eqTcyD0jQOlshVyo5lgkuYIfckt7GHc';
         return fetch(local, { method: 'HEAD' })
           .then((res) => (res.ok ? loadScript(local) : Promise.reject()))
           .catch(() => loadScript(cdn, sri))

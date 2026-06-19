@@ -136,12 +136,12 @@ Object.assign(Module, {
 
     // Static
     version: function() {
-        major_ptr = Module._malloc(4);
-        minor_ptr = Module._malloc(4);
-        var ret = Module.ccall('uc_version', 'number',
+        const major_ptr = Module._malloc(4);
+        const minor_ptr = Module._malloc(4);
+        const ret = Module.ccall('uc_version', 'number',
             ['pointer', 'pointer'], [major_ptr, minor_ptr]);
-        major = Module.getValue(major_ptr, 'i32');
-        minor = Module.getValue(minor_ptr, 'i32');
+        const major = Module.getValue(major_ptr, 'i32');
+        const minor = Module.getValue(minor_ptr, 'i32');
         Module._free(major_ptr);
         Module._free(minor_ptr);
         return ret;

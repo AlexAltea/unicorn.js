@@ -156,6 +156,16 @@
             integrity="sha384-3ceskX3iaEnIogmQchP8opvBy3Mi7Ce34nWjpBIwVTHfGYWQS9jwHDVRnpKKHJg7" crossorigin="anonymous"></script>
     <script src="demos/externals/split.min.js"></script>
 
+    <!-- CapstoneJS and KeystoneJS engines -->
+     <script src="https://cdn.jsdelivr.net/npm/@alexaltea/capstone-js@5.0.9/dist/capstone.js"
+            integrity="sha384-gE6rolKnQnVv4OPrBvDbt7pqLjTwWqqkbX4+I3KuxPChFJHB95U1f9zTDE9P5+Kg"
+            crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@alexaltea/keystone-js@0.9.2/dist/keystone.js"
+            integrity="sha384-RBtIAWmcBWC5zdAUN8RBUgxNK9ttz6nAqGqtt1GS1afGooNe3RA5fiifSkhE5ft3"
+            crossorigin="anonymous"></script>
+
+    <script src="dist/unicorn.js"></script>
+
     <!-- Unicorn.js demo -->
     <script src="demos/demo.js"></script>
     <script>
@@ -166,32 +176,14 @@
           return results == null ? null : results[1];
       }
 
-      // Load scripts sequentially to preserve dependency order
-      function loadScripts(urls, done) {
-          (function next(i) {
-              if (i >= urls.length) { done(); return; }
-              var s = document.createElement('script');
-              s.src = urls[i];
-              s.onload = function () { next(i + 1); };
-              s.onerror = function () { console.error('Failed to load ' + urls[i]); };
-              document.head.appendChild(s);
-          })(0);
-      }
-
-      // unicorn.js / keystone.js / capstone.js each expose an async factory
-      // (MUnicorn / MKeystone / MCapstone) returning a Promise; demo-<arch> defines demoInit.
-      // keystone.js and capstone.js are the all-architecture WASM builds served from
-      // GitHub Pages (the URL is unversioned): keystone.js v0.9.2, capstone.js v5.0.9.
+      // Redirect home unless a supported demo arch is requested; otherwise load demo-<arch>.js (defines demoInit) and boot.
       var arch = gup('arch');
       if (['arm', 'mips', 'sparc', 'x86'].indexOf(arch) < 0) {
           window.location = './index.html';
       } else {
-          loadScripts([
-              'https://alexaltea.github.io/keystone.js/dist/keystone.js',
-              'https://alexaltea.github.io/capstone.js/dist/capstone.js',
-              'dist/unicorn.js',
-              'demos/demo-' + arch + '.js',
-          ], function () {
+          var s = document.createElement('script');
+          s.src = 'demos/demo-' + arch + '.js';
+          s.onload = function () {
               $(function () {
                   Promise.all([MUnicorn(), MKeystone(), MCapstone()]).then(function (mods) {
                       uc = mods[0];
@@ -200,7 +192,9 @@
                       demoInit();
                   });
               });
-          });
+          };
+          s.onerror = function () { console.error('Failed to load ' + s.src); };
+          document.head.appendChild(s);
       }
     </script>
   </body>

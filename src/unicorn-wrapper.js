@@ -536,16 +536,10 @@ Object.assign(Module, {
             }
         }
         this.reg_write_type = function (regid, type, value) {
-            // Allocate space for the output value
+            // Allocate space for the input value
             var value_size = this._sizeof(type);
             var value_ptr = Module._malloc(value_size);
-            // Serialize the value: 64-bit integers cross as BigInt (WASM_BIGINT),
-            // narrower integer types and floats as Number.
-            if (type === 'i64') {
-                Module.setValue(value_ptr, BigInt(value || 0), 'i64');
-            } else {
-                Module.setValue(value_ptr, value, type);
-            }
+            Module.setValue(value_ptr, value, type);
             // Register write
             var handle = Module.getValue(this.handle_ptr, '*');
             var ret = Module.ccall('uc_reg_write', 'number',
@@ -567,14 +561,10 @@ Object.assign(Module, {
         this.reg_write_double = function (regid, value) { this.reg_write_type(regid, 'double', value); }
 
         this.reg_read_type = function (regid, type) {
-            // Allocate space for the output value
+            // Allocate zero-initialized space for the output value
             var value_size = this._sizeof(type);
             var value_ptr = Module._malloc(value_size);
-            if (type === 'i64') {
-                Module.setValue(value_ptr, 0n, 'i64');
-            } else {
-                Module.setValue(value_ptr, 0, type);
-            }
+            Module.setValue(value_ptr, 0, type);
 
             // Register read
             var handle = Module.getValue(this.handle_ptr, '*');

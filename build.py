@@ -17,6 +17,7 @@ EXPORTED_FUNCTIONS = [
     '_uc_context_free',
     '_uc_context_restore',
     '_uc_context_save',
+    '_uc_ctl',
     '_uc_emu_start',
     '_uc_emu_stop',
     '_uc_errno',
@@ -79,6 +80,7 @@ def generateConstants():
     """
     for arch in AVAILABLE_ARCHITECTURES:
         header, name, prefix = arch_constants(arch)
+        prefixes = (prefix, 'UC_CPU_')
         content = open(os.path.join(UNICORN_INCLUDE_DIR, header)).read()
         # Strip C comments up front so values never collide with `//`/`/* */`.
         content = re.sub(r'/\*.*?\*/', ' ', content, flags=re.DOTALL)
@@ -97,7 +99,7 @@ def generateConstants():
                 if len(fields) != 2 or '(' in fields[0] or ')' in fields[0]:
                     continue  # skip multi-token / function-like macros
                 line = fields[0] + ' = ' + fields[1]
-            if not line.startswith(prefix):
+            if not line.startswith(prefixes):
                 continue
 
             for token in line.split(','):
@@ -105,7 +107,7 @@ def generateConstants():
                 if not token:
                     continue
                 fields = re.split(r'\s+', token)
-                if not fields[0].startswith(prefix):
+                if not fields[0].startswith(prefixes):
                     continue
                 if len(fields) > 1 and fields[1] != '=':
                     continue

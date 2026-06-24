@@ -381,6 +381,14 @@ MUnicorn().then((uc) => {
                 sp: 'ARM_REG_SP',
                 regs: regs('ARM', ['R0', 'R1', 'R2', 'R3', 'R4', 'R5', 'R6', 'R7', 'R8', 'R9', 'R10', 'R11', 'R12', 'SP', 'LR', 'PC', 'CPSR'], 32),
               },
+              {
+                label: 'Thumb (big-endian)',
+                mode_ks: ks.MODE_THUMB | ks.MODE_BIG_ENDIAN,
+                mode_uc: uc.MODE_THUMB | uc.MODE_BIG_ENDIAN,
+                ip: 'ARM_REG_PC',
+                sp: 'ARM_REG_SP',
+                regs: regs('ARM', ['R0', 'R1', 'R2', 'R3', 'R4', 'R5', 'R6', 'R7', 'R8', 'R9', 'R10', 'R11', 'R12', 'SP', 'LR', 'PC', 'CPSR'], 32),
+              },
             ],
           },
           [uc.ARCH_ARM64]: {
@@ -475,6 +483,15 @@ MUnicorn().then((uc) => {
             ks: ks.ARCH_X86,
             syntax: ks.OPT_SYNTAX_INTEL,
             modes: [
+              {
+                label: '16-bit',
+                mode_ks: ks.MODE_16,
+                mode_uc: uc.MODE_16,
+                ip: 'X86_REG_IP',
+                sp: 'X86_REG_SP',
+                offsets: { code: '1000', data: '2000', memory: '2000', stack: '3FF0' },
+                regs: regs('X86', ['AX', 'BX', 'CX', 'DX', 'SI', 'DI', 'BP', 'SP', 'IP', 'FLAGS'], 16),
+              },
               {
                 label: '32-bit',
                 mode_ks: ks.MODE_32,
@@ -574,6 +591,14 @@ MUnicorn().then((uc) => {
           const arch = parseInt(elArch.value, 10);
           const info = ARCH_INFO[elArch.value];
           const mode = info.modes[parseInt(elMode.value, 10)];
+
+          // Edge cases, e.g. 16-bit modes
+          if (mode.offsets) {
+            elCodeOffset.value = mode.offsets.code;
+            elDataOffset.value = mode.offsets.data;
+            elMemoryOffset.value = mode.offsets.memory;
+            elStackPtr.value = mode.offsets.stack;
+          }
 
           if (a) { a.close(); }
           a = new ks.Keystone(info.ks, mode.mode_ks);
@@ -689,7 +714,7 @@ MUnicorn().then((uc) => {
         elStackPtr.value = '3FFF0';
         elArch.value = uc.ARCH_X86;
         populateModes();
-        elMode.value = 1; // Index for uc.MODE_64 mode entry
+        elMode.value = 2; // Index for uc.MODE_64 mode entry
         elCode.value = 'mov rdx, 0x13001300\nmov eax, [0x20004]\nadd rdx, rax\nmov [0x20000], edx\nor esi, 0x42';
         elData.value = '00 00 00 00 37 00 37 00';
         reset();

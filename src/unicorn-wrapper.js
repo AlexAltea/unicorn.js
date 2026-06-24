@@ -115,6 +115,31 @@ Object.assign(Module, {
     QUERY_ARCH: 3,
     QUERY_TIMEOUT: 4,
 
+    // uc_control_type
+    CTL_UC_MODE: 0,
+    CTL_UC_PAGE_SIZE: 1,
+    CTL_UC_ARCH: 2,
+    CTL_UC_TIMEOUT: 3,
+    CTL_UC_USE_EXITS: 4,
+    CTL_UC_EXITS_CNT: 5,
+    CTL_UC_EXITS: 6,
+    CTL_CPU_MODEL: 7,
+    CTL_TB_REQUEST_CACHE: 8,
+    CTL_TB_REMOVE_CACHE: 9,
+    CTL_TB_FLUSH: 10,
+    CTL_TLB_FLUSH: 11,
+    CTL_TLB_TYPE: 12,
+    CTL_TCG_BUFFER_SIZE: 13,
+    CTL_CONTEXT_MODE: 14,
+
+    // uc_tlb_type
+    TLB_CPU: 0,
+    TLB_VIRTUAL: 1,
+
+    // uc_context_content
+    CTL_CONTEXT_CPU: 1,
+    CTL_CONTEXT_MEMORY: 2,
+
     // uc_prot
     PROT_NONE: 0,
     PROT_READ: 1,
@@ -133,6 +158,19 @@ Object.assign(Module, {
     VERSION_EXTRA: 255,
     SECOND_SCALE: 1000000,
     MILISECOND_SCALE: 1000,
+
+    // uc_ctl I/O direction
+    CTL_IO_NONE: 0,
+    CTL_IO_WRITE: 1,
+    CTL_IO_READ: 2,
+    CTL_IO_READ_WRITE: 3,
+
+    // UC_CTL control-word builders
+    CTL:            (type, nr, rw) => (type | (nr << 26) | (rw << 30)) >>> 0,
+    CTL_NONE:       (type, nr) => Module.CTL(type, nr, Module.CTL_IO_NONE),
+    CTL_READ:       (type, nr) => Module.CTL(type, nr, Module.CTL_IO_READ),
+    CTL_WRITE:      (type, nr) => Module.CTL(type, nr, Module.CTL_IO_WRITE),
+    CTL_READ_WRITE: (type, nr) => Module.CTL(type, nr, Module.CTL_IO_READ_WRITE),
 
     // Static
     version: function() {
@@ -619,6 +657,134 @@ Object.assign(Module, {
         this.query_i64     = function (type) { return this.query_type(type, 'i64'); }
         this.query_float   = function (type) { return this.query_type(type, 'float'); }
         this.query_double  = function (type) { return this.query_type(type, 'double'); }
+
+        this.ctl = function (control, args) {
+            args = args || [];
+            // Lay out the varargs buffer with each argument naturally aligned.
+            var offsets = [];
+            var off = 0;
+            for (var i = 0; i < args.length; i++) {
+                var size = (args[i].type === 'i64') ? 8 : 4;
+                off = Math.ceil(off / size) * size;
+                offsets.push(off);
+                off += size;
+            }
+            var valist_ptr = Module._malloc(off || 8);
+            for (var i = 0; i < args.length; i++) {
+                var arg = args[i];
+                if (arg.type === 'i64') {
+                    Module.setValue(valist_ptr + offsets[i], BigInt(arg.value || 0), 'i64');
+                } else if (arg.type === 'ptr') {
+                    Module.setValue(valist_ptr + offsets[i], arg.value || 0, '*');
+                } else {
+                    Module.setValue(valist_ptr + offsets[i], arg.value, 'i32');
+                }
+            }
+            var handle = Module.getValue(this.handle_ptr, '*');
+            var ret = Module.ccall('uc_ctl', 'number',
+                ['pointer', 'number', 'pointer'],
+                [handle, control >>> 0, valist_ptr]
+            );
+            Module._free(valist_ptr);
+            if (ret != Module.ERR_OK) {
+                var error = 'Unicorn.js: Function uc_ctl failed with code ' + ret + ':\n' + Module.strerror(ret);
+                throw error;
+            }
+        }
+
+        // Read a single scalar control through an output pointer argument.
+        this._ctl_read = function (type, nr, out_type) {
+            var out_ptr = Module._malloc(this._sizeof(out_type));
+            Module.setValue(out_ptr, out_type === 'i64' ? 0n : 0, out_type);
+            this.ctl(Module.CTL_READ(type, nr),
+                [{ type: 'ptr', value: out_ptr }]);
+            var value = Module.getValue(out_ptr, out_type);
+            Module._free(out_ptr);
+            return value;
+        }
+
+        // Write a single i32 scalar control passed by value.
+        this._ctl_write = function (type, nr, value) {
+            this.ctl(Module.CTL_WRITE(type, nr),
+                [{ type: 'i32', value: value }]);
+        }
+
+        this.ctl_context_mode
+            = (mode) => this._ctl_write(Module.CTL_CONTEXT_MODE, 1, mode);
+        this.ctl_exits_disable
+            = () => this._ctl_write(Module.CTL_UC_USE_EXITS, 1, 0);
+        this.ctl_exits_enable
+            = () => this._ctl_write(Module.CTL_UC_USE_EXITS, 1, 1);
+        this.ctl_flush_tb
+            = () => this.ctl(Module.CTL_WRITE(Module.CTL_TB_FLUSH, 0));
+        this.ctl_flush_tlb
+            = () => this.ctl(Module.CTL_WRITE(Module.CTL_TLB_FLUSH, 0));
+        this.ctl_get_arch
+            = () => this._ctl_read(Module.CTL_UC_ARCH, 1, 'i32');
+        this.ctl_get_cpu_model
+            = () => this._ctl_read(Module.CTL_CPU_MODEL, 1, 'i32');
+        this.ctl_get_exits_cnt
+            = () => this._ctl_read(Module.CTL_UC_EXITS_CNT, 1, 'i32');
+        this.ctl_get_mode
+            = () => this._ctl_read(Module.CTL_UC_MODE, 1, 'i32');
+        this.ctl_get_page_size
+            = () => this._ctl_read(Module.CTL_UC_PAGE_SIZE, 1, 'i32');
+        this.ctl_get_tcg_buffer_size
+            = () => this._ctl_read(Module.CTL_TCG_BUFFER_SIZE, 1, 'i32');
+        this.ctl_get_timeout
+            = () => this._ctl_read(Module.CTL_UC_TIMEOUT, 1, 'i64');
+        this.ctl_set_cpu_model
+            = (model) => this._ctl_write(Module.CTL_CPU_MODEL, 1, model);
+        this.ctl_set_page_size
+            = (size) => this._ctl_write(Module.CTL_UC_PAGE_SIZE, 1, size);
+        this.ctl_set_tcg_buffer_size
+            = (size) => this._ctl_write(Module.CTL_TCG_BUFFER_SIZE, 1, size);
+        this.ctl_tlb_mode
+            = (mode) => this._ctl_write(Module.CTL_TLB_TYPE, 1, mode);
+
+        // Multiple-exit controls: exits are an array of uint64_t (BigInt).
+        this.ctl_get_exits = function (count) {
+            var buffer_ptr = Module._malloc(count * 8 || 8);
+            this.ctl(Module.CTL_READ(Module.CTL_UC_EXITS, 2),
+                [{ type: 'ptr', value: buffer_ptr }, { type: 'i32', value: count }]);
+            var exits = [];
+            for (var i = 0; i < count; i++) {
+                exits.push(Module.getValue(buffer_ptr + i * 8, 'i64'));
+            }
+            Module._free(buffer_ptr);
+            return exits;
+        }
+        this.ctl_set_exits = function (exits) {
+            var count = exits.length;
+            var buffer_ptr = Module._malloc(count * 8 || 8);
+            for (var i = 0; i < count; i++) {
+                Module.setValue(buffer_ptr + i * 8, BigInt(exits[i] || 0), 'i64');
+            }
+            this.ctl(Module.CTL_WRITE(Module.CTL_UC_EXITS, 2),
+                [{ type: 'ptr', value: buffer_ptr }, { type: 'i32', value: count }]);
+            Module._free(buffer_ptr);
+        }
+
+        // Translation-block cache controls (addresses are uint64_t -> BigInt).
+        this.ctl_remove_cache = function (address, end) {
+            this.ctl(Module.CTL_WRITE(Module.CTL_TB_REMOVE_CACHE, 2),
+                [{ type: 'i64', value: address }, { type: 'i64', value: end }]);
+        }
+        this.ctl_request_cache = function (address) {
+            var tb_ptr = Module._malloc(16); // uc_tb { uint64_t pc; uint16_t icount; uint16_t size; }
+            for (var i = 0; i < 16; i++) {
+                Module.setValue(tb_ptr + i, 0, 'i8');
+            }
+            this.ctl(Module.CTL_READ_WRITE(Module.CTL_TB_REQUEST_CACHE, 2),
+                [{ type: 'i64', value: address }, { type: 'ptr', value: tb_ptr }]);
+            var tb = {
+                pc:     Module.getValue(tb_ptr, 'i64'),
+                icount: Module.getValue(tb_ptr + 8, 'i16'),
+                size:   Module.getValue(tb_ptr + 10, 'i16'),
+            };
+            Module._free(tb_ptr);
+            return tb;
+        }
 
         // Constructor
         var ret = Module.ccall('uc_open', 'number',

@@ -22,7 +22,7 @@ if (!fs.existsSync(dist)) {
 
 const TESTS = ['test_arch_arm.js', 'test_arch_x86.js',
                'test_arch_riscv.js', 'test_arch_ppc.js', 'test_arch_s390x.js', 'test_arch_tricore.js',
-               'test_hooks.js', 'test_helpers.js', 'test_loop.js', 'test_context.js'];
+               'test_hooks.js', 'test_helpers.js', 'test_loop.js', 'test_context.js', 'test_ctl.js'];
 const results = [];
 
 for (const t of TESTS) {

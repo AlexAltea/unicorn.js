@@ -32,7 +32,8 @@ const MUnicorn = require('@alexaltea/unicorn-js/x86');  // x86 only
 
 Available variants: `arm`, `aarch64`, `m68k`, `mips`, `ppc`, `riscv`, `s390x`, `sparc`, `tricore`, `x86`.
 
-You can also include these variants directly via CDNs, e.g. `https://cdn.jsdelivr.net/npm/@alexaltea/unicorn-js/dist/unicorn_x86.js`.
+You can also include these variants directly via CDNs, e.g. \
+`https://cdn.jsdelivr.net/npm/@alexaltea/unicorn-js/dist/unicorn_x86.js`
 
 ## Usage
 

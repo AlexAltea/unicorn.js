@@ -23,7 +23,6 @@
     ".": "./dist/unicorn.js",
     "./arm": "./dist/unicorn_arm.js",
     "./aarch64": "./dist/unicorn_aarch64.js",
-    "./arm64": "./dist/unicorn_aarch64.js",
     "./m68k": "./dist/unicorn_m68k.js",
     "./mips": "./dist/unicorn_mips.js",
     "./ppc": "./dist/unicorn_ppc.js",
